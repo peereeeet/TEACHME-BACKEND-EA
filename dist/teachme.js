@@ -179,4 +179,4 @@ function main() {
         mongoose_1.default.connection.close();
     });
 }
-//# sourceMappingURL=ejercicio1.js.map
+//# sourceMappingURL=teachme.js.map

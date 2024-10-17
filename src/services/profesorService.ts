@@ -47,6 +47,16 @@ export const asignarAsignaturasAProfesor = async (nombreProfesor: string, nombre
   return profesor;
 };
 
+/////////////////////////////////////////ACTUALIZAR PROFESOR/////////////////////////////////////
+export const actualizarProfesorPorId = async (id: string, datosActualizados: Partial<typeof Profesor>) => {
+  const profesor = await Profesor.findByIdAndUpdate(id, datosActualizados, { new: true });
+
+  if (!profesor) {
+    throw new Error('Profesor no encontrado');
+  }
+
+  return profesor;
+};
 
 ///////////////////////////////ACTUALIZAR ASIGNATURAS DE PROFESOR POR NOMBRE///////////////////////////
 export const actualizarAsignaturasProfesorPorNombre = async (nombreProfesor: string, nuevasAsignaturas: string[]) => {

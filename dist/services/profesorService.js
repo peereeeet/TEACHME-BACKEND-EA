@@ -12,47 +12,57 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.actualizarAsignaturasProfesorPorNombre = exports.eliminarProfesorPorNombre = exports.asignarAsignaturasAProfesor = exports.verProfesorPorNombre = exports.listarProfesores = exports.crearProfesor = void 0;
+exports.eliminarAsignaturaDeProfesorPorNombre = exports.eliminarProfesorPorNombre = exports.actualizarAsignaturasProfesorPorNombre = exports.actualizarProfesorPorId = exports.asignarAsignaturasAProfesor = exports.verProfesorPorNombre = exports.listarProfesores = exports.crearProfesor = void 0;
 const profesor_1 = __importDefault(require("../models/profesor"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
-// Crear un nuevo profesor
+/////////////////////////////////////////CREAR PROFESOR////////////////////////////////////////
 const crearProfesor = (nombre, edad) => __awaiter(void 0, void 0, void 0, function* () {
     const profesor = new profesor_1.default({ nombre, edad });
     return yield profesor.save();
 });
 exports.crearProfesor = crearProfesor;
-// Listar todos los profesores
+/////////////////////////////////////////LISTAR PROFESORES//////////////////////////////////////
 const listarProfesores = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield profesor_1.default.find().populate('asignaturasImparte');
 });
 exports.listarProfesores = listarProfesores;
-// Ver un profesor por nombre
+/////////////////////////////////////////VER PROFESOR POR NOMBRE/////////////////////////////////////
 const verProfesorPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
     return yield profesor_1.default.findOne({ nombre }).populate('asignaturasImparte');
 });
 exports.verProfesorPorNombre = verProfesorPorNombre;
-// Asignar asignaturas a un profesor
+/////////////////////////////////////////ASIGNAR ASIGNATURAS A PROFESOR/////////////////////////////////////
 const asignarAsignaturasAProfesor = (nombreProfesor, nombresAsignaturas) => __awaiter(void 0, void 0, void 0, function* () {
     const profesor = yield profesor_1.default.findOne({ nombre: nombreProfesor });
     if (!profesor) {
         throw new Error('Profesor no encontrado');
     }
+    console.log(`Profesor encontrado: ${JSON.stringify(profesor)}`);
     const asignaturas = yield asignatura_1.default.find({ nombre: { $in: nombresAsignaturas } });
+    console.log(`Asignaturas encontradas: ${JSON.stringify(asignaturas)}`);
     if (asignaturas.length === 0) {
         throw new Error('Asignaturas no encontradas');
     }
-    asignaturas.forEach(asignatura => profesor.asignaturasImparte.push(asignatura._id));
+    asignaturas.forEach(asignatura => {
+        if (!profesor.asignaturasImparte.includes(asignatura._id)) {
+            profesor.asignaturasImparte.push(asignatura._id);
+        }
+    });
     yield profesor.save();
+    console.log(`Profesor actualizado: ${JSON.stringify(profesor)}`);
     return profesor;
 });
 exports.asignarAsignaturasAProfesor = asignarAsignaturasAProfesor;
-// Eliminar un profesor por nombre
-const eliminarProfesorPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
-    const resultado = yield profesor_1.default.findOneAndDelete({ nombre });
-    return resultado;
+/////////////////////////////////////////ACTUALIZAR PROFESOR/////////////////////////////////////
+const actualizarProfesorPorId = (id, datosActualizados) => __awaiter(void 0, void 0, void 0, function* () {
+    const profesor = yield profesor_1.default.findByIdAndUpdate(id, datosActualizados, { new: true });
+    if (!profesor) {
+        throw new Error('Profesor no encontrado');
+    }
+    return profesor;
 });
-exports.eliminarProfesorPorNombre = eliminarProfesorPorNombre;
-// Actualizar las asignaturas de un profesor por nombre
+exports.actualizarProfesorPorId = actualizarProfesorPorId;
+///////////////////////////////ACTUALIZAR ASIGNATURAS DE PROFESOR POR NOMBRE///////////////////////////
 const actualizarAsignaturasProfesorPorNombre = (nombreProfesor, nuevasAsignaturas) => __awaiter(void 0, void 0, void 0, function* () {
     const profesor = yield profesor_1.default.findOne({ nombre: nombreProfesor });
     if (!profesor) {
@@ -62,9 +72,32 @@ const actualizarAsignaturasProfesorPorNombre = (nombreProfesor, nuevasAsignatura
     if (asignaturas.length === 0) {
         throw new Error('Asignaturas no encontradas');
     }
-    profesor.asignaturasImparte = asignaturas.map(asignatura => asignatura._id);
-    yield profesor.save();
-    return profesor;
+    yield profesor_1.default.findByIdAndUpdate(profesor._id, {
+        asignaturasImparte: asignaturas.map(asignatura => asignatura._id)
+    });
+    console.log(`Asignaturas actualizadas para ${nombreProfesor}`);
 });
 exports.actualizarAsignaturasProfesorPorNombre = actualizarAsignaturasProfesorPorNombre;
+/////////////////////////////////////ELIMINAR PROFESOR POR NOMBRE////////////////////////////////////////
+const eliminarProfesorPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
+    const resultado = yield profesor_1.default.findOneAndDelete({ nombre });
+    return resultado;
+});
+exports.eliminarProfesorPorNombre = eliminarProfesorPorNombre;
+/////////////////////////////////////////////ELIMINAR ASIGNATURA DE PROFESOR POR NOMBRE///////////////////////////////////
+const eliminarAsignaturaDeProfesorPorNombre = (nombreProfesor, nombreAsignatura) => __awaiter(void 0, void 0, void 0, function* () {
+    const profesor = yield profesor_1.default.findOne({ nombre: nombreProfesor });
+    if (!profesor) {
+        throw new Error('Profesor no encontrado');
+    }
+    const asignatura = yield asignatura_1.default.findOne({ nombre: nombreAsignatura });
+    if (!asignatura) {
+        throw new Error('Asignatura no encontrada');
+    }
+    yield profesor_1.default.findByIdAndUpdate(profesor._id, {
+        asignaturasImparte: profesor.asignaturasImparte.filter(asignaturaId => asignaturaId.toString() !== asignatura._id.toString())
+    });
+    console.log(`Asignatura eliminada de ${nombreProfesor}`);
+});
+exports.eliminarAsignaturaDeProfesorPorNombre = eliminarAsignaturaDeProfesorPorNombre;
 //# sourceMappingURL=profesorService.js.map

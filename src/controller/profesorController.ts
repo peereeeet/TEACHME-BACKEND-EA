@@ -8,6 +8,7 @@ import {
   eliminarProfesorPorNombre,
   actualizarAsignaturasProfesorPorNombre,
   eliminarAsignaturaDeProfesorPorNombre,
+  actualizarProfesorPorId,
 
 } from '../services/profesorService';
 
@@ -17,7 +18,7 @@ router.use(cors());
 ///////////////////////////////////////CREAR PROFESOR//////////////////////////////////////
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { nombre, edad } = req.query; 
+    const { nombre, edad } = req.body; 
     const profesor = await crearProfesor(String(nombre), Number(edad)); 
     res.status(201).json(profesor);
   } catch (error) {
@@ -50,6 +51,19 @@ router.get('/:nombre', async (req: Request, res: Response) => {
   } catch (error) {
     const err = error as Error;
     res.status(500).json({ error: err.message });
+  }
+});
+
+/////////////////////////////////////////ACTUALIZAR PROFESOR/////////////////////////////////////
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const datosActualizados = req.body; // Suponiendo que envías los campos a actualizar en el cuerpo de la solicitud
+    const profesor = await actualizarProfesorPorId(id, datosActualizados);
+    res.status(200).json(profesor);
+  } catch (error) {
+    const err = error as Error;
+    res.status(400).json({ error: err.message });
   }
 });
 
