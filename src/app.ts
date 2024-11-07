@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import cors from 'cors'; 
-import profesorRoutes from './controller/profesorController';
+import cors from 'cors';
+import usuarioRoutes from './controller/usuarioController';
 import asignaturaRoutes from './controller/asignaturaController';
 
 const app = express();
@@ -22,5 +22,7 @@ mongoose.connect('mongodb://localhost:27017/ejercicio1')
   .catch(err => console.error('No se pudo conectar a MongoDB...', err));
 
 // Rutas
-app.use('/api/profesores', profesorRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/asignaturas', asignaturaRoutes);
+
+export default app;

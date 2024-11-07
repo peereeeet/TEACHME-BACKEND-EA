@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const profesor_1 = __importDefault(require("./models/profesor"));
+const usuario_1 = __importDefault(require("./models/usuario"));
 const asignatura_1 = __importDefault(require("./models/asignatura"));
 mongoose_1.default.connect('mongodb://127.0.0.1:27017/ejercicio1')
     .then(() => {
@@ -25,7 +25,7 @@ mongoose_1.default.connect('mongodb://127.0.0.1:27017/ejercicio1')
 //////////////////////////////////////////CREATE//////////////////////////////////////////
 function crearProfesor(nombre, edad) {
     return __awaiter(this, void 0, void 0, function* () {
-        const profesor = new profesor_1.default({ nombre, edad });
+        const profesor = new usuario_1.default({ nombre, edad });
         const resultado = yield profesor.save();
         console.log('Profesor creado:', resultado);
     });
@@ -40,7 +40,7 @@ function crearAsignatura(nombre, descripcion) {
 //////////////////////////////////////////ASIGNAR ASIGNATURAS A PROFESOR////////////////////////////
 function asignarAsignaturasAProfesor(nombreProfesor, nombresAsignaturas) {
     return __awaiter(this, void 0, void 0, function* () {
-        const profesor = yield profesor_1.default.findOne({ nombre: nombreProfesor });
+        const profesor = yield usuario_1.default.findOne({ nombre: nombreProfesor });
         if (!profesor) {
             console.error('Profesor no encontrado');
             return;
@@ -67,7 +67,7 @@ function asignarProfesoresAAsignatura(nombreAsignatura, nombresProfesores) {
             console.error('Asignatura no encontrada');
             return;
         }
-        const profesores = yield profesor_1.default.find({ nombre: { $in: nombresProfesores } });
+        const profesores = yield usuario_1.default.find({ nombre: { $in: nombresProfesores } });
         if (profesores.length === 0) {
             console.error('Profesores no encontrados');
             return;
@@ -80,7 +80,7 @@ function asignarProfesoresAAsignatura(nombreAsignatura, nombresProfesores) {
 /////////////////////////////////////////////READ//////////////////////////////////////////
 function listarProfesores() {
     return __awaiter(this, void 0, void 0, function* () {
-        const profesores = yield profesor_1.default.find().populate('asignaturasImparte');
+        const profesores = yield usuario_1.default.find().populate('asignaturasImparte');
         console.log('Profesores:', profesores);
     });
 }
@@ -93,7 +93,7 @@ function listarAsignaturas() {
 /////////////////////////////////////////////READ BY ID//////////////////////////////////////////
 function verProfesor(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const profesor = yield profesor_1.default.findById(id);
+        const profesor = yield usuario_1.default.findById(id);
         console.log('Profesor:', profesor);
     });
 }
@@ -106,7 +106,7 @@ function verAsignatura(id) {
 //////////////////////////////READ BY NAME//////////////////////////////////////////
 function verProfesorPorNombre(nombre) {
     return __awaiter(this, void 0, void 0, function* () {
-        const profesor = yield profesor_1.default.findOne({ nombre });
+        const profesor = yield usuario_1.default.findOne({ nombre });
         console.log('Profesor:', profesor);
     });
 }

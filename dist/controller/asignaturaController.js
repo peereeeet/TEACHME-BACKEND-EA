@@ -35,11 +35,11 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ error: err.message });
     }
 }));
-// Ver una asignatura por nombre
-router.get('/:nombre', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Ver una asignatura por id
+router.get('/:_id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { nombre } = req.params;
-        const asignatura = yield (0, asignaturaService_1.verAsignaturaPorNombre)(nombre);
+        const { _id } = req.params;
+        const asignatura = yield (0, asignaturaService_1.verAsignaturaPorId)(_id);
         if (!asignatura) {
             return res.status(404).json({ error: 'Asignatura no encontrada' });
         }
@@ -63,11 +63,11 @@ router.put('/:nombre/asignar-profesores', (req, res) => __awaiter(void 0, void 0
         res.status(400).json({ error: err.message });
     }
 }));
-// Eliminar una asignatura por nombre
-router.delete('/:nombre', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Eliminar una asignatura por id
+router.delete('/:_id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { nombre } = req.params;
-        const resultado = yield (0, asignaturaService_1.eliminarAsignaturaPorNombre)(nombre);
+        const { _id } = req.params;
+        const resultado = yield (0, asignaturaService_1.eliminarAsignaturaPorId)(_id);
         if (!resultado) {
             return res.status(404).json({ error: 'Asignatura no encontrada' });
         }

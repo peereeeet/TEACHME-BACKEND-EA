@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Profesor from './models/profesor';
+import Profesor from './models/usuario';
 import Asignatura from './models/asignatura';
 
 mongoose.connect('mongodb://127.0.0.1:27017/ejercicio1')

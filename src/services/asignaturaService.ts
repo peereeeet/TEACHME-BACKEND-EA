@@ -1,5 +1,5 @@
 import Asignatura from '../models/asignatura';
-import Profesor from '../models/profesor';
+import Usuario from '../models/usuario';
 
 /////////////////////////////////////CREAR NUEVA ASIGNATURA//////////////////////////////////////////
 export const crearAsignatura = async (nombre: string, descripcion: string) => {
@@ -13,11 +13,11 @@ export const listarAsignaturas = async () => {
 };
 
 //////////////////////////////////////VER ASIGNATURA POR NOMBRE///////////////////////////////////////
-export const verAsignaturaPorNombre = async (nombre: string) => {
-  return await Asignatura.findOne({ nombre }).populate('profesores');
+export const verAsignaturaPorId = async (_id: string) => {
+  return await Asignatura.findOne({ _id }).populate('profesores');
 };
 
-//////////////////////////////////////ASIGNAR PROFESORES A ASIGNATURA///////////////////////////////////////
+//////////////////////////////////////ASIGNAR PROFESORES A ASIGNATURA/////////////////////////////////
 export const asignarProfesoresAAsignatura = async (nombreAsignatura: string, nombresProfesores: string[]) => {
   const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura });
 
@@ -25,7 +25,7 @@ export const asignarProfesoresAAsignatura = async (nombreAsignatura: string, nom
     throw new Error('Asignatura no encontrada');
   }
 
-  const profesores = await Profesor.find({ nombre: { $in: nombresProfesores } });
+  const profesores = await Usuario.find({ nombre: { $in: nombresProfesores }, isProfesor: true });
 
   if (profesores.length === 0) {
     throw new Error('Profesores no encontrados');
@@ -36,13 +36,13 @@ export const asignarProfesoresAAsignatura = async (nombreAsignatura: string, nom
   return asignatura;
 };
 
-//////////////////////////////////////ELIMINAR ASIGNATURA POR NOMBRE///////////////////////////////////////
-export const eliminarAsignaturaPorNombre = async (nombre: string) => {
-  const resultado = await Asignatura.findOneAndDelete({ nombre });
+//////////////////////////////////////ELIMINAR ASIGNATURA POR NOMBRE//////////////////////////////////
+export const eliminarAsignaturaPorId = async (_id: string) => {
+  const resultado = await Asignatura.findOneAndDelete({ _id });
   return resultado;
 };
 
-//////////////////////////////////////ELIMINAR PROFESORES DE ASIGNATURA POR NOMBRE///////////////////////
+//////////////////////////////////////ELIMINAR PROFESORES DE ASIGNATURA POR NOMBRE////////////////////
 export const eliminarProfesoresAsignaturaPorNombre = async (nombreAsignatura: string, nombresProfesores: string[]) => {
   const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura });
 
@@ -50,18 +50,20 @@ export const eliminarProfesoresAsignaturaPorNombre = async (nombreAsignatura: st
     throw new Error('Asignatura no encontrada');
   }
 
-  const profesores = await Profesor.find({ nombre: { $in: nombresProfesores } });
+  const profesores = await Usuario.find({ nombre: { $in: nombresProfesores }, isProfesor: true });
 
   if (profesores.length === 0) {
     throw new Error('Profesores no encontrados');
   }
 
-  asignatura.profesores = asignatura.profesores.filter(profesor => !profesores.map(p => p._id).includes(profesor));
+  asignatura.profesores = asignatura.profesores.filter(
+    profesor => !profesores.map(p => p._id).includes(profesor)
+  );
   await asignatura.save();
   return asignatura;
 };
 
-//////////////////////////////////////ACTUALIZAR PROFESORES DE ASIGNATURA POR NOMBRE///////////////////////
+//////////////////////////////////////ACTUALIZAR PROFESORES DE ASIGNATURA POR NOMBRE///////////////////
 export const actualizarProfesoresAsignaturaPorNombre = async (nombreAsignatura: string, nuevosProfesores: string[]) => {
   const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura });
 
@@ -69,7 +71,7 @@ export const actualizarProfesoresAsignaturaPorNombre = async (nombreAsignatura: 
     throw new Error('Asignatura no encontrada');
   }
 
-  const profesores = await Profesor.find({ nombre: { $in: nuevosProfesores } });
+  const profesores = await Usuario.find({ nombre: { $in: nuevosProfesores }, isProfesor: true });
 
   if (profesores.length === 0) {
     throw new Error('Profesores no encontrados');
@@ -79,4 +81,3 @@ export const actualizarProfesoresAsignaturaPorNombre = async (nombreAsignatura: 
   await asignatura.save();
   return asignatura;
 };
-

@@ -2,9 +2,9 @@ import { Router, Request, Response } from 'express';
 import {
   crearAsignatura,
   listarAsignaturas,
-  verAsignaturaPorNombre,
+  verAsignaturaPorId,
   asignarProfesoresAAsignatura,
-  eliminarAsignaturaPorNombre,
+  eliminarAsignaturaPorId,
   actualizarProfesoresAsignaturaPorNombre,
 } from '../services/asignaturaService';
 
@@ -33,11 +33,11 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// Ver una asignatura por nombre
-router.get('/:nombre', async (req: Request, res: Response) => {
+// Ver una asignatura por id
+router.get('/:_id', async (req: Request, res: Response) => {
   try {
-    const { nombre } = req.params;
-    const asignatura = await verAsignaturaPorNombre(nombre);
+    const { _id } = req.params;
+    const asignatura = await verAsignaturaPorId(_id);
     if (!asignatura) {
       return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
@@ -61,11 +61,11 @@ router.put('/:nombre/asignar-profesores', async (req: Request, res: Response) =>
   }
 });
 
-// Eliminar una asignatura por nombre
-router.delete('/:nombre', async (req: Request, res: Response) => {
+// Eliminar una asignatura por id
+router.delete('/:_id', async (req: Request, res: Response) => {
   try {
-    const { nombre } = req.params;
-    const resultado = await eliminarAsignaturaPorNombre(nombre);
+    const { _id } = req.params;
+    const resultado = await eliminarAsignaturaPorId(_id);
     if (!resultado) {
       return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
