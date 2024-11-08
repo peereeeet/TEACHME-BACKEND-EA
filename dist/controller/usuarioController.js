@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,118 +31,248 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const cors_1 = __importDefault(require("cors"));
-const express_1 = require("express");
-const usuarioService_1 = require("../services/usuarioService");
-const router = (0, express_1.Router)();
-router.use((0, cors_1.default)());
-// Crear un nuevo usuario
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-        const usuario = yield (0, usuarioService_1.crearUsuario)(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
-        res.status(201).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
-// Listar todos los usuarios
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuarios = yield (0, usuarioService_1.listarUsuarios)();
-        res.status(200).json(usuarios);
-    }
-    catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}));
-// Ver usuario por nombre
-router.get('/:nombre', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.verUsuarioPorNombre)(req.params.nombre);
-        if (!usuario) {
-            return res.status(404).json({ error: 'Usuario no encontrado' });
+exports.crearUsuario = crearUsuario;
+exports.listarUsuarios = listarUsuarios;
+exports.verUsuarioPorNombre = verUsuarioPorNombre;
+exports.asignarAsignaturasAUsuario = asignarAsignaturasAUsuario;
+exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
+exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
+exports.actualizarAsignaturasUsuarioPorNombre = actualizarAsignaturasUsuarioPorNombre;
+exports.eliminarAsignaturaDeUsuarioPorNombre = eliminarAsignaturaDeUsuarioPorNombre;
+exports.asignarAsignaturaAUsuarioPorId = asignarAsignaturaAUsuarioPorId;
+exports.eliminarAsignaturaDeUsuarioPorId = eliminarAsignaturaDeUsuarioPorId;
+const usuarioService = __importStar(require("../services/usuarioService"));
+////////////////////////////////////CREAR USUARIO/////////////////////////////////////
+function crearUsuario(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+            const usuario = yield usuarioService.crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+            res.status(201).json(usuario);
         }
-        res.status(200).json(usuario);
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////LISTAR USUARIOS/////////////////////////////////////
+function listarUsuarios(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuarios = yield usuarioService.listarUsuarios();
+            res.status(200).json(usuarios);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////VER USUARIO POR NOMBRE/////////////////////////////////////
+function verUsuarioPorNombre(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.verUsuarioPorNombre(req.params.nombre);
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ASIGNAR ASIGNATURAS A UN USUARIO/////////////////////////////////////
+function asignarAsignaturasAUsuario(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.asignarAsignaturasAUsuario(req.params.nombre, req.body.asignaturas);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ACTUALIZAR USUARIO POR ID/////////////////////////////////////
+function actualizarUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.actualizarUsuarioPorId(req.params._id, req.body);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ELIMINAR USUARIO/////////////////////////////////////
+function eliminarUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.eliminarUsuarioPorId(req.params.id);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ACTUALIZAR ASIGNATURAS DE UN USUARIO POR NOMBRE/////////////////////////////////////
+function actualizarAsignaturasUsuarioPorNombre(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.actualizarAsignaturasUsuarioPorNombre(req.params.nombre, req.body.asignaturas);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ELIMINAR UNA ASIGNATURA DE UN USUARIO POR NOMBRE/////////////////////////////////////
+function eliminarAsignaturaDeUsuarioPorNombre(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.eliminarAsignaturaDeUsuarioPorNombre(req.params.nombre, req.params.asignaturaId);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ASIGNAR ASIGNATURA A UN USUARIO POR ID/////////////////////////////////////
+function asignarAsignaturaAUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.asignarAsignaturaAUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////ELIMINAR ASIGNATURA DE UN USUARIO POR ID/////////////////////////////////////
+function eliminarAsignaturaDeUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.eliminarAsignaturaDeUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+/*
+const router = Router();
+router.use(cors());
+
+// Crear un nuevo usuario
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+    const usuario = await crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+    res.status(201).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Listar todos los usuarios
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const usuarios = await listarUsuarios();
+    res.status(200).json(usuarios);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ver usuario por nombre
+router.get('/:nombre', async (req: Request, res: Response) => {
+  try {
+    const usuario = await verUsuarioPorNombre(req.params.nombre);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}));
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Asignar asignaturas a un usuario
-router.put('/:nombre/asignaturas', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.asignarAsignaturasAUsuario)(req.params.nombre, req.body.asignaturas);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
+router.put('/:nombre/asignaturas', async (req: Request, res: Response) => {
+  try {
+    const usuario = await asignarAsignaturasAUsuario(req.params.nombre, req.body.asignaturas);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Actualizar usuario por ID
-router.put('/:_id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.actualizarUsuarioPorId)(req.params._id, req.body);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
+router.put('/:_id', async (req: Request, res: Response) => {
+  try {
+    const usuario = await actualizarUsuarioPorId(req.params._id, req.body);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Eliminar usuario por nombre
-router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.eliminarUsuarioPorId)(req.params.id);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-}));
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const usuario = await eliminarUsuarioPorId(req.params.id);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Actualizar asignaturas de un usuario por nombre
-router.put('/:nombre/asignaturas/actualizar', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.actualizarAsignaturasUsuarioPorNombre)(req.params.nombre, req.body.asignaturas);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
+router.put('/:nombre/asignaturas/actualizar', async (req: Request, res: Response) => {
+  try {
+    const usuario = await actualizarAsignaturasUsuarioPorNombre(req.params.nombre, req.body.asignaturas);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Eliminar una asignatura de un usuario por nombre
-router.delete('/:nombre/asignaturas/:asignaturaId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.eliminarAsignaturaDeUsuarioPorNombre)(req.params.nombre, req.params.asignaturaId);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
+router.delete('/:nombre/asignaturas/:asignaturaId', async (req: Request, res: Response) => {
+  try {
+    const usuario = await eliminarAsignaturaDeUsuarioPorNombre(req.params.nombre, req.params.asignaturaId);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Ruta para agregar asignatura a un usuario por _id
-router.put('/:usuarioId/asignaturas/:asignaturaId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.asignarAsignaturaAUsuarioPorId)(req.params.usuarioId, req.params.asignaturaId);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
+router.put('/:usuarioId/asignaturas/:asignaturaId', async (req: Request, res: Response) => {
+  try {
+    const usuario = await asignarAsignaturaAUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 // Ruta para eliminar asignatura de un usuario por _id
-router.delete('/:usuarioId/asignaturas/:asignaturaId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const usuario = yield (0, usuarioService_1.eliminarAsignaturaDeUsuarioPorId)(req.params.usuarioId, req.params.asignaturaId);
-        res.status(200).json(usuario);
-    }
-    catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-}));
-exports.default = router;
+router.delete('/:usuarioId/asignaturas/:asignaturaId', async (req: Request, res: Response) => {
+  try {
+    const usuario = await eliminarAsignaturaDeUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+*/
 //# sourceMappingURL=usuarioController.js.map

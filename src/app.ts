@@ -1,8 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import usuarioRoutes from './controller/usuarioController';
-import asignaturaRoutes from './controller/asignaturaController';
+import usuarioRoutes from './routes/usuarioRoutes';
+import asignaturaRoutes from './routes/asignaturaRoutes';
+
 
 const app = express();
 const PORT = 3000;

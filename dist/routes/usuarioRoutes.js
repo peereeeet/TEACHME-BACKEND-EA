@@ -24,17 +24,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
-const asignaturaController_1 = require("../controller/asignaturaController");
+const usuarioController_1 = require("../controller/usuarioController");
 const router = express.Router();
 ////////////////////////////////////POSTS/////////////////////////////////////
-router.post('/', asignaturaController_1.crearAsignatura);
+router.post('/', usuarioController_1.crearUsuario);
 ////////////////////////////////////GETS/////////////////////////////////////
-router.get('/', asignaturaController_1.listarAsignaturas);
-router.get('/:_id', asignaturaController_1.verAsignaturaPorId);
+router.get('/', usuarioController_1.listarUsuarios);
+router.get('/:nombre', usuarioController_1.verUsuarioPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
-router.put('/:nombre/profesores', asignaturaController_1.asignarProfesoresAAsignatura);
-router.put('/:nombre/profesores/actualizar', asignaturaController_1.actualizarProfesoresAsignaturaPorNombre);
+router.put('/:nombre/asignaturas', usuarioController_1.asignarAsignaturasAUsuario);
+router.put('/:_id', usuarioController_1.actualizarUsuarioPorId);
+router.put('/:nombre/asignaturas/actualizar', usuarioController_1.actualizarAsignaturasUsuarioPorNombre);
+router.put('/:nombre/asignatura/:id', usuarioController_1.asignarAsignaturaAUsuarioPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:id', asignaturaController_1.eliminarAsignaturaPorId);
+router.delete('/:nombre/asignatura/:id', usuarioController_1.eliminarAsignaturaDeUsuarioPorId);
+router.delete('/:nombre/asignaturas/:asignaturaId', usuarioController_1.eliminarAsignaturaDeUsuarioPorNombre);
+router.delete('/:id', usuarioController_1.eliminarUsuarioPorId);
 exports.default = router;
-//# sourceMappingURL=asignaturaRoutes.js.map
+//# sourceMappingURL=usuarioRoutes.js.map

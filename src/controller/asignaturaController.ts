@@ -1,13 +1,108 @@
 import { Router, Request, Response } from 'express';
-import {
-  crearAsignatura,
-  listarAsignaturas,
-  verAsignaturaPorId,
-  asignarProfesoresAAsignatura,
-  eliminarAsignaturaPorId,
-  actualizarProfesoresAsignaturaPorNombre,
-} from '../services/asignaturaService';
+import * as asignaturaService from '../services/asignaturaService';
 
+////////////////////////////////////CREAR ASIGNATURA/////////////////////////////////////
+export async function crearAsignatura(req: Request, res: Response) {
+  try {
+    const { nombre, descripcion } = req.body;
+    const asignatura = await asignaturaService.crearAsignatura(nombre, descripcion);
+    res.status(200).send().json(asignatura);
+    console.log(listarAsignaturas);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+}
+////////////////////////////////////LISTAR ASIGNATURAS/////////////////////////////////////
+export async function listarAsignaturas(req: Request, res: Response) {
+  try {
+    const asignaturas = await asignaturaService.listarAsignaturas();
+    res.status(200).send().json(asignaturas);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+////////////////////////////////////VER ASIGNATURA POR NOMBRE E ID/////////////////////////////////////
+export async function verAsignaturaPorId(req: Request, res: Response) {
+  try {
+    const asignatura = await asignaturaService.verAsignaturaPorId(req.params._id);
+    if (!asignatura) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
+    }
+    console.log(asignatura);
+    res.status(200).send().json(asignatura);  
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function verAsignaturaPorNombre(req: Request, res: Response) {
+  try {
+    const asignatura = await asignaturaService.verAsignaturaPorNombre(req.params.nombre);
+    if (!asignatura) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
+    }
+    console.log(asignatura);
+    res.status(200).json(asignatura);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+//AÑADIR USUARIO A ASIGNATURA POR NOMBRE E ID
+export async function asignarUsuariosAAsignaturaPorNombre(req: Request, res: Response) {
+  try {
+    const { nombreAsignatura, nombresUsuarios } = req.body;
+    const asignatura = await asignaturaService.asignarUsuariosAAsignaturaPorNombre(nombreAsignatura, nombresUsuarios);
+    console.log(asignatura);
+    res.status(200).send().json(asignatura);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+export async function asignarUsuariosAAsignaturaPorId(req: Request, res: Response) {
+  try {
+    const { _id } = req.params;
+    const { nombresUsuarios } = req.body;
+    const asignatura = await asignaturaService.asignarUsuariosAAsignaturaPorId(_id, nombresUsuarios);
+    console.log(asignatura);
+    res.status(200).send().json(asignatura);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+} 
+//ELIMINAR ASIGNATURA DE LA BASE DE DATOS POR NOMBRE E ID
+export async function eliminarAsignaturaPorNombre(req: Request, res: Response) {
+  try {
+    const { nombre } = req.params;
+    const resultado = await asignaturaService.eliminarAsignaturaPorNombre(nombre);
+    if (!resultado) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
+    }
+    console.log(listarAsignaturas);
+    res.status(200).send().json(listarAsignaturas);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function eliminarAsignaturaPorId(req: Request, res: Response) {
+  try {
+    const { _id } = req.params;
+    const resultado = await asignaturaService.eliminarAsignaturaPorId(_id);
+    if (!resultado) {
+      return res.status(404).json({ error: 'Asignatura no encontrada' });
+    }
+    console.log(listarAsignaturas);
+    res.status(200).send().json(listarAsignaturas);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+
+
+/*
 const router = Router();
 
 // Crear una nueva asignatura
@@ -89,4 +184,4 @@ router.put('/:nombre/actualizar-profesores', async (req: Request, res: Response)
   }
 });
 
-export default router;
+export default router;*/

@@ -3,38 +3,73 @@ import Usuario from '../models/usuario';
 
 /////////////////////////////////////CREAR NUEVA ASIGNATURA//////////////////////////////////////////
 export const crearAsignatura = async (nombre: string, descripcion: string) => {
-  const asignatura = new Asignatura({ nombre, descripcion });
+  const asignatura = new Asignatura({nombre, descripcion });
   return await asignatura.save();
 };
 
+////////////////////////////////////MODIFICAR NOMBRE ASIGNATURA POR ID////////////////////////////
+export const modificarNombreAsignaturaPorId = async (_id: string, nombre: string) => {
+  return await Asignatura.findByIdAndUpdate(_id, { nombre }, { new: true });
+}
+
+////////////////////////////////////MODIFICAR DESCRIPCION ASIGNATURA POR ID////////////////////////////
+export const modificarDescripcionAsignaturaPorId = async (_id: string, descripcion: string) => {
+  return await Asignatura.findByIdAndUpdate(_id, { descripcion }, { new: true });
+}
+
 /////////////////////////////////// LISTAR TODAS LAS ASIGNATURAS/////////////////////////////////////
 export const listarAsignaturas = async () => {
-  return await Asignatura.find().populate('profesores');
+  return await Asignatura.find().populate('usuarios');
 };
 
-//////////////////////////////////////VER ASIGNATURA POR NOMBRE///////////////////////////////////////
+//////////////////////////////////////VER ASIGNATURA POR NOMBRE E ID///////////////////////////////////////
 export const verAsignaturaPorId = async (_id: string) => {
-  return await Asignatura.findOne({ _id }).populate('profesores');
+  return await Asignatura.findOne({ _id }).populate('usuarios');
 };
 
-//////////////////////////////////////ASIGNAR PROFESORES A ASIGNATURA/////////////////////////////////
-export const asignarProfesoresAAsignatura = async (nombreAsignatura: string, nombresProfesores: string[]) => {
+export const verAsignaturaPorNombre = async (nombre: string) => {
+  return await Asignatura.findOne({ nombre }).populate('usuarios');
+};
+
+
+//////////////////////////////////////ASIGNAR USUARIOS A ASIGNATURA POR NOMBRE E ID//////////////////////
+export const asignarUsuariosAAsignaturaPorNombre = async (nombreAsignatura: string, nombresUsuarios: string[]) => {
   const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura });
 
   if (!asignatura) {
     throw new Error('Asignatura no encontrada');
   }
 
-  const profesores = await Usuario.find({ nombre: { $in: nombresProfesores }, isProfesor: true });
+  const usuarios = await Usuario.find({ nombre: { $in: nombresUsuarios } });
 
-  if (profesores.length === 0) {
-    throw new Error('Profesores no encontrados');
+  if (usuarios.length === 0) {
+    throw new Error('Usuarios no encontrados');
   }
 
-  profesores.forEach(profesor => asignatura.profesores.push(profesor._id));
+  asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
   await asignatura.save();
   return asignatura;
 };
+
+export const asignarUsuariosAAsignaturaPorId = async (_id: string, nombresUsuarios: string[]) => {
+  const asignatura = await Asignatura.findById(_id);
+
+  if (!asignatura) {
+    throw new Error('Asignatura no encontrada');
+  }
+
+  const usuarios = await Usuario.find({ nombre: { $in: nombresUsuarios } });
+
+  if (usuarios.length === 0) {
+    throw new Error('Usuarios no encontrados');
+  }
+
+  asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
+  await asignatura.save();
+  return asignatura;
+}
+
+
 
 //////////////////////////////////////ELIMINAR ASIGNATURA POR NOMBRE//////////////////////////////////
 export const eliminarAsignaturaPorId = async (_id: string) => {
@@ -42,42 +77,10 @@ export const eliminarAsignaturaPorId = async (_id: string) => {
   return resultado;
 };
 
-//////////////////////////////////////ELIMINAR PROFESORES DE ASIGNATURA POR NOMBRE////////////////////
-export const eliminarProfesoresAsignaturaPorNombre = async (nombreAsignatura: string, nombresProfesores: string[]) => {
-  const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura });
+export const eliminarAsignaturaPorNombre = async (nombre: string) => {
+  const resultado = await Asignatura.findOneAndDelete({ nombre });
+  return resultado;
+}
 
-  if (!asignatura) {
-    throw new Error('Asignatura no encontrada');
-  }
 
-  const profesores = await Usuario.find({ nombre: { $in: nombresProfesores }, isProfesor: true });
 
-  if (profesores.length === 0) {
-    throw new Error('Profesores no encontrados');
-  }
-
-  asignatura.profesores = asignatura.profesores.filter(
-    profesor => !profesores.map(p => p._id).includes(profesor)
-  );
-  await asignatura.save();
-  return asignatura;
-};
-
-//////////////////////////////////////ACTUALIZAR PROFESORES DE ASIGNATURA POR NOMBRE///////////////////
-export const actualizarProfesoresAsignaturaPorNombre = async (nombreAsignatura: string, nuevosProfesores: string[]) => {
-  const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura });
-
-  if (!asignatura) {
-    throw new Error('Asignatura no encontrada');
-  }
-
-  const profesores = await Usuario.find({ nombre: { $in: nuevosProfesores }, isProfesor: true });
-
-  if (profesores.length === 0) {
-    throw new Error('Profesores no encontrados');
-  }
-
-  asignatura.profesores = profesores.map(profesor => profesor._id);
-  await asignatura.save();
-  return asignatura;
-};

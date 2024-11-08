@@ -121,6 +121,8 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
 
 
 
+
+
   async function main() {
     ////////CREAR 4 PROFESORES Y 10 ASIGNATURAS//////////////////
     console.log('CREAR 4 PROFESORES Y 10 ASIGNATURAS');

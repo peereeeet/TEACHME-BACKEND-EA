@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
-const usuarioController_1 = __importDefault(require("./controller/usuarioController"));
-const asignaturaController_1 = __importDefault(require("./controller/asignaturaController"));
+const usuarioRoutes_1 = __importDefault(require("./routes/usuarioRoutes"));
+const asignaturaRoutes_1 = __importDefault(require("./routes/asignaturaRoutes"));
 const app = (0, express_1.default)();
 const PORT = 3000;
 // Aplica el middleware CORS
@@ -23,7 +23,7 @@ mongoose_1.default.connect('mongodb://localhost:27017/ejercicio1')
 })
     .catch(err => console.error('No se pudo conectar a MongoDB...', err));
 // Rutas
-app.use('/api/usuarios', usuarioController_1.default);
-app.use('/api/asignaturas', asignaturaController_1.default);
+app.use('/api/usuarios', usuarioRoutes_1.default);
+app.use('/api/asignaturas', asignaturaRoutes_1.default);
 exports.default = app;
 //# sourceMappingURL=app.js.map
