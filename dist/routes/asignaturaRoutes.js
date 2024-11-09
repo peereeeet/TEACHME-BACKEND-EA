@@ -31,10 +31,12 @@ router.post('/', asignaturaController_1.crearAsignatura);
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', asignaturaController_1.listarAsignaturas);
 router.get('/:_id', asignaturaController_1.verAsignaturaPorId);
+router.get('/:nombre', asignaturaController_1.verAsignaturaPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
-router.put('/:nombre/profesores', asignaturaController_1.asignarProfesoresAAsignatura);
-router.put('/:nombre/profesores/actualizar', asignaturaController_1.actualizarProfesoresAsignaturaPorNombre);
+router.put('/:nombre/usuario', asignaturaController_1.asignarUsuariosAAsignaturaPorNombre);
+router.put('/:_id/usuario ', asignaturaController_1.asignarUsuariosAAsignaturaPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:id', asignaturaController_1.eliminarAsignaturaPorId);
+router.delete('/:_id', asignaturaController_1.eliminarAsignaturaPorId);
+router.delete('/:nombre', asignaturaController_1.eliminarAsignaturaPorNombre);
 exports.default = router;
 //# sourceMappingURL=asignaturaRoutes.js.map

@@ -42,9 +42,9 @@ router.put('/:_id/nombre', modificarNombreUsuarioPorId);
 router.put('/:_id/password', modificarPasswordUsuarioPorId);
 router.put('/:_id/rol', modificarRolUsuarioPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:usuarioId/asignaturas/:asignaturaid', eliminarAsignaturaDeUsuarioPorId);
+router.delete('/:usuarioId/asignaturas/:asignaturaId', eliminarAsignaturaDeUsuarioPorId);
 router.delete('/:nombre/asignaturas/:asignaturaId', eliminarAsignaturaDeUsuarioPorNombre);
-router.delete('/usuarioId', eliminarUsuarioPorId);
+router.delete('/:usuarioId', eliminarUsuarioPorId);
 
 
 

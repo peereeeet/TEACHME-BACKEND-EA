@@ -24,7 +24,7 @@ router.get('/:nombre', verAsignaturaPorNombre);
 router.put('/:nombre/usuario', asignarUsuariosAAsignaturaPorNombre);
 router.put('/:_id/usuario ', asignarUsuariosAAsignaturaPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:id', eliminarAsignaturaPorId);
+router.delete('/:_id', eliminarAsignaturaPorId);
 router.delete('/:nombre', eliminarAsignaturaPorNombre);
 
 

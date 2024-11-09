@@ -90,9 +90,10 @@ export const actualizarAsignaturasUsuarioPorId = async (_id: string, asignaturas
   return await usuario.save();
 }
 
-////////////////////////////////////////ELIMINAR USUARIO//////////////////////////////////////////
+// Eliminar usuario por ID usando ObjectId
 export const eliminarUsuarioPorId = async (_id: string) => {
-  return await Usuario.findOneAndDelete({ _id });
+  const objectId = new mongoose.Types.ObjectId(_id);
+  return await Usuario.findOneAndDelete({ _id: objectId });
 };
 
 ////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR NOMBRE E ID//////////////////////////////////////////
@@ -107,17 +108,18 @@ export const eliminarAsignaturaDeUsuarioPorNombre = async (nombre: string, asign
   return await usuario.save();
 };
 
-export const eliminarAsignaturaDeUsuarioPorId = async (_id: string, asignaturaId: string) => {
-  const usuarioObjectId = new mongoose.Types.ObjectId(_id);
+export const eliminarAsignaturaDeUsuarioPorId = async (usuarioId: string, asignaturaId: string) => {
+  const usuarioObjectId = new mongoose.Types.ObjectId(usuarioId);
   const asignaturaObjectId = new mongoose.Types.ObjectId(asignaturaId);
 
   const usuario = await Usuario.findById(usuarioObjectId);
   if (!usuario) {
-    throw new Error('Usuario no encontrado'+usuarioObjectId);
+    throw new Error('Usuario no encontrado');
   }
 
+  // Filtra el array `asignaturasImparte` para eliminar la asignatura específica
   usuario.asignaturasImparte = usuario.asignaturasImparte.filter(
-    id => id.toString() !== asignaturaObjectId.toString()
+    id => !id.equals(asignaturaObjectId)  // Usa `.equals()` para comparar `ObjectId`s
   );
 
   return await usuario.save();

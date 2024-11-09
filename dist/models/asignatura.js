@@ -7,7 +7,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const asignaturaSchema = new mongoose_1.default.Schema({
     nombre: { type: String },
     descripcion: { type: String },
-    profesores: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Usuario' }]
+    usuarios: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Usuario' }]
 });
 const Asignatura = mongoose_1.default.model('Asignatura', asignaturaSchema);
 exports.default = Asignatura;

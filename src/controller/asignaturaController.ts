@@ -6,19 +6,18 @@ export async function crearAsignatura(req: Request, res: Response) {
   try {
     const { nombre, descripcion } = req.body;
     const asignatura = await asignaturaService.crearAsignatura(nombre, descripcion);
-    res.status(200).send().json(asignatura);
-    console.log(listarAsignaturas);
+    return res.status(201).json(asignatura); // Usar `return` para asegurar una única respuesta
   } catch (error: any) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message }); // Usar `return` aquí también
   }
 }
 ////////////////////////////////////LISTAR ASIGNATURAS/////////////////////////////////////
 export async function listarAsignaturas(req: Request, res: Response) {
   try {
     const asignaturas = await asignaturaService.listarAsignaturas();
-    res.status(200).send().json(asignaturas);
+    return res.status(200).json(asignaturas);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 }
 ////////////////////////////////////VER ASIGNATURA POR NOMBRE E ID/////////////////////////////////////
@@ -88,13 +87,12 @@ export async function eliminarAsignaturaPorNombre(req: Request, res: Response) {
 
 export async function eliminarAsignaturaPorId(req: Request, res: Response) {
   try {
-    const { _id } = req.params;
-    const resultado = await asignaturaService.eliminarAsignaturaPorId(_id);
-    if (!resultado) {
+    console.log("ID recibido para eliminar:", req.params._id); // Agrega este log
+    const asignatura = await asignaturaService.eliminarAsignaturaPorId(req.params._id);
+    if (!asignatura) {
       return res.status(404).json({ error: 'Asignatura no encontrada' });
     }
-    console.log(listarAsignaturas);
-    res.status(200).send().json(listarAsignaturas);
+    res.status(200).json({ message: 'Asignatura eliminada con éxito' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

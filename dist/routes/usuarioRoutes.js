@@ -31,14 +31,21 @@ router.post('/', usuarioController_1.crearUsuario);
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', usuarioController_1.listarUsuarios);
 router.get('/:nombre', usuarioController_1.verUsuarioPorNombre);
+router.get('/:_id', usuarioController_1.verUsuarioPorId);
+router.get('/:nombre/asignaturas', usuarioController_1.obtenerIdUsuarioPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
 router.put('/:nombre/asignaturas', usuarioController_1.asignarAsignaturasAUsuario);
 router.put('/:_id', usuarioController_1.actualizarUsuarioPorId);
 router.put('/:nombre/asignaturas/actualizar', usuarioController_1.actualizarAsignaturasUsuarioPorNombre);
-router.put('/:nombre/asignatura/:id', usuarioController_1.asignarAsignaturaAUsuarioPorId);
+router.put('/:usuarioId/asignaturas/:asignaturaId', usuarioController_1.asignarAsignaturaAUsuarioPorId);
+router.put('/:_id/edad', usuarioController_1.modificarEdadUsuarioPorId);
+router.put('/:_id/email', usuarioController_1.modificarEmailUsuarioPorId);
+router.put('/:_id/nombre', usuarioController_1.modificarNombreUsuarioPorId);
+router.put('/:_id/password', usuarioController_1.modificarPasswordUsuarioPorId);
+router.put('/:_id/rol', usuarioController_1.modificarRolUsuarioPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:nombre/asignatura/:id', usuarioController_1.eliminarAsignaturaDeUsuarioPorId);
+router.delete('/:usuarioId/asignaturas/:asignaturaId', usuarioController_1.eliminarAsignaturaDeUsuarioPorId);
 router.delete('/:nombre/asignaturas/:asignaturaId', usuarioController_1.eliminarAsignaturaDeUsuarioPorNombre);
-router.delete('/:id', usuarioController_1.eliminarUsuarioPorId);
+router.delete('/:usuarioId', usuarioController_1.eliminarUsuarioPorId);
 exports.default = router;
 //# sourceMappingURL=usuarioRoutes.js.map

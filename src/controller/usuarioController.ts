@@ -88,17 +88,18 @@ export async function actualizarUsuarioPorId(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-////////////////////////////////////ELIMINAR USUARIO/////////////////////////////////////
 export async function eliminarUsuarioPorId(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.eliminarUsuarioPorId(req.params.id);
-    console.log(listarUsuarios);
+    const usuario = await usuarioService.eliminarUsuarioPorId(req.params.usuarioId);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
     res.status(200).json(usuario);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 }
-////////////////////////////////////ACTUALIZAR ASIGNATURAS DE UN USUARIO POR NOMBRE/////////////////////////////////////
+////////////////////////////////ACTUALIZAR ASIGNATURAS DE UN USUARIO POR NOMBRE/////////////////////////////////////
 export async function actualizarAsignaturasUsuarioPorNombre(req: Request, res: Response) {
   try {
     const usuario = await usuarioService.actualizarAsignaturasUsuarioPorNombre(req.params.nombre, req.body.asignaturas);
@@ -129,11 +130,13 @@ export async function asignarAsignaturaAUsuarioPorId(req: Request, res: Response
 ////////////////////////////////////ELIMINAR ASIGNATURA DE UN USUARIO POR ID/////////////////////////////////////
 export async function eliminarAsignaturaDeUsuarioPorId(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.eliminarAsignaturaDeUsuarioPorId(req.params.usuarioId, req.body.asignaturaId);
-    console.log(usuario);  
-    res.status(200).json(usuario);
+    const usuario = await usuarioService.eliminarAsignaturaDeUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario o asignatura no encontrados' });
+    }
+    res.status(200).json({ message: 'Asignatura desasignada con éxito', usuario });
   } catch (error: any) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 }
 

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Asignatura from '../models/asignatura';
 import Usuario from '../models/usuario';
 
@@ -71,10 +72,15 @@ export const asignarUsuariosAAsignaturaPorId = async (_id: string, nombresUsuari
 
 
 
-//////////////////////////////////////ELIMINAR ASIGNATURA POR NOMBRE//////////////////////////////////
 export const eliminarAsignaturaPorId = async (_id: string) => {
-  const resultado = await Asignatura.findOneAndDelete({ _id });
-  return resultado;
+  try {
+    const objectId = new mongoose.Types.ObjectId(_id);
+    const resultado = await Asignatura.findByIdAndDelete(objectId);
+    return resultado;
+  } catch (error) {
+    console.error("Error en eliminarAsignaturaPorId:", error);
+    throw error;
+  }
 };
 
 export const eliminarAsignaturaPorNombre = async (nombre: string) => {
