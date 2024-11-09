@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Profesor from './models/usuario';
 import Asignatura from './models/asignatura';
+import Usuario from './models/usuario';
 
 mongoose.connect('mongodb://127.0.0.1:27017/ejercicio1')
   .then(() => {
@@ -51,8 +52,8 @@ async function asignarAsignaturasAProfesor(nombreProfesor: string, nombresAsigna
   console.log(`Asignaturas asignadas a ${nombreProfesor}:`, profesor.asignaturasImparte);
 }
 
-  //////////////////////////////////////////ASIGNAR PROFESORES A LAS ASIGNATURAS QUE IMPARTEN///////////////
-    async function asignarProfesoresAAsignatura(nombreAsignatura: string, nombresProfesores: string[]) {
+  //////////////////////////////////////////ASIGNAR USUARIOS A LAS ASIGNATURAS QUE IMPARTEN///////////////
+    async function asignarProfesoresAAsignatura(nombreAsignatura: string, nombresUsuarios: string[]) {
         const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura }).populate('profesores');
         
         if (!asignatura) {
@@ -60,15 +61,15 @@ async function asignarAsignaturasAProfesor(nombreProfesor: string, nombresAsigna
         return;
         }
     
-        const profesores = await Profesor.find({ nombre: { $in: nombresProfesores } });
-        if (profesores.length === 0) {
-        console.error('Profesores no encontrados');
+        const usuarios = await Usuario.find({ nombre: { $in: nombresUsuarios } });
+        if (usuarios.length === 0) {
+        console.error('Usuarios no encontrados');
         return;
         }
     
-        profesores.forEach(profesor => asignatura.profesores.push(profesor._id));
+        usuarios.forEach(usuarios => asignatura.usuarios.push(usuarios._id));
         await asignatura.save();
-        console.log(`Profesores asignados a ${nombreAsignatura}:`, asignatura.profesores);
+        console.log(`Usuarios asignados a ${nombreAsignatura}:`, asignatura.usuarios);
     }
   
 
