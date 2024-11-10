@@ -22,6 +22,14 @@ export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
   return usuario._id;
 };
 
+export const obtenerAsignaturasDeUsuario = async (usuarioId: string) => {
+  const usuario = await Usuario.findById(new mongoose.Types.ObjectId(usuarioId)).populate('asignaturasImparte');
+  if (!usuario) {
+    throw new Error('Usuario no encontrado');
+  }
+  return usuario.asignaturasImparte;
+};
+
 ////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
 export const verUsuarioPorNombre = async (_id: string) => {
   console.log(_id);

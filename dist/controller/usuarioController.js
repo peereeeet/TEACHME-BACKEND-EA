@@ -31,7 +31,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.obtenerAsignaturasDelUsuario = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -50,6 +54,7 @@ exports.modificarEmailUsuarioPorId = modificarEmailUsuarioPorId;
 exports.modificarPasswordUsuarioPorId = modificarPasswordUsuarioPorId;
 exports.modificarRolUsuarioPorId = modificarRolUsuarioPorId;
 const usuarioService = __importStar(require("../services/usuarioService"));
+const usuario_1 = __importDefault(require("../models/usuario"));
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 function crearUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -262,6 +267,26 @@ function modificarPasswordUsuarioPorId(req, res) {
         }
     });
 }
+const obtenerAsignaturasDelUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const usuarioId = req.params.usuarioId;
+        console.log("ID del usuario recibido:", usuarioId); // Verificación de ID
+        const usuario = yield usuario_1.default.findById(usuarioId).populate('asignaturasImparte');
+        if (usuario) {
+            console.log("Usuario encontrado:", usuario);
+            res.status(200).json(usuario.asignaturasImparte);
+        }
+        else {
+            console.log("Usuario no encontrado con ID:", usuarioId);
+            res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+    }
+    catch (error) {
+        console.error("Error al obtener las asignaturas:", error);
+        res.status(500).json({ message: 'Error al obtener las asignaturas', error });
+    }
+});
+exports.obtenerAsignaturasDelUsuario = obtenerAsignaturasDelUsuario;
 ////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID/////////////////////////////////////
 function modificarRolUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {

@@ -30,6 +30,7 @@ const router = express.Router();
 router.post('/', usuarioController_1.crearUsuario);
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', usuarioController_1.listarUsuarios);
+router.get('/:usuarioId/asignaturas', usuarioController_1.obtenerAsignaturasDelUsuario);
 router.get('/:nombre', usuarioController_1.verUsuarioPorNombre);
 router.get('/:_id', usuarioController_1.verUsuarioPorId);
 router.get('/:nombre/asignaturas', usuarioController_1.obtenerIdUsuarioPorNombre);

@@ -182,6 +182,29 @@ export async function modificarPasswordUsuarioPorId(req: Request, res: Response)
   }
 }
 
+export const obtenerAsignaturasDelUsuario = async (req: Request, res: Response) => {
+  try {
+    const usuarioId = req.params.usuarioId;
+    console.log("ID del usuario recibido:", usuarioId); // Verificación de ID
+
+    const usuario = await Usuario.findById(usuarioId).populate('asignaturasImparte');
+    
+    if (usuario) {
+      console.log("Usuario encontrado:", usuario);
+      res.status(200).json(usuario.asignaturasImparte);
+    } else {
+      console.log("Usuario no encontrado con ID:", usuarioId);
+      res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error("Error al obtener las asignaturas:", error);
+    res.status(500).json({ message: 'Error al obtener las asignaturas', error });
+  }
+};
+
+
+
+
 ////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID/////////////////////////////////////
 export async function modificarRolUsuarioPorId(req: Request, res: Response) {
   try {

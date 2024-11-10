@@ -17,6 +17,7 @@ import {
     modificarNombreUsuarioPorId,
     modificarPasswordUsuarioPorId,
     modificarRolUsuarioPorId,
+    obtenerAsignaturasDelUsuario,
 
 } from '../controller/usuarioController';
 
@@ -28,6 +29,7 @@ router.post('/', crearUsuario);
 
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', listarUsuarios);
+router.get('/:usuarioId/asignaturas', obtenerAsignaturasDelUsuario);
 router.get('/:nombre', verUsuarioPorNombre);
 router.get('/:_id', verUsuarioPorId);
 router.get('/:nombre/asignaturas', obtenerIdUsuarioPorNombre);

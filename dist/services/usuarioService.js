@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.eliminarUsuarioPorId = exports.actualizarAsignaturasUsuarioPorId = exports.actualizarAsignaturasUsuarioPorNombre = exports.actualizarUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.obtenerIdUsuarioPorNombre = exports.listarUsuarios = exports.crearUsuario = void 0;
+exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.eliminarUsuarioPorId = exports.actualizarAsignaturasUsuarioPorId = exports.actualizarAsignaturasUsuarioPorNombre = exports.actualizarUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.obtenerAsignaturasDeUsuario = exports.obtenerIdUsuarioPorNombre = exports.listarUsuarios = exports.crearUsuario = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const usuario_1 = __importDefault(require("../models/usuario"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
@@ -36,6 +36,14 @@ const obtenerIdUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, 
     return usuario._id;
 });
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
+const obtenerAsignaturasDeUsuario = (usuarioId) => __awaiter(void 0, void 0, void 0, function* () {
+    const usuario = yield usuario_1.default.findById(new mongoose_1.default.Types.ObjectId(usuarioId)).populate('asignaturasImparte');
+    if (!usuario) {
+        throw new Error('Usuario no encontrado');
+    }
+    return usuario.asignaturasImparte;
+});
+exports.obtenerAsignaturasDeUsuario = obtenerAsignaturasDeUsuario;
 ////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
 const verUsuarioPorNombre = (_id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(_id);
