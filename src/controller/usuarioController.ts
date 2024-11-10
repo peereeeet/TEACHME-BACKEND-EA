@@ -15,7 +15,16 @@ export async function crearUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-
+// Ruta para el login
+export const loginUsuario = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    const usuario = await usuarioService.autenticarUsuario(email, password);
+    res.status(200).json({ message: 'Login exitoso', usuario });
+  } catch (error: any) {
+    res.status(401).json({ error: error.message });
+  }
+};
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
   try {

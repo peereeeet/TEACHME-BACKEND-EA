@@ -28,6 +28,7 @@ const usuarioController_1 = require("../controller/usuarioController");
 const router = express.Router();
 ////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
 router.post('/', usuarioController_1.crearUsuario); // Crear usuario
+router.post('/login', usuarioController_1.loginUsuario);
 router.get('/listar-paginados', usuarioController_1.obtenerUsuariosPaginados); // Nueva ruta de paginación (asegúrate de que esté antes de las rutas con parámetros)
 router.get('/', usuarioController_1.listarUsuarios); // Listar todos los usuarios
 ////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////

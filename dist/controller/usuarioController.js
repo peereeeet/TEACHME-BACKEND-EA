@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.loginUsuario = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -69,6 +69,18 @@ function crearUsuario(req, res) {
         }
     });
 }
+// Ruta para el login
+const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, password } = req.body;
+        const usuario = yield usuarioService.autenticarUsuario(email, password);
+        res.status(200).json({ message: 'Login exitoso', usuario });
+    }
+    catch (error) {
+        res.status(401).json({ error: error.message });
+    }
+});
+exports.loginUsuario = loginUsuario;
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 function obtenerIdUsuarioPorNombre(req, res) {
     return __awaiter(this, void 0, void 0, function* () {

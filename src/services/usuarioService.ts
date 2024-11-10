@@ -1,13 +1,32 @@
 import mongoose from 'mongoose';
 import Usuario from '../models/usuario';
 import Asignatura from '../models/asignatura';
+import bcrypt from 'bcrypt';
+
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 export const crearUsuario = async (nombre: string, edad: number, email: string, password: string, isProfesor = false, isAlumno = false, isAdmin = false) => {
-  const usuario = new Usuario({ nombre, edad, email, password, isProfesor, isAlumno, isAdmin });
+  // Hashear la contraseña antes de guardarla
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  const usuario = new Usuario({ nombre, edad, email, password: hashedPassword, isProfesor, isAlumno, isAdmin });
   return await usuario.save();
 };
+// Función para autenticar un usuario
+export const autenticarUsuario = async (email: string, password: string) => {
+  const usuario = await Usuario.findOne({ email });
+  if (!usuario) {
+    throw new Error('Usuario no encontrado');
+  }
+  
+  const esPasswordCorrecto = await bcrypt.compare(password, usuario.password);
+  if (!esPasswordCorrecto) {
+    throw new Error('Contraseña incorrecta');
+  }
 
+  return usuario; // Retorna el usuario si la autenticación es correcta
+};
 ////////////////////////////////////////LISTAR USUARIOS//////////////////////////////////////////
 export const listarUsuarios = async () => {
   return await Usuario.find().populate('asignaturasImparte');
