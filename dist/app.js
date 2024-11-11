@@ -8,10 +8,12 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const usuarioRoutes_1 = __importDefault(require("./routes/usuarioRoutes"));
 const asignaturaRoutes_1 = __importDefault(require("./routes/asignaturaRoutes"));
+const authJWTRoutes_1 = __importDefault(require("./routes/authJWTRoutes"));
 const app = (0, express_1.default)();
 const PORT = 3000;
 // Aplica el middleware CORS
 app.use((0, cors_1.default)());
+app.use(express_1.default.json());
 app.use(express_1.default.json());
 // Conexión a MongoDB
 mongoose_1.default.connect('mongodb://localhost:27017/ejercicio1')
@@ -25,5 +27,6 @@ mongoose_1.default.connect('mongodb://localhost:27017/ejercicio1')
 // Rutas
 app.use('/api/usuarios', usuarioRoutes_1.default);
 app.use('/api/asignaturas', asignaturaRoutes_1.default);
+app.use('/api/auth', authJWTRoutes_1.default);
 exports.default = app;
 //# sourceMappingURL=app.js.map

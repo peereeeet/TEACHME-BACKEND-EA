@@ -33,8 +33,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.crearUsuario = crearUsuario;
+exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
 exports.verUsuarioPorNombre = verUsuarioPorNombre;
+exports.verUsuarioPorId = verUsuarioPorId;
 exports.asignarAsignaturasAUsuario = asignarAsignaturasAUsuario;
 exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
 exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
@@ -42,13 +44,21 @@ exports.actualizarAsignaturasUsuarioPorNombre = actualizarAsignaturasUsuarioPorN
 exports.eliminarAsignaturaDeUsuarioPorNombre = eliminarAsignaturaDeUsuarioPorNombre;
 exports.asignarAsignaturaAUsuarioPorId = asignarAsignaturaAUsuarioPorId;
 exports.eliminarAsignaturaDeUsuarioPorId = eliminarAsignaturaDeUsuarioPorId;
+exports.modificarNombreUsuarioPorId = modificarNombreUsuarioPorId;
+exports.modificarEdadUsuarioPorId = modificarEdadUsuarioPorId;
+exports.modificarEmailUsuarioPorId = modificarEmailUsuarioPorId;
+exports.modificarPasswordUsuarioPorId = modificarPasswordUsuarioPorId;
+exports.modificarRolUsuarioPorId = modificarRolUsuarioPorId;
 const usuarioService = __importStar(require("../services/usuarioService"));
-////////////////////////////////////CREAR USUARIO/////////////////////////////////////
+const mongoose_1 = require("mongoose");
+////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 function crearUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-            const usuario = yield usuarioService.crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+            const _id = new mongoose_1.mongo.ObjectId();
+            const usuario = yield usuarioService.crearUsuario(_id, nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+            console.log(usuario);
             res.status(201).json(usuario);
         }
         catch (error) {
@@ -56,11 +66,25 @@ function crearUsuario(req, res) {
         }
     });
 }
-////////////////////////////////////LISTAR USUARIOS/////////////////////////////////////
+////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
+function obtenerIdUsuarioPorNombre(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.obtenerIdUsuarioPorNombre(req.params.nombre);
+            console.log(usuario);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////////LISTAR USUARIOS//////////////////////////////////////////
 function listarUsuarios(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const usuarios = yield usuarioService.listarUsuarios();
+            console.log(usuarios);
             res.status(200).json(usuarios);
         }
         catch (error) {
@@ -68,7 +92,7 @@ function listarUsuarios(req, res) {
         }
     });
 }
-////////////////////////////////////VER USUARIO POR NOMBRE/////////////////////////////////////
+////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
 function verUsuarioPorNombre(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -76,6 +100,22 @@ function verUsuarioPorNombre(req, res) {
             if (!usuario) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
+            console.log(usuario);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+function verUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.verUsuarioPorId(req.params._id);
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            console.log(usuario);
             res.status(200).json(usuario);
         }
         catch (error) {
@@ -88,6 +128,7 @@ function asignarAsignaturasAUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const usuario = yield usuarioService.asignarAsignaturasAUsuario(req.params.nombre, req.body.asignaturas);
+            console.log(usuario);
             res.status(200).json(usuario);
         }
         catch (error) {
@@ -100,6 +141,7 @@ function actualizarUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const usuario = yield usuarioService.actualizarUsuarioPorId(req.params._id, req.body);
+            console.log(usuario);
             res.status(200).json(usuario);
         }
         catch (error) {
@@ -112,6 +154,7 @@ function eliminarUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const usuario = yield usuarioService.eliminarUsuarioPorId(req.params.id);
+            console.log(listarUsuarios);
             res.status(200).json(usuario);
         }
         catch (error) {
@@ -148,6 +191,7 @@ function asignarAsignaturaAUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const usuario = yield usuarioService.asignarAsignaturaAUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+            console.log(usuario);
             res.status(200).json(usuario);
         }
         catch (error) {
@@ -159,7 +203,70 @@ function asignarAsignaturaAUsuarioPorId(req, res) {
 function eliminarAsignaturaDeUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.eliminarAsignaturaDeUsuarioPorId(req.params.usuarioId, req.params.asignaturaId);
+            const usuario = yield usuarioService.eliminarAsignaturaDeUsuarioPorId(req.params.usuarioId, req.body.asignaturaId);
+            console.log(usuario);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////añadir las funciones restantes de usuarioService.ts/////////////////////////////////////
+////////////////////////////////////MODIFICAR NOMBRE DE USUARIO POR ID/////////////////////////////////////
+function modificarNombreUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.modificarNombreUsuarioPorId(req.params._id, req.body.nombre);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////MODIFICAR EDAD DE USUARIO POR ID/////////////////////////////////////
+function modificarEdadUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.modificarEdadUsuarioPorId(req.params._id, req.body.edad);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////MODIFICAR EMAIL DE USUARIO POR ID/////////////////////////////////////
+function modificarEmailUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.modificarEmailUsuarioPorId(req.params._id, req.body.email);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////MODIFICAR PASSWORD DE USUARIO POR ID/////////////////////////////////////
+function modificarPasswordUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.modificarPasswordUsuarioPorId(req.params._id, req.body.password);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID/////////////////////////////////////
+function modificarRolUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { isProfesor, isAlumno, isAdmin } = req.body;
+            const usuario = yield usuarioService.modificarRolUsuarioPorId(req.params._id, isProfesor, isAlumno, isAdmin);
             res.status(200).json(usuario);
         }
         catch (error) {

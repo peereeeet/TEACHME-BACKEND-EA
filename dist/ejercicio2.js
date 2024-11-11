@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const usuario_1 = __importDefault(require("./models/usuario"));
 const asignatura_1 = __importDefault(require("./models/asignatura"));
+const usuario_2 = __importDefault(require("./models/usuario"));
 mongoose_1.default.connect('mongodb://localhost:27017/ejercicio1')
     .then(() => {
     console.log('Conectado a MongoDB para el ejercicio 2...');
@@ -34,11 +35,19 @@ function eliminarTodoasLasAsignaturas() {
         console.log('Todas las asignaturas eliminadas:', resultado);
     });
 }
+//delete de todos los usuarios
+function eliminarTodosLosUsuarios() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const resultado = yield usuario_2.default.deleteMany({});
+        console.log('Todos los usuarios eliminados:', resultado);
+    });
+}
 ///////////////////////////////////////////MAIN//////////////////////////////////////////
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         yield eliminarTodoasLasAsignaturas();
         yield eliminarTodosLosProfesores();
+        yield eliminarTodosLosUsuarios();
         console.log('ADIOOOOOS MUNDO CRUEL');
         mongoose_1.default.connection.close();
     });

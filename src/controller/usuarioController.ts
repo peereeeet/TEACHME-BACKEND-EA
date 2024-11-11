@@ -2,13 +2,15 @@ import cors from 'cors';
 import { Router, Request, Response } from 'express';
 import * as usuarioService from '../services/usuarioService';
 import Usuario from '../models/usuario';
+import { mongo } from 'mongoose';
 
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 export async function crearUsuario(req: Request, res: Response) {
   try {
     const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-    const usuario = await usuarioService.crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+    const _id = new mongo.ObjectId ();
+    const usuario = await usuarioService.crearUsuario(_id, nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
     console.log(usuario);
     res.status(201).json(usuario);
   } catch (error: any) {

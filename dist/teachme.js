@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const usuario_1 = __importDefault(require("./models/usuario"));
 const asignatura_1 = __importDefault(require("./models/asignatura"));
+const usuario_2 = __importDefault(require("./models/usuario"));
 mongoose_1.default.connect('mongodb://127.0.0.1:27017/ejercicio1')
     .then(() => {
     console.log('Conectado a MongoDB parece que te vas a tener que esperar xd...');
@@ -59,22 +60,22 @@ function asignarAsignaturasAProfesor(nombreProfesor, nombresAsignaturas) {
         console.log(`Asignaturas asignadas a ${nombreProfesor}:`, profesor.asignaturasImparte);
     });
 }
-//////////////////////////////////////////ASIGNAR PROFESORES A LAS ASIGNATURAS QUE IMPARTEN///////////////
-function asignarProfesoresAAsignatura(nombreAsignatura, nombresProfesores) {
+//////////////////////////////////////////ASIGNAR USUARIOS A LAS ASIGNATURAS QUE IMPARTEN///////////////
+function asignarProfesoresAAsignatura(nombreAsignatura, nombresUsuarios) {
     return __awaiter(this, void 0, void 0, function* () {
         const asignatura = yield asignatura_1.default.findOne({ nombre: nombreAsignatura }).populate('profesores');
         if (!asignatura) {
             console.error('Asignatura no encontrada');
             return;
         }
-        const profesores = yield usuario_1.default.find({ nombre: { $in: nombresProfesores } });
-        if (profesores.length === 0) {
-            console.error('Profesores no encontrados');
+        const usuarios = yield usuario_2.default.find({ nombre: { $in: nombresUsuarios } });
+        if (usuarios.length === 0) {
+            console.error('Usuarios no encontrados');
             return;
         }
-        profesores.forEach(profesor => asignatura.profesores.push(profesor._id));
+        usuarios.forEach(usuarios => asignatura.usuarios.push(usuarios._id));
         yield asignatura.save();
-        console.log(`Profesores asignados a ${nombreAsignatura}:`, asignatura.profesores);
+        console.log(`Usuarios asignados a ${nombreAsignatura}:`, asignatura.usuarios);
     });
 }
 /////////////////////////////////////////////READ//////////////////////////////////////////

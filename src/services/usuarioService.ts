@@ -3,8 +3,8 @@ import Usuario from '../models/usuario';
 import Asignatura from '../models/asignatura';
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
-export const crearUsuario = async (nombre: string, edad: number, email: string, password: string, isProfesor = false, isAlumno = false, isAdmin = false) => {
-  const usuario = new Usuario({ nombre, edad, email, password, isProfesor, isAlumno, isAdmin });
+export const crearUsuario = async (_id: mongoose.Types.ObjectId, nombre: string, edad: number, email: string, password: string, isProfesor = false, isAlumno = false, isAdmin = false) => {
+  const usuario = new Usuario({_id,  nombre, edad, email, password, isProfesor, isAlumno, isAdmin });
   return await usuario.save();
 };
 

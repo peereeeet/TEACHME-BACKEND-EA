@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.actualizarProfesoresAsignaturaPorNombre = exports.eliminarProfesoresAsignaturaPorNombre = exports.eliminarAsignaturaPorId = exports.asignarProfesoresAAsignatura = exports.verAsignaturaPorId = exports.listarAsignaturas = exports.crearAsignatura = void 0;
+exports.eliminarAsignaturaPorNombre = exports.eliminarAsignaturaPorId = exports.asignarUsuariosAAsignaturaPorId = exports.asignarUsuariosAAsignaturaPorNombre = exports.verAsignaturaPorNombre = exports.verAsignaturaPorId = exports.listarAsignaturas = exports.modificarDescripcionAsignaturaPorId = exports.modificarNombreAsignaturaPorId = exports.crearAsignatura = void 0;
 const asignatura_1 = __importDefault(require("../models/asignatura"));
 const usuario_1 = __importDefault(require("../models/usuario"));
 /////////////////////////////////////CREAR NUEVA ASIGNATURA//////////////////////////////////////////
@@ -21,65 +21,68 @@ const crearAsignatura = (nombre, descripcion) => __awaiter(void 0, void 0, void 
     return yield asignatura.save();
 });
 exports.crearAsignatura = crearAsignatura;
+////////////////////////////////////MODIFICAR NOMBRE ASIGNATURA POR ID////////////////////////////
+const modificarNombreAsignaturaPorId = (_id, nombre) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield asignatura_1.default.findByIdAndUpdate(_id, { nombre }, { new: true });
+});
+exports.modificarNombreAsignaturaPorId = modificarNombreAsignaturaPorId;
+////////////////////////////////////MODIFICAR DESCRIPCION ASIGNATURA POR ID////////////////////////////
+const modificarDescripcionAsignaturaPorId = (_id, descripcion) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield asignatura_1.default.findByIdAndUpdate(_id, { descripcion }, { new: true });
+});
+exports.modificarDescripcionAsignaturaPorId = modificarDescripcionAsignaturaPorId;
 /////////////////////////////////// LISTAR TODAS LAS ASIGNATURAS/////////////////////////////////////
 const listarAsignaturas = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield asignatura_1.default.find().populate('profesores');
+    return yield asignatura_1.default.find().populate('usuarios');
 });
 exports.listarAsignaturas = listarAsignaturas;
-//////////////////////////////////////VER ASIGNATURA POR NOMBRE///////////////////////////////////////
+//////////////////////////////////////VER ASIGNATURA POR NOMBRE E ID///////////////////////////////////////
 const verAsignaturaPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield asignatura_1.default.findOne({ _id }).populate('profesores');
+    return yield asignatura_1.default.findOne({ _id }).populate('usuarios');
 });
 exports.verAsignaturaPorId = verAsignaturaPorId;
-//////////////////////////////////////ASIGNAR PROFESORES A ASIGNATURA/////////////////////////////////
-const asignarProfesoresAAsignatura = (nombreAsignatura, nombresProfesores) => __awaiter(void 0, void 0, void 0, function* () {
+const verAsignaturaPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield asignatura_1.default.findOne({ nombre }).populate('usuarios');
+});
+exports.verAsignaturaPorNombre = verAsignaturaPorNombre;
+//////////////////////////////////////ASIGNAR USUARIOS A ASIGNATURA POR NOMBRE E ID//////////////////////
+const asignarUsuariosAAsignaturaPorNombre = (nombreAsignatura, nombresUsuarios) => __awaiter(void 0, void 0, void 0, function* () {
     const asignatura = yield asignatura_1.default.findOne({ nombre: nombreAsignatura });
     if (!asignatura) {
         throw new Error('Asignatura no encontrada');
     }
-    const profesores = yield usuario_1.default.find({ nombre: { $in: nombresProfesores }, isProfesor: true });
-    if (profesores.length === 0) {
-        throw new Error('Profesores no encontrados');
+    const usuarios = yield usuario_1.default.find({ nombre: { $in: nombresUsuarios } });
+    if (usuarios.length === 0) {
+        throw new Error('Usuarios no encontrados');
     }
-    profesores.forEach(profesor => asignatura.profesores.push(profesor._id));
+    asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
     yield asignatura.save();
     return asignatura;
 });
-exports.asignarProfesoresAAsignatura = asignarProfesoresAAsignatura;
+exports.asignarUsuariosAAsignaturaPorNombre = asignarUsuariosAAsignaturaPorNombre;
+const asignarUsuariosAAsignaturaPorId = (_id, nombresUsuarios) => __awaiter(void 0, void 0, void 0, function* () {
+    const asignatura = yield asignatura_1.default.findById(_id);
+    if (!asignatura) {
+        throw new Error('Asignatura no encontrada');
+    }
+    const usuarios = yield usuario_1.default.find({ nombre: { $in: nombresUsuarios } });
+    if (usuarios.length === 0) {
+        throw new Error('Usuarios no encontrados');
+    }
+    asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
+    yield asignatura.save();
+    return asignatura;
+});
+exports.asignarUsuariosAAsignaturaPorId = asignarUsuariosAAsignaturaPorId;
 //////////////////////////////////////ELIMINAR ASIGNATURA POR NOMBRE//////////////////////////////////
 const eliminarAsignaturaPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
     const resultado = yield asignatura_1.default.findOneAndDelete({ _id });
     return resultado;
 });
 exports.eliminarAsignaturaPorId = eliminarAsignaturaPorId;
-//////////////////////////////////////ELIMINAR PROFESORES DE ASIGNATURA POR NOMBRE////////////////////
-const eliminarProfesoresAsignaturaPorNombre = (nombreAsignatura, nombresProfesores) => __awaiter(void 0, void 0, void 0, function* () {
-    const asignatura = yield asignatura_1.default.findOne({ nombre: nombreAsignatura });
-    if (!asignatura) {
-        throw new Error('Asignatura no encontrada');
-    }
-    const profesores = yield usuario_1.default.find({ nombre: { $in: nombresProfesores }, isProfesor: true });
-    if (profesores.length === 0) {
-        throw new Error('Profesores no encontrados');
-    }
-    asignatura.profesores = asignatura.profesores.filter(profesor => !profesores.map(p => p._id).includes(profesor));
-    yield asignatura.save();
-    return asignatura;
+const eliminarAsignaturaPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
+    const resultado = yield asignatura_1.default.findOneAndDelete({ nombre });
+    return resultado;
 });
-exports.eliminarProfesoresAsignaturaPorNombre = eliminarProfesoresAsignaturaPorNombre;
-//////////////////////////////////////ACTUALIZAR PROFESORES DE ASIGNATURA POR NOMBRE///////////////////
-const actualizarProfesoresAsignaturaPorNombre = (nombreAsignatura, nuevosProfesores) => __awaiter(void 0, void 0, void 0, function* () {
-    const asignatura = yield asignatura_1.default.findOne({ nombre: nombreAsignatura });
-    if (!asignatura) {
-        throw new Error('Asignatura no encontrada');
-    }
-    const profesores = yield usuario_1.default.find({ nombre: { $in: nuevosProfesores }, isProfesor: true });
-    if (profesores.length === 0) {
-        throw new Error('Profesores no encontrados');
-    }
-    asignatura.profesores = profesores.map(profesor => profesor._id);
-    yield asignatura.save();
-    return asignatura;
-});
-exports.actualizarProfesoresAsignaturaPorNombre = actualizarProfesoresAsignaturaPorNombre;
+exports.eliminarAsignaturaPorNombre = eliminarAsignaturaPorNombre;
 //# sourceMappingURL=asignaturaService.js.map

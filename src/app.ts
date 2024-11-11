@@ -16,7 +16,6 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.json() as RequestHandler);
-app.use('/api/auth', authRoutes);
 
 // Conexión a MongoDB
 mongoose.connect('mongodb://localhost:27017/ejercicio1')
@@ -31,5 +30,5 @@ mongoose.connect('mongodb://localhost:27017/ejercicio1')
 // Rutas
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/asignaturas', asignaturaRoutes);
-
+app.use('/api/auth', authRoutes);
 export default app;

@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const usuarioSchema = new mongoose.Schema({
+  _id: { type: mongoose.Schema.Types.ObjectId, auto: true , required: true },
   nombre: { type: String },
   edad: { type: Number },
   email: { type: String, required: true, unique: true },
