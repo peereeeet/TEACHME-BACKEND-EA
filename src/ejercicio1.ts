@@ -50,7 +50,7 @@ async function asignarAsignaturasAProfesor(nombreProfesor: string, nombresAsigna
   await profesor.save();
   console.log(`Asignaturas asignadas a ${nombreProfesor}:`, profesor.asignaturasImparte);
 }
-
+/*
   //////////////////////////////////////////ASIGNAR PROFESORES A LAS ASIGNATURAS QUE IMPARTEN///////////////
     async function asignarProfesoresAAsignatura(nombreAsignatura: string, nombresProfesores: string[]) {
         const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura }).populate('profesores');
@@ -69,7 +69,7 @@ async function asignarAsignaturasAProfesor(nombreProfesor: string, nombresAsigna
         profesores.forEach(profesor => asignatura.profesores.push(profesor._id));
         await asignatura.save();
         console.log(`Profesores asignados a ${nombreAsignatura}:`, asignatura.profesores);
-    }
+    }*/
   
 
   /////////////////////////////////////////////READ//////////////////////////////////////////
@@ -149,7 +149,7 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
     await asignarAsignaturasAProfesor('Pedro', ['Biologia', 'Historia', 'Geografia']);
     await asignarAsignaturasAProfesor('Jordi', ['Ingles', 'Programacion', 'Lenguaje']);
     await asignarAsignaturasAProfesor('Bryan', ['Musica', 'Lenguaje', 'Programacion']);
-    
+    /*
     /////////ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE ////////////////////////
     console.log('ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE');
     await asignarProfesoresAAsignatura('Matematicas', ['Juan']);
@@ -164,7 +164,7 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
     await asignarProfesoresAAsignatura('Musica', ['Bryan']);
     await asignarProfesoresAAsignatura('Lenguaje', ['Bryan']);
     await asignarProfesoresAAsignatura('Programacion', ['Bryan']);
-
+*/
     /////////LISTAR PROFESORES Y ASIGNATURAS////////////////////////
     console.log('LISTAR PROFESORES Y ASIGNATURAS');
     await listarProfesores();
