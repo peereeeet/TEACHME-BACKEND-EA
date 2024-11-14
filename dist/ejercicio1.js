@@ -59,24 +59,26 @@ function asignarAsignaturasAProfesor(nombreProfesor, nombresAsignaturas) {
         console.log(`Asignaturas asignadas a ${nombreProfesor}:`, profesor.asignaturasImparte);
     });
 }
-//////////////////////////////////////////ASIGNAR PROFESORES A LAS ASIGNATURAS QUE IMPARTEN///////////////
-function asignarProfesoresAAsignatura(nombreAsignatura, nombresProfesores) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const asignatura = yield asignatura_1.default.findOne({ nombre: nombreAsignatura }).populate('profesores');
+/*
+  //////////////////////////////////////////ASIGNAR PROFESORES A LAS ASIGNATURAS QUE IMPARTEN///////////////
+    async function asignarProfesoresAAsignatura(nombreAsignatura: string, nombresProfesores: string[]) {
+        const asignatura = await Asignatura.findOne({ nombre: nombreAsignatura }).populate('profesores');
+        
         if (!asignatura) {
-            console.error('Asignatura no encontrada');
-            return;
+        console.error('Asignatura no encontrada');
+        return;
         }
-        const profesores = yield usuario_1.default.find({ nombre: { $in: nombresProfesores } });
+    
+        const profesores = await Profesor.find({ nombre: { $in: nombresProfesores } });
         if (profesores.length === 0) {
-            console.error('Profesores no encontrados');
-            return;
+        console.error('Profesores no encontrados');
+        return;
         }
+    
         profesores.forEach(profesor => asignatura.profesores.push(profesor._id));
-        yield asignatura.save();
+        await asignatura.save();
         console.log(`Profesores asignados a ${nombreAsignatura}:`, asignatura.profesores);
-    });
-}
+    }*/
 /////////////////////////////////////////////READ//////////////////////////////////////////
 function listarProfesores() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -151,20 +153,22 @@ function main() {
         yield asignarAsignaturasAProfesor('Pedro', ['Biologia', 'Historia', 'Geografia']);
         yield asignarAsignaturasAProfesor('Jordi', ['Ingles', 'Programacion', 'Lenguaje']);
         yield asignarAsignaturasAProfesor('Bryan', ['Musica', 'Lenguaje', 'Programacion']);
+        /*
         /////////ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE ////////////////////////
         console.log('ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE');
-        yield asignarProfesoresAAsignatura('Matematicas', ['Juan']);
-        yield asignarProfesoresAAsignatura('Fisica', ['Juan']);
-        yield asignarProfesoresAAsignatura('Quimica', ['Juan']);
-        yield asignarProfesoresAAsignatura('Biologia', ['Pedro']);
-        yield asignarProfesoresAAsignatura('Historia', ['Pedro']);
-        yield asignarProfesoresAAsignatura('Geografia', ['Pedro']);
-        yield asignarProfesoresAAsignatura('Ingles', ['Jordi']);
-        yield asignarProfesoresAAsignatura('Programacion', ['Jordi']);
-        yield asignarProfesoresAAsignatura('Lenguaje', ['Jordi']);
-        yield asignarProfesoresAAsignatura('Musica', ['Bryan']);
-        yield asignarProfesoresAAsignatura('Lenguaje', ['Bryan']);
-        yield asignarProfesoresAAsignatura('Programacion', ['Bryan']);
+        await asignarProfesoresAAsignatura('Matematicas', ['Juan']);
+        await asignarProfesoresAAsignatura('Fisica', ['Juan']);
+        await asignarProfesoresAAsignatura('Quimica', ['Juan']);
+        await asignarProfesoresAAsignatura('Biologia', ['Pedro']);
+        await asignarProfesoresAAsignatura('Historia', ['Pedro']);
+        await asignarProfesoresAAsignatura('Geografia', ['Pedro']);
+        await asignarProfesoresAAsignatura('Ingles', ['Jordi']);
+        await asignarProfesoresAAsignatura('Programacion', ['Jordi']);
+        await asignarProfesoresAAsignatura('Lenguaje', ['Jordi']);
+        await asignarProfesoresAAsignatura('Musica', ['Bryan']);
+        await asignarProfesoresAAsignatura('Lenguaje', ['Bryan']);
+        await asignarProfesoresAAsignatura('Programacion', ['Bryan']);
+    */
         /////////LISTAR PROFESORES Y ASIGNATURAS////////////////////////
         console.log('LISTAR PROFESORES Y ASIGNATURAS');
         yield listarProfesores();

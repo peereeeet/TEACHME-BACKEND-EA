@@ -10,6 +10,11 @@ interface JwtPayload {
   id: string;
 }
 
+// Extiende Request para incluir el userId
+interface CustomRequest extends Request {
+  userId?: string;
+}
+
 // Middleware para verificar el token JWT
 export async function verifyToken(req: Request, res: Response, next: NextFunction) {
   const token = req.header('x-access-token');
@@ -28,25 +33,25 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
   }
 }
 
-//ESTA FUNCION SE ENCARGA DE VERIFICAR SI EL USUARIO ES UN PROFESOR O NO (FUTUROS PERMISOS PARA LA APLICACION)
-export async function isUsuario(req: Request, res: Response, next: NextFunction) {
-    try {
-      const usuario = await Usuario.findById(req.userId);
-      if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
-  
-      const asignaturaId = req.params.id;
-      const asignatura = await Asignatura.findById(asignaturaId);
-  
-      if (!asignatura) return res.status(404).json({ message: "Asignatura no encontrada" });
-  
-      const usuarioEnAsignatura = asignatura.usuarios.some(userId => userId.equals(req.userId));
-      if (!usuarioEnAsignatura) return res.status(403).json({ message: "Acceso denegado: el usuario no pertenece a esta asignatura" });
-  
-      console.log("El usuario("+ usuario.nombre +") pertenece a la asignatura");
-      next();
-      
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Error en el servidor", error });
+export async function isOwner(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userIdFromToken = (req as CustomRequest).userId;
+    const userIdToModify = req.params.id;
+    const usuario = await Usuario.findById(userIdFromToken);
+
+    if (!usuario) {
+      return res.status(404).json({ message: "No user found" });
     }
+
+    if (userIdFromToken !== userIdToModify) {
+      return res.status(403).json({ message: "Not Owner" });
+    }
+
+     //PERMITIR ACCESO AL USUARIO
+     next();
   }
+  catch (error) {
+    return res.status(401).json({ message: 'Unauthorized!' });
+  }
+}
+

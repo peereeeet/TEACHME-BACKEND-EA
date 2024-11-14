@@ -13,10 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = verifyToken;
-exports.isUsuario = isUsuario;
+exports.isOwner = isOwner;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const usuario_1 = __importDefault(require("../models/usuario"));
-const asignatura_1 = __importDefault(require("../models/asignatura"));
 const _SECRET = 'api+jwt';
 // Middleware para verificar el token JWT
 function verifyToken(req, res, next) {
@@ -37,26 +36,23 @@ function verifyToken(req, res, next) {
         }
     });
 }
-//ESTA FUNCION SE ENCARGA DE VERIFICAR SI EL USUARIO ES UN PROFESOR O NO (FUTUROS PERMISOS PARA LA APLICACION)
-function isUsuario(req, res, next) {
+function isOwner(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuario_1.default.findById(req.userId);
-            if (!usuario)
-                return res.status(404).json({ message: "Usuario no encontrado" });
-            const asignaturaId = req.params.id;
-            const asignatura = yield asignatura_1.default.findById(asignaturaId);
-            if (!asignatura)
-                return res.status(404).json({ message: "Asignatura no encontrada" });
-            const usuarioEnAsignatura = asignatura.usuarios.some(userId => userId.equals(req.userId));
-            if (!usuarioEnAsignatura)
-                return res.status(403).json({ message: "Acceso denegado: el usuario no pertenece a esta asignatura" });
-            console.log("El usuario(" + usuario.nombre + ") pertenece a la asignatura");
+            const userIdFromToken = req.userId;
+            const userIdToModify = req.params.id;
+            const usuario = yield usuario_1.default.findById(userIdFromToken);
+            if (!usuario) {
+                return res.status(404).json({ message: "No user found" });
+            }
+            if (userIdFromToken !== userIdToModify) {
+                return res.status(403).json({ message: "Not Owner" });
+            }
+            //PERMITIR ACCESO AL USUARIO
             next();
         }
         catch (error) {
-            console.error(error);
-            return res.status(500).json({ message: "Error en el servidor", error });
+            return res.status(401).json({ message: 'Unauthorized!' });
         }
     });
 }

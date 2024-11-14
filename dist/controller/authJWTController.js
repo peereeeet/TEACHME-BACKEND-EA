@@ -13,9 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = login;
+exports.loginUsuarioController = loginUsuarioController;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const usuario_1 = __importDefault(require("../models/usuario"));
+const authJWTService_1 = require("../services/authJWTService");
 const _SECRET = 'api+jwt';
 // Login y generación de token
 function login(req, res) {
@@ -33,6 +35,19 @@ function login(req, res) {
             // Generar token JWT
             const token = jsonwebtoken_1.default.sign({ id: usuario._id }, _SECRET, { expiresIn: 86400 }); // expira en 24 horas
             res.json({ token });
+        }
+        catch (error) {
+            console.error('Error en login:', error);
+            res.status(500).json({ message: 'Server error' });
+        }
+    });
+}
+function loginUsuarioController(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { emailOrNombre, password } = req.body;
+        try {
+            const { token, usuario } = yield (0, authJWTService_1.loginUsuario)(emailOrNombre, password);
+            res.json({ token, usuario });
         }
         catch (error) {
             console.error('Error en login:', error);
