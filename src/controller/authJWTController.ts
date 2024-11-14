@@ -12,11 +12,10 @@ export async function login(req: Request, res: Response) {
   const { email, password } = req.body;
 
   try {
-    // Verificar si el usuario existe
     const usuario = await Usuario.findOne({ email });
     if (!usuario) return res.status(404).json({ message: 'User not found' });
 
-    // Verificar la contraseña
+
     const isPasswordValid = await bcrypt.compare(password, usuario.password);
     if (!isPasswordValid) return res.status(401).json({ message: 'Invalid password' });
 
@@ -38,6 +37,20 @@ export async function loginUsuarioController(req: Request, res: Response) {
     res.json({ token, usuario });
   } catch (error) {
     console.error('Error en login:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+
+export async function registerUsuario(req: Request, res: Response) {
+  const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+
+  try {
+    const usuario = new Usuario({ nombre, edad, email, password, isProfesor, isAlumno, isAdmin });
+    await usuario.save();
+    res.json(usuario);
+  } catch (error) {
+    console.error('Error al registrarse:', error);
     res.status(500).json({ message: 'Server error' });
   }
 }

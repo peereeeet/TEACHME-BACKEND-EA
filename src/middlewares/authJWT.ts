@@ -49,7 +49,7 @@ export async function isOwner(req: Request, res: Response, next: NextFunction) {
       return res.status(403).json({ message: "Not Owner" });
     }
 
-     //PERMITIR ACCESO AL USUARIO
+    
      next();
   }
   catch (error) {
