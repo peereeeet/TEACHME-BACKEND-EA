@@ -1,4 +1,3 @@
-// authJWT.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import Usuario from '../models/usuario';
@@ -17,7 +16,10 @@ interface CustomRequest extends Request {
 
 // Middleware para verificar el token JWT
 export async function verifyToken(req: Request, res: Response, next: NextFunction) {
-  const token = req.header('x-access-token');
+  console.log("Executing verifyToken middleware");
+  const token = req.header('Authorization');
+  console.log("Token:", token);
+
   if (!token) return res.status(403).json({ message: 'No token provided' });
 
   try {
@@ -36,7 +38,7 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
 export async function isOwner(req: Request, res: Response, next: NextFunction) {
   try {
     const userIdFromToken = (req as CustomRequest).userId;
-    const userIdToModify = req.params.id;
+    const userIdToModify = req.params._id;
     const usuario = await Usuario.findById(userIdFromToken);
 
     if (!usuario) {

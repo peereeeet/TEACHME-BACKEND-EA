@@ -30,23 +30,23 @@ router.post('/',crearUsuario);
 
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', listarUsuarios);
-router.get('/:nombre', verUsuarioPorNombre);
+//router.get('/:nombre', verUsuarioPorNombre);
 router.get('/:_id', verUsuarioPorId);
 router.get('/:nombre/asignaturas', obtenerIdUsuarioPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
-router.put('/:nombre/asignaturas',verifyToken, isOwner, asignarAsignaturasAUsuario);
-router.put('/:_id',verifyToken, isOwner, actualizarUsuarioPorId);
-router.put('/:nombre/asignaturas/actualizar',verifyToken, isOwner, actualizarAsignaturasUsuarioPorNombre);
-router.put('/:usuarioId/asignaturas/:asignaturaId',verifyToken, isOwner, asignarAsignaturaAUsuarioPorId);
-router.put('/:_id/edad',verifyToken, isOwner, modificarEdadUsuarioPorId);
-router.put('/:_id/email',verifyToken, isOwner, modificarEmailUsuarioPorId);
-router.put('/:_id/nombre',verifyToken, isOwner, modificarNombreUsuarioPorId);
-router.put('/:_id/password',verifyToken, isOwner, modificarPasswordUsuarioPorId);
-router.put('/:_id/rol',verifyToken, isOwner, modificarRolUsuarioPorId);
+router.put('/:nombre/asignaturas',[verifyToken, isOwner ], asignarAsignaturasAUsuario);
+router.put('/:_id',[verifyToken, isOwner ],actualizarUsuarioPorId);
+router.put('/:nombre/asignaturas/actualizar',[verifyToken, isOwner ], actualizarAsignaturasUsuarioPorNombre);
+router.put('/:_id/asignaturas/:asignaturaId',[verifyToken, isOwner ], asignarAsignaturaAUsuarioPorId);
+router.put('/:_id/edad',[verifyToken, isOwner ], modificarEdadUsuarioPorId);
+router.put('/:_id/email',[verifyToken, isOwner ], modificarEmailUsuarioPorId);
+router.put('/:_id/nombre',[verifyToken, isOwner ], modificarNombreUsuarioPorId);
+router.put('/:_id/password',[verifyToken, isOwner ], modificarPasswordUsuarioPorId);
+router.put('/:_id/rol',[verifyToken, isOwner ], modificarRolUsuarioPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:usuarioId/asignaturas/:asignaturaid',verifyToken, isOwner, eliminarAsignaturaDeUsuarioPorId);
-router.delete('/:nombre/asignaturas/:asignaturaId',verifyToken, isOwner, eliminarAsignaturaDeUsuarioPorNombre);
-router.delete('/usuarioId',verifyToken, isOwner, eliminarUsuarioPorId);
+router.delete('/:_id/asignaturas/:asignaturaid',[verifyToken, isOwner ], eliminarAsignaturaDeUsuarioPorId);
+router.delete('/:nombre/asignaturas/:asignaturaId',[verifyToken, isOwner ], eliminarAsignaturaDeUsuarioPorNombre);
+router.delete('/:_id', [verifyToken, isOwner ],eliminarUsuarioPorId);
 
 
 

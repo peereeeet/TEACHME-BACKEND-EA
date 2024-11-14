@@ -67,7 +67,7 @@ export const asignarAsignaturaAUsuarioPorId = async (usuarioId: string, asignatu
 
 ////////////////////////////////////////ACTUALIZAR USUARIO (NOMBRE/ID)//////////////////////////////////////////
 export const actualizarUsuarioPorId = async (_id: string, datos: any) => {
-  return await Usuario.findByIdAndUpdate(_id, datos, { new: true });
+  return await Usuario.findByIdAndUpdate(_id, datos);
 };
 ////////////////////////////////////////ACTUALIZAR ASIGNATURAS DE USUARIO POR NOMBRE E ID///////////////////////////
 export const actualizarAsignaturasUsuarioPorNombre = async (nombre: string, asignaturas: string[]) => {
@@ -92,8 +92,15 @@ export const actualizarAsignaturasUsuarioPorId = async (_id: string, asignaturas
 
 ////////////////////////////////////////ELIMINAR USUARIO//////////////////////////////////////////
 export const eliminarUsuarioPorId = async (_id: string) => {
-  return await Usuario.findOneAndDelete({ _id });
+  const resultado = await Usuario.findOneAndDelete({ _id });
+  return await resultado;
 };
+
+/*export const eliminarUsuarioPorNombre = async (nombre: string) => {
+  const resultado = await Usuario.findOneAndDelete({ nombre });
+  return await resultado;
+};
+*/
 
 ////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR NOMBRE E ID//////////////////////////////////////////
 export const eliminarAsignaturaDeUsuarioPorNombre = async (nombre: string, asignaturaId: string) => {

@@ -6,17 +6,22 @@ import { mongo } from 'mongoose';
 
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
-export async function crearUsuario(req: Request, res: Response) {
-  try {
-    const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-    const _id = new mongo.ObjectId ();
-    const usuario = await usuarioService.crearUsuario(_id, nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
-    console.log(usuario);
-    res.status(201).json(usuario);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+  export async function crearUsuario(req: Request, res: Response) {
+    try {
+      const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+      const _id = new mongo.ObjectId ();
+      const usuario = await usuarioService.crearUsuario(_id, nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+      console.log(usuario);
+      res.status(201).json(usuario);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+    const usuarioExistente = await usuarioService.verUsuarioPorNombre(req.body.nombre);
+    if (usuarioExistente) {
+      return res.status(409).json({ error: 'El nombre de usuario ya está en uso por otro usuario' }); 
+    }
+      
   }
-}
 
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
@@ -93,7 +98,7 @@ export async function actualizarUsuarioPorId(req: Request, res: Response) {
 ////////////////////////////////////ELIMINAR USUARIO/////////////////////////////////////
 export async function eliminarUsuarioPorId(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.eliminarUsuarioPorId(req.params.id);
+    const usuario = await usuarioService.eliminarUsuarioPorId(req.params._id);
     console.log(listarUsuarios);
     res.status(200).json(usuario);
   } catch (error: any) {

@@ -20,7 +20,9 @@ const _SECRET = 'api+jwt';
 // Middleware para verificar el token JWT
 function verifyToken(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = req.header('x-access-token');
+        console.log("Executing verifyToken middleware");
+        const token = req.header('Authorization');
+        console.log("Token:", token);
         if (!token)
             return res.status(403).json({ message: 'No token provided' });
         try {
@@ -40,7 +42,7 @@ function isOwner(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const userIdFromToken = req.userId;
-            const userIdToModify = req.params.id;
+            const userIdToModify = req.params._id;
             const usuario = yield usuario_1.default.findById(userIdFromToken);
             if (!usuario) {
                 return res.status(404).json({ message: "No user found" });

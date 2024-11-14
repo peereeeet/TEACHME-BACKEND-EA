@@ -28,15 +28,15 @@ const usuarioController_1 = require("../controller/usuarioController");
 const authJWT_1 = require("../middlewares/authJWT");
 const router = express.Router();
 ////////////////////////////////////POSTS/////////////////////////////////////
-router.post('/', authJWT_1.verifyToken, usuarioController_1.crearUsuario);
+router.post('/', usuarioController_1.crearUsuario);
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', usuarioController_1.listarUsuarios);
-router.get('/:nombre', usuarioController_1.verUsuarioPorNombre);
+//router.get('/:nombre', verUsuarioPorNombre);
 router.get('/:_id', usuarioController_1.verUsuarioPorId);
 router.get('/:nombre/asignaturas', usuarioController_1.obtenerIdUsuarioPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
 router.put('/:nombre/asignaturas', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.asignarAsignaturasAUsuario);
-router.put('/:_id', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.actualizarUsuarioPorId);
+router.put('/:_id', usuarioController_1.actualizarUsuarioPorId);
 router.put('/:nombre/asignaturas/actualizar', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.actualizarAsignaturasUsuarioPorNombre);
 router.put('/:usuarioId/asignaturas/:asignaturaId', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.asignarAsignaturaAUsuarioPorId);
 router.put('/:_id/edad', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.modificarEdadUsuarioPorId);

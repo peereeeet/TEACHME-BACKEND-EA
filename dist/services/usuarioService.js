@@ -78,7 +78,7 @@ const asignarAsignaturaAUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(vo
 exports.asignarAsignaturaAUsuarioPorId = asignarAsignaturaAUsuarioPorId;
 ////////////////////////////////////////ACTUALIZAR USUARIO (NOMBRE/ID)//////////////////////////////////////////
 const actualizarUsuarioPorId = (_id, datos) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findByIdAndUpdate(_id, datos, { new: true });
+    return yield usuario_1.default.findByIdAndUpdate(_id, datos);
 });
 exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
 ////////////////////////////////////////ACTUALIZAR ASIGNATURAS DE USUARIO POR NOMBRE E ID///////////////////////////
