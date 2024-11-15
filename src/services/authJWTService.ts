@@ -11,15 +11,13 @@
       const isMatch = await bcrypt.compare(password, usuario.password);
       if (!isMatch) throw new Error('Contraseña incorrecta');
     
-      const token = jwt.sign({ userId: usuario._id, isAdmin: usuario.isAdmin }, 
-        'yourSecretKey', { expiresIn: '1h' });
+      const token = jwt.sign({ userId: usuario._id}, 
+        'api+jwt', { expiresIn: '1h' });
     
       console.log('Usuario logueado:', usuario);
     
       return { token, usuario };
     };
-
-
   
     export const registerUsuario = async (nombre: string, edad: number,email: string, password: string,isProfesor = false, isAlumno = false, isAdmin = false
     ) => {
@@ -55,4 +53,3 @@
         throw error;
       }
     };
-

@@ -30,7 +30,7 @@ router.post('/',crearUsuario);
 
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', listarUsuarios);
-//router.get('/:nombre', verUsuarioPorNombre);
+router.get('/:nombre', verUsuarioPorNombre);
 router.get('/:_id', verUsuarioPorId);
 router.get('/:nombre/asignaturas', obtenerIdUsuarioPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////

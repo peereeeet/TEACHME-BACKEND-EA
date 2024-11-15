@@ -99,7 +99,7 @@ export async function actualizarUsuarioPorId(req: Request, res: Response) {
 export async function eliminarUsuarioPorId(req: Request, res: Response) {
   try {
     const usuario = await usuarioService.eliminarUsuarioPorId(req.params._id);
-    console.log(listarUsuarios);
+    console.log(usuarioService.listarUsuarios);
     res.status(200).json(usuario);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

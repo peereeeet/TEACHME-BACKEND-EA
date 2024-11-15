@@ -23,14 +23,14 @@ export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
 };
 
 ////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
-export const verUsuarioPorNombre = async (_id: string) => {
+export const verUsuarioPorId = async (_id: string) => {
   console.log(_id);
   const usuario = await Usuario.findOne({ _id }).populate('asignaturasImparte');
   console.log(usuario);
   return usuario;
 }
 
-export const verUsuarioPorId = async (nombre: string) => {
+export const verUsuarioPorNombre = async (nombre: string) => {
   return await Usuario.findOne({ nombre }).populate('asignaturasImparte');
 };
 
