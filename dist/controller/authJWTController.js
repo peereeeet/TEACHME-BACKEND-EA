@@ -12,45 +12,74 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = login;
 exports.loginUsuarioController = loginUsuarioController;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
+exports.registerUsuario = registerUsuario;
 const usuario_1 = __importDefault(require("../models/usuario"));
 const authJWTService_1 = require("../services/authJWTService");
 const _SECRET = 'api+jwt';
-// Login y generación de token
-function login(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const { email, password } = req.body;
-        try {
-            // Verificar si el usuario existe
-            const usuario = yield usuario_1.default.findOne({ email });
-            if (!usuario)
-                return res.status(404).json({ message: 'User not found' });
-            // Verificar la contraseña
-            const isPasswordValid = yield bcryptjs_1.default.compare(password, usuario.password);
-            if (!isPasswordValid)
-                return res.status(401).json({ message: 'Invalid password' });
-            // Generar token JWT
-            const token = jsonwebtoken_1.default.sign({ id: usuario._id }, _SECRET, { expiresIn: 86400 }); // expira en 24 horas
-            res.json({ token });
-        }
-        catch (error) {
-            console.error('Error en login:', error);
-            res.status(500).json({ message: 'Server error' });
-        }
-    });
-}
 function loginUsuarioController(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { emailOrNombre, password } = req.body;
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({
+                message: 'Faltan campos requeridos: email o password',
+            });
+        }
         try {
-            const { token, usuario } = yield (0, authJWTService_1.loginUsuario)(emailOrNombre, password);
+            const { token, usuario } = yield (0, authJWTService_1.loginUsuario)(email, password);
             res.json({ token, usuario });
         }
         catch (error) {
             console.error('Error en login:', error);
+            if (error.message === 'Usuario no encontrado') {
+                return res.status(404).json({
+                    message: 'Usuario no encontrado. Asegúrate de que el email sea correctos.',
+                });
+            }
+            if (error.message === 'Contraseña incorrecta') {
+                return res.status(401).json({
+                    message: 'Contraseña incorrecta. Asegúrate de que la contraseña sea correcta.',
+                });
+            }
+            res.status(500).json({ message: 'Server error' });
+        }
+    });
+}
+function registerUsuario(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+        try {
+            const usuario = new usuario_1.default({ nombre, edad, email, password, isProfesor, isAlumno, isAdmin });
+            yield usuario.save();
+            res.json(usuario);
+        }
+        catch (error) {
+            if (error.message === 'Faltan datos requeridos en la solicitud.') {
+                return res.status(400).json({
+                    message: 'Faltan datos requeridos en la solicitud.',
+                });
+            }
+            if (error.message === 'Correo electrónico inválido.') {
+                return res.status(400).json({
+                    message: 'Correo electrónico inválido.',
+                });
+            }
+            if (error.message === 'El nombre ya está registrado, escoge otro.') {
+                return res.status(400).json({
+                    message: 'El nombre ya está registrado, escoge otro.',
+                });
+            }
+            if (error.message === 'El correo electrónico ya está registrado.') {
+                return res.status(400).json({
+                    message: 'El correo electrónico ya está registrado.',
+                });
+            }
+            if (error.message === 'La contraseña debe tener al menos 3 caracteres.') {
+                return res.status(400).json({
+                    message: 'La contraseña debe tener al menos 3 caracteres.',
+                });
+            }
+            console.error('Error en registro:', error.message);
             res.status(500).json({ message: 'Server error' });
         }
     });

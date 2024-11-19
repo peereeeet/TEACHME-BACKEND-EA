@@ -4,9 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authJWTController_1 = require("../controller/authJWTController");
 const router = (0, express_1.Router)();
-// Ruta para login
-router.post('/login', authJWTController_1.login);
-//ruta para login con verificacion de token jwt
 router.post('/loginUsuario', authJWTController_1.loginUsuarioController);
+router.post('/register', authJWTController_1.registerUsuario);
 exports.default = router;
 //# sourceMappingURL=authJWTRoutes.js.map

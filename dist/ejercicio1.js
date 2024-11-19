@@ -131,11 +131,12 @@ function obtenerNumeroDeProfesoresPorAsignatura() {
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         ////////CREAR 4 PROFESORES Y 10 ASIGNATURAS//////////////////
-        console.log('CREAR 4 PROFESORES Y 10 ASIGNATURAS');
-        yield crearProfesor('Juan', 30);
-        yield crearProfesor('Pedro', 40);
-        yield crearProfesor('Jordi', 35);
-        yield crearProfesor('Bryan', 23);
+        /* console.log('CREAR 4 PROFESORES Y 10 ASIGNATURAS');
+         await crearProfesor('Juan', 30);
+         await crearProfesor('Pedro', 40);
+         await crearProfesor('Jordi', 35);
+         await crearProfesor('Bryan', 23);*/
+        console.log('CREAR 10 ASIGNATURAS');
         yield crearAsignatura('Matematicas', 'Calculo y algebra');
         yield crearAsignatura('Fisica', 'Estudio de la materia');
         yield crearAsignatura('Quimica', 'Estudio de los atomos');
@@ -148,11 +149,12 @@ function main() {
         yield crearAsignatura('Musica', 'Estudio de la musica');
         /////////ASIGNAR ASIGNATURAS A PROFESORES CON POPULATE////////////////////////
         /////////ASIGNAR 3 ASIGNATURAS A CADA PROFESOR ////////////////////////
-        console.log('ASIGNAR ASIGNATURAS A PROFESORES CON POPULATE:  3 ASIGNATURAS A CADA PROFESOR');
-        yield asignarAsignaturasAProfesor('Juan', ['Matematicas', 'Fisica', 'Quimica']);
-        yield asignarAsignaturasAProfesor('Pedro', ['Biologia', 'Historia', 'Geografia']);
-        yield asignarAsignaturasAProfesor('Jordi', ['Ingles', 'Programacion', 'Lenguaje']);
-        yield asignarAsignaturasAProfesor('Bryan', ['Musica', 'Lenguaje', 'Programacion']);
+        /*console.log('ASIGNAR ASIGNATURAS A PROFESORES CON POPULATE:  3 ASIGNATURAS A CADA PROFESOR');
+       
+        await asignarAsignaturasAProfesor('Juan', ['Matematicas', 'Fisica', 'Quimica']);
+        await asignarAsignaturasAProfesor('Pedro', ['Biologia', 'Historia', 'Geografia']);
+        await asignarAsignaturasAProfesor('Jordi', ['Ingles', 'Programacion', 'Lenguaje']);
+        await asignarAsignaturasAProfesor('Bryan', ['Musica', 'Lenguaje', 'Programacion']);*/
         /*
         /////////ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE ////////////////////////
         console.log('ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE');
@@ -168,18 +170,21 @@ function main() {
         await asignarProfesoresAAsignatura('Musica', ['Bryan']);
         await asignarProfesoresAAsignatura('Lenguaje', ['Bryan']);
         await asignarProfesoresAAsignatura('Programacion', ['Bryan']);
-    */
-        /////////LISTAR PROFESORES Y ASIGNATURAS////////////////////////
-        console.log('LISTAR PROFESORES Y ASIGNATURAS');
-        yield listarProfesores();
-        yield listarAsignaturas();
-        /////////VER PROFESOR Y ASIGNATURA////////////////////////
-        console.log('VER PROFESOR Y ASIGNATURA');
-        yield verProfesorPorNombre('Juan');
-        yield verAsignaturaPorNombre('Matematicas');
-        /////////////////////////////////////////////AGREGATION PIPELINE//////////////////////////////////////////
-        console.log('AGREGATION PIPELINE');
-        yield obtenerNumeroDeProfesoresPorAsignatura();
+    */ /*
+            /////////LISTAR PROFESORES Y ASIGNATURAS////////////////////////
+            console.log('LISTAR PROFESORES Y ASIGNATURAS');
+            await listarProfesores();
+            await listarAsignaturas();
+        
+            /////////VER PROFESOR Y ASIGNATURA////////////////////////
+            console.log('VER PROFESOR Y ASIGNATURA');
+            await verProfesorPorNombre('Juan');
+           await verAsignaturaPorNombre('Matematicas');
+            
+            /////////////////////////////////////////////AGREGATION PIPELINE//////////////////////////////////////////
+            console.log('AGREGATION PIPELINE');
+            await obtenerNumeroDeProfesoresPorAsignatura();
+            */
         mongoose_1.default.connection.close();
     });
 }

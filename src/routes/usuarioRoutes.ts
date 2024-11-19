@@ -1,15 +1,14 @@
 import * as express from 'express';
 import {
     crearUsuario,
-    obtenerIdUsuarioPorNombre,
     listarUsuarios,
     verUsuarioPorNombre,
     verUsuarioPorId,
-    asignarAsignaturasAUsuario,
+    asignarAsignaturasAUsuarioEmail,
     actualizarUsuarioPorId,
     eliminarUsuarioPorId,
     actualizarAsignaturasUsuarioPorNombre,
-    eliminarAsignaturaDeUsuarioPorNombre,
+    eliminarAsignaturaDeUsuarioPorEmail,
     asignarAsignaturaAUsuarioPorId,
     eliminarAsignaturaDeUsuarioPorId,
     modificarEdadUsuarioPorId,
@@ -17,7 +16,8 @@ import {
     modificarNombreUsuarioPorId,
     modificarPasswordUsuarioPorId,
     modificarRolUsuarioPorId,
-
+    listarUsuariosAdmin,
+    listarUsuariosAdminPorNombre
 } from '../controller/usuarioController';
 import { verifyToken, isOwner } from '../middlewares/authJWT';
 
@@ -31,10 +31,11 @@ router.post('/',crearUsuario);
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', listarUsuarios);
 router.get('/:nombre', verUsuarioPorNombre);
-router.get('/:_id', verUsuarioPorId);
-router.get('/:nombre/asignaturas', obtenerIdUsuarioPorNombre);
+router.get('/porID/:_id', verUsuarioPorId);
+router.get('/adminID/:_id',[verifyToken, isOwner ], listarUsuariosAdmin);
+router.get('/adminNombre/:nombre',[verifyToken, isOwner ], listarUsuariosAdminPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
-router.put('/:nombre/asignaturas',[verifyToken, isOwner ], asignarAsignaturasAUsuario);
+router.put('/:email/asignaturas',[verifyToken, isOwner ], asignarAsignaturasAUsuarioEmail);
 router.put('/:_id',[verifyToken, isOwner ],actualizarUsuarioPorId);
 router.put('/:nombre/asignaturas/actualizar',[verifyToken, isOwner ], actualizarAsignaturasUsuarioPorNombre);
 router.put('/:_id/asignaturas/:asignaturaId',[verifyToken, isOwner ], asignarAsignaturaAUsuarioPorId);
@@ -45,7 +46,7 @@ router.put('/:_id/password',[verifyToken, isOwner ], modificarPasswordUsuarioPor
 router.put('/:_id/rol',[verifyToken, isOwner ], modificarRolUsuarioPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
 router.delete('/:_id/asignaturas/:asignaturaid',[verifyToken, isOwner ], eliminarAsignaturaDeUsuarioPorId);
-router.delete('/:nombre/asignaturas/:asignaturaId',[verifyToken, isOwner ], eliminarAsignaturaDeUsuarioPorNombre);
+router.delete('/:email/asignaturas',[verifyToken, isOwner ], eliminarAsignaturaDeUsuarioPorEmail);
 router.delete('/:_id', [verifyToken, isOwner ],eliminarUsuarioPorId);
 
 

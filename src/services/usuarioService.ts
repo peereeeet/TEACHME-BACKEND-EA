@@ -12,43 +12,72 @@ export const crearUsuario = async (_id: mongoose.Types.ObjectId, nombre: string,
 export const listarUsuarios = async () => {
   return await Usuario.find().populate('asignaturasImparte');
 };
-
-//OBTENER ID DE USUARIO POR NOMBRE
-export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
+////////////////////////////////////////EJERCICIO SEMINARIO 7//////////////////////////////////////////
+////////////////////////////////////////LISTAR USUARIOS CON PERMISO DE ADMIN//////////////////////////////////////////
+export const listarUsuariosAdmin = async (_id: string) => {
+  const usuario = await Usuario.findOne({ _id });
+  if (!usuario) {
+    throw new Error('Usuario no encontrado');
+  }
+  if (usuario && usuario.isAdmin === true) {
+    return await Usuario.find().populate('asignaturasImparte');
+  }
+  
+  return 'No tienes permisos para ver la lista de usuarios';
+}
+//CON NOMBRE 
+export const listarUsuariosAdminNombre = async (nombre: string) => {
   const usuario = await Usuario.findOne({ nombre });
   if (!usuario) {
     throw new Error('Usuario no encontrado');
   }
-  return usuario._id;
-};
+  if (usuario && usuario.isAdmin === true) {
+    return await Usuario.find().populate('asignaturasImparte');
+  }
+  
+  return 'No tienes permisos para ver la lista de usuarios';
+}
+
 
 ////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
 export const verUsuarioPorId = async (_id: string) => {
-  console.log(_id);
   const usuario = await Usuario.findOne({ _id }).populate('asignaturasImparte');
   console.log(usuario);
   return usuario;
-}
+};
 
 export const verUsuarioPorNombre = async (nombre: string) => {
   return await Usuario.findOne({ nombre }).populate('asignaturasImparte');
 };
 
 ////////////////////////////////////////ASIGNAR ASIGNATURAS A USUARIO/////////////////////////////////
-export const asignarAsignaturasAUsuario = async (nombre: string, asignaturas: string[]) => {
-  const usuario = await Usuario.findOne({ nombre });
+export const asignarAsignaturasAUsuarioEmail = async (email: string, asignaturas: string[]) => {
+  const usuario = await Usuario.findOne({ email });
   if (!usuario) {
     throw new Error('Usuario no encontrado');
   }
 
+  // Buscar las asignaturas solicitadas
   const asignaturasEncontradas = await Asignatura.find({ nombre: { $in: asignaturas } });
-  //algo de control de errores no viene mal xd
   if (asignaturasEncontradas.length !== asignaturas.length) {
-    throw new Error('Algunas asignaturas no fueron encontradas');
+    throw new Error('Algunas asignaturas no fueron encontradas, te has inventado el nombre?');
   }
-  usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id);
+
+  // Obtener IDs de las asignaturas encontradas
+  const nuevosIds = asignaturasEncontradas.map(asignatura => asignatura._id);
+
+  // Combinar las asignaturas existentes con las nuevas, eliminando duplicados
+  const asignaturasActualizadas = Array.from(
+    new Set([...usuario.asignaturasImparte.map(id => id.toString()), ...nuevosIds.map(id => id.toString())])
+  );
+
+  // Convertir de nuevo a ObjectId
+  usuario.asignaturasImparte = asignaturasActualizadas.map(id => new mongoose.Types.ObjectId(id));
+
+  // Guardar y devolver el usuario actualizado
   return await usuario.save();
 };
+
 export const asignarAsignaturaAUsuarioPorId = async (usuarioId: string, asignaturaId: string) => {
   const usuarioObjectId = new mongoose.Types.ObjectId(usuarioId);
   const asignaturaObjectId = new mongoose.Types.ObjectId(asignaturaId);
@@ -102,17 +131,44 @@ export const eliminarUsuarioPorId = async (_id: string) => {
 };
 */
 
-////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR NOMBRE E ID//////////////////////////////////////////
-export const eliminarAsignaturaDeUsuarioPorNombre = async (nombre: string, asignaturaId: string) => {
-  const usuario = await Usuario.findOne({ nombre });
+////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR EMAIL E ID//////////////////////////////////////////
+export const eliminarAsignaturasDeUsuarioPorEmail = async (email: string, asignaturas: string[]) => {
+  const usuario = await Usuario.findOne({ email });
+
   if (!usuario) {
     throw new Error('Usuario no encontrado');
   }
-  usuario.asignaturasImparte = usuario.asignaturasImparte.filter(
-    id => id.toString() !== asignaturaId
-  );
-  return await usuario.save();
+  let asignaturasEliminadas: boolean[] = [];
+  for (const asignatura of asignaturas) {
+    let asignaturaId: mongoose.Types.ObjectId;
+
+    if (mongoose.Types.ObjectId.isValid(asignatura)) {
+      asignaturaId = new mongoose.Types.ObjectId(asignatura);
+    } else {
+      
+      const asignaturaEncontrada = await Asignatura.findOne({ nombre: asignatura });
+      if (!asignaturaEncontrada) {
+        asignaturasEliminadas.push(false);
+        continue;
+      }
+      asignaturaId = asignaturaEncontrada._id;
+    }
+
+    const asignaturasActuales = usuario.asignaturasImparte.map(id => id.toString());
+    const index = asignaturasActuales.indexOf(asignaturaId.toString());
+
+    if (index === -1) {
+      asignaturasEliminadas.push(false); 
+    } else {
+      usuario.asignaturasImparte.splice(index, 1);
+      asignaturasEliminadas.push(true);
+    }
+  }
+  await usuario.save();
+
+  return usuario;
 };
+
 
 export const eliminarAsignaturaDeUsuarioPorId = async (_id: string, asignaturaId: string) => {
   const usuarioObjectId = new mongoose.Types.ObjectId(_id);
@@ -129,6 +185,7 @@ export const eliminarAsignaturaDeUsuarioPorId = async (_id: string, asignaturaId
 
   return await usuario.save();
 };
+
 
 ////////////////////////////////////////FUNCIONES PARA MODIFICAR CAMPOS DE USUARIO///////////////////////////////
 

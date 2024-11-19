@@ -2,23 +2,32 @@
     import Usuario from '../models/usuario';
     import bcrypt from 'bcryptjs';
     import jwt from 'jsonwebtoken';
-    
-    export const loginUsuario = async (emailOrNombre: string, password: string) => {
-      const usuario = await Usuario.findOne({$or: [{ email: emailOrNombre }, { nombre: emailOrNombre }]});
-    
-      if (!usuario) throw new Error('Usuario no encontrado');
-    
-      const isMatch = await bcrypt.compare(password, usuario.password);
-      if (!isMatch) throw new Error('Contraseña incorrecta');
-    
-      const token = jwt.sign({ userId: usuario._id}, 
-        'api+jwt', { expiresIn: '1h' });
-    
+    import IJwtPayload from '../models/authModel';
+import { error } from 'console';
+
+    const _SECRET: string = 'api+jwt';
+   
+   //////////////////////////////////////////LOGIN USUARIO////////////////////////////////////////// 
+    export const loginUsuario = async (email: string, password: string) => {
+      const usuario= await Usuario.findOne({ email: email });
+      if (!usuario) {
+        throw new Error('Usuario no encontrado');
+      
+      }
+      const session = { 'id': usuario._id.toString() } as IJwtPayload;
+
+      const token = jwt.sign(session, _SECRET, {
+              expiresIn: 86400,
+          });
+      
       console.log('Usuario logueado:', usuario);
-    
       return { token, usuario };
+
     };
   
+
+
+    //////////////////////////////////////////REGISTRO USUARIO//////////////////////////////////////////
     export const registerUsuario = async (nombre: string, edad: number,email: string, password: string,isProfesor = false, isAlumno = false, isAdmin = false
     ) => {
 
@@ -29,6 +38,12 @@
       if (!emailRegex.test(email)) {
         throw new Error('Correo electrónico inválido.');
       }
+    
+      const nombreExistente= await Usuario.findOne({ nombre });
+      if (nombreExistente) {
+        throw new Error('El nombre ya está registrado, escoge otro.');
+      }
+      
       const usuarioExistente = await Usuario.findOne({ email });
       if (usuarioExistente) {
         throw new Error('El correo electrónico ya está registrado.');
@@ -37,9 +52,8 @@
         throw new Error('La contraseña debe tener al menos 3 caracteres.');
       }
 
-  
-      const usuario = new Usuario({nombre,edad,email,password,isProfesor,isAlumno,isAdmin
-      });
+      const usuario = new Usuario({nombre,edad,email});
+
       try {
         await usuario.save();
         return usuario;

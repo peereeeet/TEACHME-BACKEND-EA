@@ -125,11 +125,12 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
 
   async function main() {
     ////////CREAR 4 PROFESORES Y 10 ASIGNATURAS//////////////////
-    console.log('CREAR 4 PROFESORES Y 10 ASIGNATURAS');
+   /* console.log('CREAR 4 PROFESORES Y 10 ASIGNATURAS');
     await crearProfesor('Juan', 30);
     await crearProfesor('Pedro', 40);
     await crearProfesor('Jordi', 35);
-    await crearProfesor('Bryan', 23);
+    await crearProfesor('Bryan', 23);*/
+    console.log('CREAR 10 ASIGNATURAS');
     await crearAsignatura('Matematicas', 'Calculo y algebra');
     await crearAsignatura('Fisica', 'Estudio de la materia');
     await crearAsignatura('Quimica', 'Estudio de los atomos');
@@ -143,12 +144,12 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
 
     /////////ASIGNAR ASIGNATURAS A PROFESORES CON POPULATE////////////////////////
     /////////ASIGNAR 3 ASIGNATURAS A CADA PROFESOR ////////////////////////
-    console.log('ASIGNAR ASIGNATURAS A PROFESORES CON POPULATE:  3 ASIGNATURAS A CADA PROFESOR');
+    /*console.log('ASIGNAR ASIGNATURAS A PROFESORES CON POPULATE:  3 ASIGNATURAS A CADA PROFESOR');
    
     await asignarAsignaturasAProfesor('Juan', ['Matematicas', 'Fisica', 'Quimica']);
     await asignarAsignaturasAProfesor('Pedro', ['Biologia', 'Historia', 'Geografia']);
     await asignarAsignaturasAProfesor('Jordi', ['Ingles', 'Programacion', 'Lenguaje']);
-    await asignarAsignaturasAProfesor('Bryan', ['Musica', 'Lenguaje', 'Programacion']);
+    await asignarAsignaturasAProfesor('Bryan', ['Musica', 'Lenguaje', 'Programacion']);*/
     /*
     /////////ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE ////////////////////////
     console.log('ASIGNAR PROFESORES A CADA ASIGNATURA CORRESPONDIENTE');
@@ -164,7 +165,7 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
     await asignarProfesoresAAsignatura('Musica', ['Bryan']);
     await asignarProfesoresAAsignatura('Lenguaje', ['Bryan']);
     await asignarProfesoresAAsignatura('Programacion', ['Bryan']);
-*/
+*//*
     /////////LISTAR PROFESORES Y ASIGNATURAS////////////////////////
     console.log('LISTAR PROFESORES Y ASIGNATURAS');
     await listarProfesores();
@@ -178,7 +179,7 @@ async function obtenerNumeroDeProfesoresPorAsignatura() {
     /////////////////////////////////////////////AGREGATION PIPELINE//////////////////////////////////////////
     console.log('AGREGATION PIPELINE');
     await obtenerNumeroDeProfesoresPorAsignatura();
-    
+    */
 
 
     mongoose.connection.close();

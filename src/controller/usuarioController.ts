@@ -23,18 +23,6 @@ import { mongo } from 'mongoose';
       
   }
 
-////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
-export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
-  try {
-    const usuario = await usuarioService.obtenerIdUsuarioPorNombre(req.params.nombre);
-    console.log(usuario);
-    res.status(200).json(usuario);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
-  }
-}
-
-
 
 ////////////////////////////////////////LISTAR USUARIOS//////////////////////////////////////////
 export async function listarUsuarios(req: Request, res: Response) {
@@ -42,6 +30,42 @@ export async function listarUsuarios(req: Request, res: Response) {
     const usuarios = await usuarioService.listarUsuarios();
     console.log(usuarios);  
     res.status(200).json(usuarios);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+////////////////////////////////////////EJERCICIO SEMINARIO 7//////////////////////////////////////////
+////////////////////////////////////////LISTAR USUARIOS CON PERMISO DE ADMIN//////////////////////////////////////////
+//CON ID
+export async function listarUsuariosAdmin(req: Request, res: Response) {
+  try {
+    const usuario = await usuarioService.listarUsuariosAdmin(req.params._id);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    if (usuario === 'No tienes permisos para ver la lista de usuarios') {
+      return res.status(403).json({ error: 'No tienes permisos para ver la lista de usuarios' });
+    }
+
+    console.log(usuario);
+    res.status(200).json(usuario);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+//CON NOMBRE
+export async function listarUsuariosAdminPorNombre(req: Request, res: Response) {
+  try {
+    const usuario = await usuarioService.listarUsuariosAdminNombre(req.params.nombre);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    if (usuario === 'No tienes permisos para ver la lista de usuarios') {
+      return res.status(403).json({ error: 'No tienes permisos para ver la lista de usuarios' });
+    }
+    console.log(usuario);
+    res.status(200).json(usuario);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -62,7 +86,8 @@ export async function verUsuarioPorNombre(req: Request, res: Response) {
 
 export async function verUsuarioPorId(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.verUsuarioPorId(req.params._id);
+    const u = req.params._id;
+    const usuario = await usuarioService.verUsuarioPorId(u);
     if (!usuario) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -74,9 +99,9 @@ export async function verUsuarioPorId(req: Request, res: Response) {
 }
 
 ////////////////////////////////////ASIGNAR ASIGNATURAS A UN USUARIO/////////////////////////////////////
-export async function asignarAsignaturasAUsuario(req: Request, res: Response) { 
+export async function asignarAsignaturasAUsuarioEmail(req: Request, res: Response) { 
   try {
-    const usuario = await usuarioService.asignarAsignaturasAUsuario(req.params.nombre, req.body.asignaturas);
+    const usuario = await usuarioService.asignarAsignaturasAUsuarioEmail(req.params.email, req.body.asignaturas);
     console.log(usuario);
     res.status(200).json(usuario);
   } catch (error: any) {
@@ -115,14 +140,24 @@ export async function actualizarAsignaturasUsuarioPorNombre(req: Request, res: R
   }
 }
 ////////////////////////////////////ELIMINAR UNA ASIGNATURA DE UN USUARIO POR NOMBRE/////////////////////////////////////
-export async function eliminarAsignaturaDeUsuarioPorNombre(req: Request, res: Response) {
+export async function eliminarAsignaturaDeUsuarioPorEmail(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.eliminarAsignaturaDeUsuarioPorNombre(req.params.nombre, req.params.asignaturaId);
-    res.status(200).json(usuario);
+    const email = req.params.email;
+    const asignaturas = Array.isArray(req.body.asignaturas) ? req.body.asignaturas : [req.body.asignaturas];
+    const usuario = await usuarioService.eliminarAsignaturasDeUsuarioPorEmail(email, asignaturas);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.status(200).json({
+      message: 'Asignaturas eliminadas con éxito',
+      asignaturasImparte: usuario.asignaturasImparte,
+      asignaturasCount: usuario.asignaturasImparte.length,
+    });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 }
+
 ////////////////////////////////////ASIGNAR ASIGNATURA A UN USUARIO POR ID/////////////////////////////////////
 export async function asignarAsignaturaAUsuarioPorId(req: Request, res: Response) {
   try {

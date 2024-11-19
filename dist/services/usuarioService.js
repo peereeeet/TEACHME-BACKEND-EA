@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.eliminarUsuarioPorId = exports.actualizarAsignaturasUsuarioPorId = exports.actualizarAsignaturasUsuarioPorNombre = exports.actualizarUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.obtenerIdUsuarioPorNombre = exports.listarUsuarios = exports.crearUsuario = void 0;
+exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarAsignaturaDeUsuarioPorId = exports.eliminarAsignaturasDeUsuarioPorEmail = exports.eliminarUsuarioPorId = exports.actualizarAsignaturasUsuarioPorId = exports.actualizarAsignaturasUsuarioPorNombre = exports.actualizarUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuarioEmail = exports.verUsuarioPorNombre = exports.verUsuarioPorId = exports.listarUsuariosAdminNombre = exports.listarUsuariosAdmin = exports.listarUsuarios = exports.crearUsuario = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const usuario_1 = __importDefault(require("../models/usuario"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
@@ -27,42 +27,63 @@ const listarUsuarios = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.find().populate('asignaturasImparte');
 });
 exports.listarUsuarios = listarUsuarios;
-//OBTENER ID DE USUARIO POR NOMBRE
-const obtenerIdUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
+////////////////////////////////////////EJERCICIO SEMINARIO 7//////////////////////////////////////////
+////////////////////////////////////////LISTAR USUARIOS CON PERMISO DE ADMIN//////////////////////////////////////////
+const listarUsuariosAdmin = (_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const usuario = yield usuario_1.default.findOne({ _id });
+    if (!usuario) {
+        throw new Error('Usuario no encontrado');
+    }
+    if (usuario && usuario.isAdmin === true) {
+        return yield usuario_1.default.find().populate('asignaturasImparte');
+    }
+    return 'No tienes permisos para ver la lista de usuarios';
+});
+exports.listarUsuariosAdmin = listarUsuariosAdmin;
+//CON NOMBRE 
+const listarUsuariosAdminNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
     const usuario = yield usuario_1.default.findOne({ nombre });
     if (!usuario) {
         throw new Error('Usuario no encontrado');
     }
-    return usuario._id;
+    if (usuario && usuario.isAdmin === true) {
+        return yield usuario_1.default.find().populate('asignaturasImparte');
+    }
+    return 'No tienes permisos para ver la lista de usuarios';
 });
-exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
+exports.listarUsuariosAdminNombre = listarUsuariosAdminNombre;
 ////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
-const verUsuarioPorNombre = (_id) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(_id);
+const verUsuarioPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
     const usuario = yield usuario_1.default.findOne({ _id }).populate('asignaturasImparte');
     console.log(usuario);
     return usuario;
 });
-exports.verUsuarioPorNombre = verUsuarioPorNombre;
-const verUsuarioPorId = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
+exports.verUsuarioPorId = verUsuarioPorId;
+const verUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findOne({ nombre }).populate('asignaturasImparte');
 });
-exports.verUsuarioPorId = verUsuarioPorId;
+exports.verUsuarioPorNombre = verUsuarioPorNombre;
 ////////////////////////////////////////ASIGNAR ASIGNATURAS A USUARIO/////////////////////////////////
-const asignarAsignaturasAUsuario = (nombre, asignaturas) => __awaiter(void 0, void 0, void 0, function* () {
-    const usuario = yield usuario_1.default.findOne({ nombre });
+const asignarAsignaturasAUsuarioEmail = (email, asignaturas) => __awaiter(void 0, void 0, void 0, function* () {
+    const usuario = yield usuario_1.default.findOne({ email });
     if (!usuario) {
         throw new Error('Usuario no encontrado');
     }
+    // Buscar las asignaturas solicitadas
     const asignaturasEncontradas = yield asignatura_1.default.find({ nombre: { $in: asignaturas } });
-    //algo de control de errores no viene mal xd
     if (asignaturasEncontradas.length !== asignaturas.length) {
-        throw new Error('Algunas asignaturas no fueron encontradas');
+        throw new Error('Algunas asignaturas no fueron encontradas, te has inventado el nombre?');
     }
-    usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id);
+    // Obtener IDs de las asignaturas encontradas
+    const nuevosIds = asignaturasEncontradas.map(asignatura => asignatura._id);
+    // Combinar las asignaturas existentes con las nuevas, eliminando duplicados
+    const asignaturasActualizadas = Array.from(new Set([...usuario.asignaturasImparte.map(id => id.toString()), ...nuevosIds.map(id => id.toString())]));
+    // Convertir de nuevo a ObjectId
+    usuario.asignaturasImparte = asignaturasActualizadas.map(id => new mongoose_1.default.Types.ObjectId(id));
+    // Guardar y devolver el usuario actualizado
     return yield usuario.save();
 });
-exports.asignarAsignaturasAUsuario = asignarAsignaturasAUsuario;
+exports.asignarAsignaturasAUsuarioEmail = asignarAsignaturasAUsuarioEmail;
 const asignarAsignaturaAUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(void 0, void 0, void 0, function* () {
     const usuarioObjectId = new mongoose_1.default.Types.ObjectId(usuarioId);
     const asignaturaObjectId = new mongoose_1.default.Types.ObjectId(asignaturaId);
@@ -104,19 +125,49 @@ const actualizarAsignaturasUsuarioPorId = (_id, asignaturas) => __awaiter(void 0
 exports.actualizarAsignaturasUsuarioPorId = actualizarAsignaturasUsuarioPorId;
 ////////////////////////////////////////ELIMINAR USUARIO//////////////////////////////////////////
 const eliminarUsuarioPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findOneAndDelete({ _id });
+    const resultado = yield usuario_1.default.findOneAndDelete({ _id });
+    return yield resultado;
 });
 exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
-////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR NOMBRE E ID//////////////////////////////////////////
-const eliminarAsignaturaDeUsuarioPorNombre = (nombre, asignaturaId) => __awaiter(void 0, void 0, void 0, function* () {
-    const usuario = yield usuario_1.default.findOne({ nombre });
+/*export const eliminarUsuarioPorNombre = async (nombre: string) => {
+  const resultado = await Usuario.findOneAndDelete({ nombre });
+  return await resultado;
+};
+*/
+////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR EMAIL E ID//////////////////////////////////////////
+const eliminarAsignaturasDeUsuarioPorEmail = (email, asignaturas) => __awaiter(void 0, void 0, void 0, function* () {
+    const usuario = yield usuario_1.default.findOne({ email });
     if (!usuario) {
         throw new Error('Usuario no encontrado');
     }
-    usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
-    return yield usuario.save();
+    let asignaturasEliminadas = [];
+    for (const asignatura of asignaturas) {
+        let asignaturaId;
+        if (mongoose_1.default.Types.ObjectId.isValid(asignatura)) {
+            asignaturaId = new mongoose_1.default.Types.ObjectId(asignatura);
+        }
+        else {
+            const asignaturaEncontrada = yield asignatura_1.default.findOne({ nombre: asignatura });
+            if (!asignaturaEncontrada) {
+                asignaturasEliminadas.push(false);
+                continue;
+            }
+            asignaturaId = asignaturaEncontrada._id;
+        }
+        const asignaturasActuales = usuario.asignaturasImparte.map(id => id.toString());
+        const index = asignaturasActuales.indexOf(asignaturaId.toString());
+        if (index === -1) {
+            asignaturasEliminadas.push(false);
+        }
+        else {
+            usuario.asignaturasImparte.splice(index, 1);
+            asignaturasEliminadas.push(true);
+        }
+    }
+    yield usuario.save();
+    return usuario;
 });
-exports.eliminarAsignaturaDeUsuarioPorNombre = eliminarAsignaturaDeUsuarioPorNombre;
+exports.eliminarAsignaturasDeUsuarioPorEmail = eliminarAsignaturasDeUsuarioPorEmail;
 const eliminarAsignaturaDeUsuarioPorId = (_id, asignaturaId) => __awaiter(void 0, void 0, void 0, function* () {
     const usuarioObjectId = new mongoose_1.default.Types.ObjectId(_id);
     const asignaturaObjectId = new mongoose_1.default.Types.ObjectId(asignaturaId);

@@ -31,22 +31,23 @@ const router = express.Router();
 router.post('/', usuarioController_1.crearUsuario);
 ////////////////////////////////////GETS/////////////////////////////////////
 router.get('/', usuarioController_1.listarUsuarios);
-//router.get('/:nombre', verUsuarioPorNombre);
-router.get('/:_id', usuarioController_1.verUsuarioPorId);
-router.get('/:nombre/asignaturas', usuarioController_1.obtenerIdUsuarioPorNombre);
+router.get('/:nombre', usuarioController_1.verUsuarioPorNombre);
+router.get('/porID/:_id', usuarioController_1.verUsuarioPorId);
+router.get('/adminID/:_id', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.listarUsuariosAdmin);
+router.get('/adminNombre/:nombre', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.listarUsuariosAdminPorNombre);
 ////////////////////////////////////PUTS/////////////////////////////////////
-router.put('/:nombre/asignaturas', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.asignarAsignaturasAUsuario);
-router.put('/:_id', usuarioController_1.actualizarUsuarioPorId);
-router.put('/:nombre/asignaturas/actualizar', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.actualizarAsignaturasUsuarioPorNombre);
-router.put('/:usuarioId/asignaturas/:asignaturaId', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.asignarAsignaturaAUsuarioPorId);
-router.put('/:_id/edad', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.modificarEdadUsuarioPorId);
-router.put('/:_id/email', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.modificarEmailUsuarioPorId);
-router.put('/:_id/nombre', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.modificarNombreUsuarioPorId);
-router.put('/:_id/password', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.modificarPasswordUsuarioPorId);
-router.put('/:_id/rol', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.modificarRolUsuarioPorId);
+router.put('/:email/asignaturas', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.asignarAsignaturasAUsuarioEmail);
+router.put('/:_id', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.actualizarUsuarioPorId);
+router.put('/:nombre/asignaturas/actualizar', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.actualizarAsignaturasUsuarioPorNombre);
+router.put('/:_id/asignaturas/:asignaturaId', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.asignarAsignaturaAUsuarioPorId);
+router.put('/:_id/edad', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.modificarEdadUsuarioPorId);
+router.put('/:_id/email', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.modificarEmailUsuarioPorId);
+router.put('/:_id/nombre', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.modificarNombreUsuarioPorId);
+router.put('/:_id/password', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.modificarPasswordUsuarioPorId);
+router.put('/:_id/rol', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.modificarRolUsuarioPorId);
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:usuarioId/asignaturas/:asignaturaid', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.eliminarAsignaturaDeUsuarioPorId);
-router.delete('/:nombre/asignaturas/:asignaturaId', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.eliminarAsignaturaDeUsuarioPorNombre);
-router.delete('/usuarioId', authJWT_1.verifyToken, authJWT_1.isOwner, usuarioController_1.eliminarUsuarioPorId);
+router.delete('/:_id/asignaturas/:asignaturaid', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.eliminarAsignaturaDeUsuarioPorId);
+router.delete('/:email/asignaturas', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.eliminarAsignaturaDeUsuarioPorEmail);
+router.delete('/:_id', [authJWT_1.verifyToken, authJWT_1.isOwner], usuarioController_1.eliminarUsuarioPorId);
 exports.default = router;
 //# sourceMappingURL=usuarioRoutes.js.map

@@ -33,15 +33,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.crearUsuario = crearUsuario;
-exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
+exports.listarUsuariosAdmin = listarUsuariosAdmin;
+exports.listarUsuariosAdminPorNombre = listarUsuariosAdminPorNombre;
 exports.verUsuarioPorNombre = verUsuarioPorNombre;
 exports.verUsuarioPorId = verUsuarioPorId;
-exports.asignarAsignaturasAUsuario = asignarAsignaturasAUsuario;
+exports.asignarAsignaturasAUsuarioEmail = asignarAsignaturasAUsuarioEmail;
 exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
 exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
 exports.actualizarAsignaturasUsuarioPorNombre = actualizarAsignaturasUsuarioPorNombre;
-exports.eliminarAsignaturaDeUsuarioPorNombre = eliminarAsignaturaDeUsuarioPorNombre;
+exports.eliminarAsignaturaDeUsuarioPorEmail = eliminarAsignaturaDeUsuarioPorEmail;
 exports.asignarAsignaturaAUsuarioPorId = asignarAsignaturaAUsuarioPorId;
 exports.eliminarAsignaturaDeUsuarioPorId = eliminarAsignaturaDeUsuarioPorId;
 exports.modificarNombreUsuarioPorId = modificarNombreUsuarioPorId;
@@ -64,18 +65,9 @@ function crearUsuario(req, res) {
         catch (error) {
             res.status(400).json({ error: error.message });
         }
-    });
-}
-////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
-function obtenerIdUsuarioPorNombre(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const usuario = yield usuarioService.obtenerIdUsuarioPorNombre(req.params.nombre);
-            console.log(usuario);
-            res.status(200).json(usuario);
-        }
-        catch (error) {
-            res.status(400).json({ error: error.message });
+        const usuarioExistente = yield usuarioService.verUsuarioPorNombre(req.body.nombre);
+        if (usuarioExistente) {
+            return res.status(409).json({ error: 'El nombre de usuario ya está en uso por otro usuario' });
         }
     });
 }
@@ -86,6 +78,46 @@ function listarUsuarios(req, res) {
             const usuarios = yield usuarioService.listarUsuarios();
             console.log(usuarios);
             res.status(200).json(usuarios);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////////EJERCICIO SEMINARIO 7//////////////////////////////////////////
+////////////////////////////////////////LISTAR USUARIOS CON PERMISO DE ADMIN//////////////////////////////////////////
+//CON ID
+function listarUsuariosAdmin(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.listarUsuariosAdmin(req.params._id);
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            if (usuario === 'No tienes permisos para ver la lista de usuarios') {
+                return res.status(403).json({ error: 'No tienes permisos para ver la lista de usuarios' });
+            }
+            console.log(usuario);
+            res.status(200).json(usuario);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+//CON NOMBRE
+function listarUsuariosAdminPorNombre(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const usuario = yield usuarioService.listarUsuariosAdminNombre(req.params.nombre);
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            if (usuario === 'No tienes permisos para ver la lista de usuarios') {
+                return res.status(403).json({ error: 'No tienes permisos para ver la lista de usuarios' });
+            }
+            console.log(usuario);
+            res.status(200).json(usuario);
         }
         catch (error) {
             res.status(500).json({ error: error.message });
@@ -111,7 +143,8 @@ function verUsuarioPorNombre(req, res) {
 function verUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.verUsuarioPorId(req.params._id);
+            const u = req.params._id;
+            const usuario = yield usuarioService.verUsuarioPorId(u);
             if (!usuario) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
@@ -124,10 +157,10 @@ function verUsuarioPorId(req, res) {
     });
 }
 ////////////////////////////////////ASIGNAR ASIGNATURAS A UN USUARIO/////////////////////////////////////
-function asignarAsignaturasAUsuario(req, res) {
+function asignarAsignaturasAUsuarioEmail(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.asignarAsignaturasAUsuario(req.params.nombre, req.body.asignaturas);
+            const usuario = yield usuarioService.asignarAsignaturasAUsuarioEmail(req.params.email, req.body.asignaturas);
             console.log(usuario);
             res.status(200).json(usuario);
         }
@@ -153,8 +186,8 @@ function actualizarUsuarioPorId(req, res) {
 function eliminarUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.eliminarUsuarioPorId(req.params.id);
-            console.log(listarUsuarios);
+            const usuario = yield usuarioService.eliminarUsuarioPorId(req.params._id);
+            console.log(usuarioService.listarUsuarios);
             res.status(200).json(usuario);
         }
         catch (error) {
@@ -175,11 +208,20 @@ function actualizarAsignaturasUsuarioPorNombre(req, res) {
     });
 }
 ////////////////////////////////////ELIMINAR UNA ASIGNATURA DE UN USUARIO POR NOMBRE/////////////////////////////////////
-function eliminarAsignaturaDeUsuarioPorNombre(req, res) {
+function eliminarAsignaturaDeUsuarioPorEmail(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.eliminarAsignaturaDeUsuarioPorNombre(req.params.nombre, req.params.asignaturaId);
-            res.status(200).json(usuario);
+            const email = req.params.email;
+            const asignaturas = Array.isArray(req.body.asignaturas) ? req.body.asignaturas : [req.body.asignaturas];
+            const usuario = yield usuarioService.eliminarAsignaturasDeUsuarioPorEmail(email, asignaturas);
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            res.status(200).json({
+                message: 'Asignaturas eliminadas con éxito',
+                asignaturasImparte: usuario.asignaturasImparte,
+                asignaturasCount: usuario.asignaturasImparte.length,
+            });
         }
         catch (error) {
             res.status(400).json({ error: error.message });
