@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import Asignatura from '../models/asignatura';
 import Usuario from '../models/usuario';
+import { Types } from 'mongoose';
+
 
 /////////////////////////////////////CREAR NUEVA ASIGNATURA//////////////////////////////////////////
 export const crearAsignatura = async (nombre: string, descripcion: string) => {
@@ -47,10 +49,18 @@ export const asignarUsuariosAAsignaturaPorNombre = async (nombreAsignatura: stri
     throw new Error('Usuarios no encontrados');
   }
 
-  asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
+  // Inicializar usuarios si es undefined
+  if (!asignatura.usuarios) {
+    asignatura.usuarios = [];
+  }
+
+  asignatura.usuarios = asignatura.usuarios.concat(
+    usuarios.map(u => u._id as Types.ObjectId)
+  );
   await asignatura.save();
   return asignatura;
 };
+
 
 export const asignarUsuariosAAsignaturaPorId = async (_id: string, nombresUsuarios: string[]) => {
   const asignatura = await Asignatura.findById(_id);
@@ -65,10 +75,17 @@ export const asignarUsuariosAAsignaturaPorId = async (_id: string, nombresUsuari
     throw new Error('Usuarios no encontrados');
   }
 
-  asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
+  // Inicializar usuarios si es undefined
+  if (!asignatura.usuarios) {
+    asignatura.usuarios = [];
+  }
+
+  asignatura.usuarios = asignatura.usuarios.concat(
+    usuarios.map(u => u._id as Types.ObjectId)
+  );
   await asignatura.save();
   return asignatura;
-}
+};
 
 
 

@@ -1,228 +1,195 @@
-import mongoose from 'mongoose';
-import Usuario from '../models/usuario';
+import mongoose, { Types } from 'mongoose';
+import Usuario, { IUsuario } from '../models/usuario'; // Importamos IUsuario
 import Asignatura from '../models/asignatura';
 import bcrypt from 'bcrypt';
 
-
-////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
-export const crearUsuario = async (nombre: string, edad: number, email: string, password: string, isProfesor = false, isAlumno = false, isAdmin = false) => {
-  // Hashear la contraseña antes de guardarla
+// Crear usuario
+export const crearUsuario = async (
+  nombre: string,
+  edad: number,
+  email: string,
+  password: string,
+  isProfesor = false,
+  isAlumno = false,
+  isAdmin = false
+) => {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
-
   const usuario = new Usuario({ nombre, edad, email, password: hashedPassword, isProfesor, isAlumno, isAdmin });
   return await usuario.save();
 };
-// Función para autenticar un usuario
+
+// Autenticar usuario
 export const autenticarUsuario = async (email: string, password: string) => {
   const usuario = await Usuario.findOne({ email });
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-  
-  const esPasswordCorrecto = await bcrypt.compare(password, usuario.password);
-  if (!esPasswordCorrecto) {
-    throw new Error('Contraseña incorrecta');
-  }
-
-  return usuario; // Retorna el usuario si la autenticación es correcta
+  if (!usuario) throw new Error('Usuario no encontrado');
+  const isValid = await bcrypt.compare(password, usuario.password);
+  if (!isValid) throw new Error('Contraseña incorrecta');
+  return usuario;
 };
-////////////////////////////////////////LISTAR USUARIOS//////////////////////////////////////////
+
+// Obtener ID de usuario por nombre
+export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
+  const usuario = await Usuario.findOne({ nombre });
+  if (!usuario) throw new Error('Usuario no encontrado');
+  return usuario._id;
+};
+
+export const findByUsername = async (username: string): Promise<IUsuario | null> => {
+  return await Usuario.findOne({ nombre: username });
+};
+
+// En usuarioService.ts
+
+export const findByEmail = async (email: string): Promise<IUsuario | null> => {
+  return await Usuario.findOne({ email }); // Busca un usuario por su email
+};
+
+// Listar usuarios
 export const listarUsuarios = async () => {
   return await Usuario.find().populate('asignaturasImparte');
 };
 
-export const obtenerUsuariosPaginados = async (page: number, limit: number) => {
-  const skip = (page - 1) * limit;
-  const usuarios = await Usuario.find()
-    .skip(skip)
-    .limit(limit)
-    .populate('asignaturasImparte');
-
-  const total = await Usuario.countDocuments();
-  return {
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-    usuarios,
-  };
-};
-
-//OBTENER ID DE USUARIO POR NOMBRE
-export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
-  const usuario = await Usuario.findOne({ nombre });
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-  return usuario._id;
-};
-
-export const obtenerAsignaturasDeUsuario = async (usuarioId: string) => {
-  const usuario = await Usuario.findById(new mongoose.Types.ObjectId(usuarioId)).populate('asignaturasImparte');
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-  return usuario.asignaturasImparte;
-};
-
-////////////////////////////////////////VER USUARIO POR ID Y POR NOMBRE///////////////////////////////////
-export const verUsuarioPorNombre = async (_id: string) => {
-  console.log(_id);
-  const usuario = await Usuario.findOne({ _id }).populate('asignaturasImparte');
-  console.log(usuario);
-  return usuario;
-}
-
-export const verUsuarioPorId = async (nombre: string) => {
+// Ver usuario por nombre
+export const verUsuarioPorNombre = async (nombre: string): Promise<IUsuario | null> => {
   return await Usuario.findOne({ nombre }).populate('asignaturasImparte');
 };
 
-////////////////////////////////////////ASIGNAR ASIGNATURAS A USUARIO/////////////////////////////////
-export const asignarAsignaturasAUsuario = async (nombre: string, asignaturas: string[]) => {
-  const usuario = await Usuario.findOne({ nombre });
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
+export const verUsuarioPorId = async (_id: string): Promise<IUsuario | null> => {
+  console.log("Buscando usuario con ID:", _id); // Log del ID recibido
+  try {
+      //const objectId = new mongoose.Types.ObjectId(_id); // Convierte a ObjectId si no lo es
+      const usuario = await Usuario.findById(_id).populate('asignaturasImparte');
+      console.log("Resultado de la búsqueda:", usuario); // Log del resultado
+      return usuario;
+  } catch (error) {
+      console.error("Error en la búsqueda por ID:", error);
+      throw error; // Lanza el error para que sea capturado en el controlador
   }
-
-  const asignaturasEncontradas = await Asignatura.find({ nombre: { $in: asignaturas } });
-  //algo de control de errores no viene mal xd
-  if (asignaturasEncontradas.length !== asignaturas.length) {
-    throw new Error('Algunas asignaturas no fueron encontradas');
-  }
-  usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id);
-  return await usuario.save();
-};
-export const asignarAsignaturaAUsuarioPorId = async (usuarioId: string, asignaturaId: string) => {
-  const usuarioObjectId = new mongoose.Types.ObjectId(usuarioId);
-  const asignaturaObjectId = new mongoose.Types.ObjectId(asignaturaId);
-
-  const usuario = await Usuario.findById(usuarioObjectId);
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-
-  if (!usuario.asignaturasImparte.includes(asignaturaObjectId)) {
-    usuario.asignaturasImparte.push(asignaturaObjectId);
-  }
-
-  return await usuario.save();
 };
 
-////////////////////////////////////////ACTUALIZAR USUARIO (NOMBRE/ID)//////////////////////////////////////////
+
+// Actualizar usuario por ID
 export const actualizarUsuarioPorId = async (_id: string, datos: any) => {
   return await Usuario.findByIdAndUpdate(_id, datos, { new: true });
 };
-////////////////////////////////////////ACTUALIZAR ASIGNATURAS DE USUARIO POR NOMBRE E ID///////////////////////////
-export const actualizarAsignaturasUsuarioPorNombre = async (nombre: string, asignaturas: string[]) => {
-  const usuario = await Usuario.findOne({ nombre });
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-  const asignaturasEncontradas = await Asignatura.find({ nombre: { $in: asignaturas } });
-  usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id);
-  return await usuario.save();
-};
 
-export const actualizarAsignaturasUsuarioPorId = async (_id: string, asignaturas: string[]) => {
-  const usuario = await Usuario.findById(_id);
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-  const asignaturasEncontradas = await Asignatura.find({ nombre: { $in: asignaturas } });
-  usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id);
-  return await usuario.save();
-}
-
-// Eliminar usuario por ID usando ObjectId
+// Eliminar usuario por ID
 export const eliminarUsuarioPorId = async (_id: string) => {
-  const objectId = new mongoose.Types.ObjectId(_id);
-  return await Usuario.findOneAndDelete({ _id: objectId });
+  return await Usuario.findByIdAndDelete(_id);
 };
 
-////////////////////////////////////////ELIMINAR ASIGNATURA DE USUARIO POR NOMBRE E ID//////////////////////////////////////////
-export const eliminarAsignaturaDeUsuarioPorNombre = async (nombre: string, asignaturaId: string) => {
-  const usuario = await Usuario.findOne({ nombre });
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-  usuario.asignaturasImparte = usuario.asignaturasImparte.filter(
-    id => id.toString() !== asignaturaId
-  );
-  return await usuario.save();
-};
-
-export const eliminarAsignaturaDeUsuarioPorId = async (usuarioId: string, asignaturaId: string) => {
-  const usuarioObjectId = new mongoose.Types.ObjectId(usuarioId);
-  const asignaturaObjectId = new mongoose.Types.ObjectId(asignaturaId);
-
-  const usuario = await Usuario.findById(usuarioObjectId);
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
-
-  // Filtra el array `asignaturasImparte` para eliminar la asignatura específica
-  usuario.asignaturasImparte = usuario.asignaturasImparte.filter(
-    id => !id.equals(asignaturaObjectId)  // Usa `.equals()` para comparar `ObjectId`s
-  );
-
-  return await usuario.save();
-};
-
-////////////////////////////////////////FUNCIONES PARA MODIFICAR CAMPOS DE USUARIO///////////////////////////////
-
-////////////////////////////////////////MODIFICAR NOMBRE DE USUARIO POR ID//////////////////////////////////////////
+// Modificar nombre de usuario por ID
 export const modificarNombreUsuarioPorId = async (_id: string, nombre: string) => {
   return await Usuario.findByIdAndUpdate(_id, { nombre }, { new: true });
 };
 
-////////////////////////////////////////MODIFICAR EDAD DE USUARIO POR ID//////////////////////////////////////////
+// Modificar edad de usuario por ID
 export const modificarEdadUsuarioPorId = async (_id: string, edad: number) => {
   return await Usuario.findByIdAndUpdate(_id, { edad }, { new: true });
 };
 
-////////////////////////////////////////MODIFICAR EMAIL DE USUARIO POR ID//////////////////////////////////////////
+// Modificar email de usuario por ID
 export const modificarEmailUsuarioPorId = async (_id: string, email: string) => {
   return await Usuario.findByIdAndUpdate(_id, { email }, { new: true });
 };
 
-////////////////////////////////////////MODIFICAR PASSWORD DE USUARIO POR ID//////////////////////////////////////////
+// Modificar contraseña de usuario por ID
 export const modificarPasswordUsuarioPorId = async (_id: string, password: string) => {
-  return await Usuario.findByIdAndUpdate(_id, { password  }, { new: true });
-}
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return await Usuario.findByIdAndUpdate(_id, { password: hashedPassword }, { new: true });
+};
 
-////////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID//////////////////////////////////////////
+// Modificar rol de usuario por ID
 export const modificarRolUsuarioPorId = async (_id: string, isProfesor: boolean, isAlumno: boolean, isAdmin: boolean) => {
   return await Usuario.findByIdAndUpdate(_id, { isProfesor, isAlumno, isAdmin }, { new: true });
 };
 
+// Obtener usuarios paginados
+export const obtenerUsuariosPaginados = async (page: number, limit: number) => {
+  const skip = (page - 1) * limit;
+  const usuarios = await Usuario.find().skip(skip).limit(limit).populate('asignaturasImparte');
+  const total = await Usuario.countDocuments();
+  return { total, page, limit, totalPages: Math.ceil(total / limit), usuarios };
+};
+
+// Actualizar asignaturas de usuario por nombre
+export const actualizarAsignaturasUsuarioPorNombre = async (nombre: string, asignaturas: string[]) => {
+  const usuario = await Usuario.findOne({ nombre });
+  if (!usuario) throw new Error('Usuario no encontrado');
+  const asignaturasEncontradas = await Asignatura.find({ nombre: { $in: asignaturas } });
+  usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id as Types.ObjectId);
+  return await usuario.save();
+};
+
+// Eliminar asignatura de usuario por nombre
+export const eliminarAsignaturaDeUsuarioPorNombre = async (nombre: string, asignaturaId: string) => {
+  const usuario = await Usuario.findOne({ nombre });
+  if (!usuario) throw new Error('Usuario no encontrado');
+
+  if (!usuario.asignaturasImparte) {
+    usuario.asignaturasImparte = [];
+  }
+
+  usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
+
+  return await usuario.save();
+};
+
+// Obtener asignaturas paginadas de usuario
 export const obtenerAsignaturasPaginadasDeUsuario = async (usuarioId: string, page: number, limit: number) => {
   const skip = (page - 1) * limit;
 
-  // Primero encuentra al usuario
   const usuario = await Usuario.findById(usuarioId);
-  if (!usuario) {
-    throw new Error('Usuario no encontrado');
-  }
+  if (!usuario) throw new Error('Usuario no encontrado');
 
-  // Cuenta el total de asignaturas antes de la paginación
-  const totalAsignaturas = usuario.asignaturasImparte.length;
+  const totalAsignaturas = usuario.asignaturasImparte?.length || 0;
 
-  // Luego aplica la paginación en la consulta
-  const asignaturasPaginadas = await Usuario.findById(usuarioId)
-    .populate({
-      path: 'asignaturasImparte',
-      options: { limit: limit, skip: skip }
-    });
+  const asignaturasPaginadas = await Usuario.findById(usuarioId).populate({
+    path: 'asignaturasImparte',
+    options: { limit, skip },
+  });
 
   return {
     total: totalAsignaturas,
-    page: page,
-    limit: limit,
+    page,
+    limit,
     totalPages: Math.ceil(totalAsignaturas / limit),
-    asignaturas: asignaturasPaginadas ? asignaturasPaginadas.asignaturasImparte : []
+    asignaturas: asignaturasPaginadas?.asignaturasImparte || [],
   };
 };
 
+// Asignar asignaturas a usuario por nombre
+export const asignarAsignaturasAUsuario = async (nombre: string, asignaturas: string[]) => {
+  const usuario = await Usuario.findOne({ nombre });
+  if (!usuario) throw new Error('Usuario no encontrado');
 
+  const asignaturasEncontradas = await Asignatura.find({ nombre: { $in: asignaturas } });
+  if (!usuario.asignaturasImparte) usuario.asignaturasImparte = [];
+  usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id as Types.ObjectId);
+  return await usuario.save();
+};
 
+// Asignar asignatura a usuario por ID
+export const asignarAsignaturaAUsuarioPorId = async (usuarioId: string, asignaturaId: string) => {
+  const usuario = await Usuario.findById(usuarioId);
+  if (!usuario) throw new Error('Usuario no encontrado');
+  const asignaturaObjectId = new Types.ObjectId(asignaturaId);
+
+  if (!usuario.asignaturasImparte) usuario.asignaturasImparte = [];
+  if (!usuario.asignaturasImparte.some(id => id.toString() === asignaturaObjectId.toString())) {
+    usuario.asignaturasImparte.push(asignaturaObjectId);
+  }
+  return await usuario.save();
+};
+
+// Eliminar asignatura de usuario por ID
+export const eliminarAsignaturaDeUsuarioPorId = async (usuarioId: string, asignaturaId: string) => {
+  const usuario = await Usuario.findById(usuarioId);
+  if (!usuario) throw new Error('Usuario no encontrado');
+
+  if (!usuario.asignaturasImparte) usuario.asignaturasImparte = [];
+  usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
+  return await usuario.save();
+};

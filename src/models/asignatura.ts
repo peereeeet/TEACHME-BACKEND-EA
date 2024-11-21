@@ -1,11 +1,23 @@
-import mongoose from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
-const asignaturaSchema = new mongoose.Schema({
+// Define la interfaz para Asignatura
+export interface IAsignatura extends Document {
+  nombre?: string; // Campo opcional
+  descripcion?: string; // Campo opcional
+  usuarios?: Types.ObjectId[]; // Relación con los usuarios
+}
 
-  nombre: { type: String },
-  descripcion: { type: String },
-  usuarios: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Usuario' }]
-});
+// Esquema de Asignatura
+const asignaturaSchema = new Schema<IAsignatura>(
+  {
+    nombre: { type: String },
+    descripcion: { type: String },
+    usuarios: { type: [Schema.Types.ObjectId], ref: 'Usuario', default: [] }, // Establece default: []
+  },
+  { versionKey: false } // Desactivamos el campo __v
+);
 
-const Asignatura = mongoose.model('Asignatura', asignaturaSchema);
+// Modelo de Asignatura
+const Asignatura = model<IAsignatura>('Asignatura', asignaturaSchema);
+
 export default Asignatura;

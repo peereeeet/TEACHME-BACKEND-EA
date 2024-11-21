@@ -2,6 +2,9 @@ import cors from 'cors';
 import { Router, Request, Response } from 'express';
 import * as usuarioService from '../services/usuarioService';
 import Usuario from '../models/usuario';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
 
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
@@ -15,12 +18,23 @@ export async function crearUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-// Ruta para el login
 export const loginUsuario = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const usuario = await usuarioService.autenticarUsuario(email, password);
-    res.status(200).json({ message: 'Login exitoso', usuario });
+
+    // Generar el token JWT
+    const token = jwt.sign(
+      { email: usuario.email, isAdmin: usuario.isAdmin },
+      process.env.SECRET || 'secretkey', // Secret key para firmar el token
+      { expiresIn: '10m' } // El token expirará en 1 hora
+    );
+
+    res.status(200).json({
+      message: 'Login exitoso',
+      usuario: usuario,
+      token: token // Incluimos el token en la respuesta
+    });
   } catch (error: any) {
     res.status(401).json({ error: error.message });
   }
@@ -64,16 +78,23 @@ export async function verUsuarioPorNombre(req: Request, res: Response) {
 
 export async function verUsuarioPorId(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.verUsuarioPorId(req.params._id);
+    const userId = req.params.id; // Asegúrate de que sea "id" y no "_id"
+    console.log("ID recibido:", userId); // Log del ID recibido
+
+    const usuario = await usuarioService.verUsuarioPorId(userId);
     if (!usuario) {
+      console.log("Usuario no encontrado en la base de datos");
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    console.log(usuario);
+
+    console.log("Usuario encontrado:", usuario);
     res.status(200).json(usuario);
   } catch (error: any) {
+    console.error("Error al buscar usuario por ID:", error);
     res.status(500).json({ error: error.message });
   }
 }
+
 
 ////////////////////////////////////ASIGNAR ASIGNATURAS A UN USUARIO/////////////////////////////////////
 export async function asignarAsignaturasAUsuario(req: Request, res: Response) { 
@@ -90,11 +111,19 @@ export async function asignarAsignaturasAUsuario(req: Request, res: Response) {
 ////////////////////////////////////ACTUALIZAR USUARIO POR ID/////////////////////////////////////
 export async function actualizarUsuarioPorId(req: Request, res: Response) {
   try {
-    const usuario = await usuarioService.actualizarUsuarioPorId(req.params._id, req.body);
-    console.log(usuario);
-    res.status(200).json(usuario);
+      const datos = req.body;
+
+      // Si se incluye una contraseña, hashearla
+      if (datos.password) {
+          const saltRounds = 10;
+          datos.password = await bcrypt.hash(datos.password, saltRounds);
+      }
+
+      const usuario = await usuarioService.actualizarUsuarioPorId(req.params._id, datos);
+      console.log(usuario);
+      res.status(200).json(usuario);
   } catch (error: any) {
-    res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
   }
 }
 export async function eliminarUsuarioPorId(req: Request, res: Response) {

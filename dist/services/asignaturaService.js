@@ -56,6 +56,10 @@ const asignarUsuariosAAsignaturaPorNombre = (nombreAsignatura, nombresUsuarios) 
     if (usuarios.length === 0) {
         throw new Error('Usuarios no encontrados');
     }
+    // Inicializar usuarios si es undefined
+    if (!asignatura.usuarios) {
+        asignatura.usuarios = [];
+    }
     asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
     yield asignatura.save();
     return asignatura;
@@ -69,6 +73,10 @@ const asignarUsuariosAAsignaturaPorId = (_id, nombresUsuarios) => __awaiter(void
     const usuarios = yield usuario_1.default.find({ nombre: { $in: nombresUsuarios } });
     if (usuarios.length === 0) {
         throw new Error('Usuarios no encontrados');
+    }
+    // Inicializar usuarios si es undefined
+    if (!asignatura.usuarios) {
+        asignatura.usuarios = [];
     }
     asignatura.usuarios = asignatura.usuarios.concat(usuarios.map(u => u._id));
     yield asignatura.save();

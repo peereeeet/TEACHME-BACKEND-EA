@@ -55,6 +55,8 @@ exports.modificarPasswordUsuarioPorId = modificarPasswordUsuarioPorId;
 exports.modificarRolUsuarioPorId = modificarRolUsuarioPorId;
 const usuarioService = __importStar(require("../services/usuarioService"));
 const usuario_1 = __importDefault(require("../models/usuario"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 function crearUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -69,12 +71,19 @@ function crearUsuario(req, res) {
         }
     });
 }
-// Ruta para el login
 const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
         const usuario = yield usuarioService.autenticarUsuario(email, password);
-        res.status(200).json({ message: 'Login exitoso', usuario });
+        // Generar el token JWT
+        const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', // Secret key para firmar el token
+        { expiresIn: '10m' } // El token expirará en 1 hora
+        );
+        res.status(200).json({
+            message: 'Login exitoso',
+            usuario: usuario,
+            token: token // Incluimos el token en la respuesta
+        });
     }
     catch (error) {
         res.status(401).json({ error: error.message });
@@ -126,14 +135,18 @@ function verUsuarioPorNombre(req, res) {
 function verUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.verUsuarioPorId(req.params._id);
+            const userId = req.params.id; // Asegúrate de que sea "id" y no "_id"
+            console.log("ID recibido:", userId); // Log del ID recibido
+            const usuario = yield usuarioService.verUsuarioPorId(userId);
             if (!usuario) {
+                console.log("Usuario no encontrado en la base de datos");
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
-            console.log(usuario);
+            console.log("Usuario encontrado:", usuario);
             res.status(200).json(usuario);
         }
         catch (error) {
+            console.error("Error al buscar usuario por ID:", error);
             res.status(500).json({ error: error.message });
         }
     });
@@ -155,7 +168,13 @@ function asignarAsignaturasAUsuario(req, res) {
 function actualizarUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const usuario = yield usuarioService.actualizarUsuarioPorId(req.params._id, req.body);
+            const datos = req.body;
+            // Si se incluye una contraseña, hashearla
+            if (datos.password) {
+                const saltRounds = 10;
+                datos.password = yield bcrypt_1.default.hash(datos.password, saltRounds);
+            }
+            const usuario = yield usuarioService.actualizarUsuarioPorId(req.params._id, datos);
             console.log(usuario);
             res.status(200).json(usuario);
         }
