@@ -10,7 +10,6 @@ export const AdminValidation = (req: Request, res: Response, next: NextFunction)
             return res.json('You are not admin'); 
         }
          //eres administrador
-         console.log('seguent funcio')
         return next();
          
           
