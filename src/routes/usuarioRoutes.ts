@@ -29,7 +29,7 @@ import { verifyOwnership } from '../middleware/verifyOwner';
 const router = express.Router();
 
 ////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
-router.post('/', crearUsuario); // Crear usuario sin protección para permitir registro inicial
+router.post('/user/newUser', crearUsuario); // Crear usuario sin protección para permitir registro inicial
 router.post('/login', loginUsuario); // Login no protegido
 router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Solo admin
 router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin

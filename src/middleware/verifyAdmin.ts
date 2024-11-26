@@ -4,11 +4,11 @@ export const AdminValidation = (req: Request, res: Response, next: NextFunction)
     console.log('Verifying admin');
     try{
         //Recogemos datos del payload del token
-        const admin = req.user.isAdmin;
-        console.log(admin);
-        if(admin != true){
+       // const admin = req.user.isAdmin;
+       /*  console.log(req);
+        if(req.query != true){
             return res.json('You are not admin'); 
-        }
+        } */
          //eres administrador
         return next();
          

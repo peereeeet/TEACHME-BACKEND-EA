@@ -4,17 +4,19 @@ import * as usuarioService from '../services/usuarioService';
 import Usuario from '../models/usuario';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { log } from 'console';
 
 
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 export async function crearUsuario(req: Request, res: Response) {
   try {
-    const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-    const usuario = await usuarioService.crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
-    console.log(usuario);
+    const { name,mail,password,profile } = req.body;
+    const usuario = await usuarioService.crearUsuario(name, mail, password, profile);
     res.status(201).json(usuario);
   } catch (error: any) {
+    console.log(error);
+    
     res.status(400).json({ error: error.message });
   }
 }

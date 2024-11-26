@@ -2,20 +2,25 @@ import mongoose, { Types } from 'mongoose';
 import Usuario, { IUsuario } from '../models/usuario'; // Importamos IUsuario
 import Asignatura from '../models/asignatura';
 import bcrypt from 'bcrypt';
+enum Profile {
+  ADMIN = 'Admin',
+  PROFESOR = 'Profesor',
+  ALUMNO = 'Alumno',
+}
+
 
 // Crear usuario
 export const crearUsuario = async (
   nombre: string,
-  edad: number,
   email: string,
   password: string,
-  isProfesor = false,
-  isAlumno = false,
-  isAdmin = false
+  profile  :string,
 ) => {
+  console.log(nombre, email, password, profile);
+  
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
-  const usuario = new Usuario({ nombre, edad, email, password: hashedPassword, isProfesor, isAlumno, isAdmin });
+  const usuario = new Usuario({ nombre, email, password: hashedPassword, isAdmin: profile === Profile.ADMIN, isProfesor: profile === Profile.PROFESOR, isAlumno: profile === Profile.ALUMNO });
   return await usuario.save();
 };
 
