@@ -38,6 +38,8 @@ export const loginUsuario = async (req: Request, res: Response) => {
       token: token // Incluimos el token en la respuesta
     });
   } catch (error: any) {
+    console.log (error)
+
     res.status(401).json({ error: error.message });
   }
 };

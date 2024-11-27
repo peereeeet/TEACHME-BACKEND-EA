@@ -9,14 +9,15 @@ import dotenv from 'dotenv'; // Importar dotenv
 dotenv.config();
 
 const app = express();
-const PORT = 3800;
+const PORT = 3000;
 
 // Aplica el middleware CORS
 app.use(cors());
 app.use(express.json());
 
+
 // Conexión a MongoDB
-mongoose.connect('locahost:27017', )
+mongoose.connect('mongodb+srv://juliaroquet:NuostEiBNYhHyuCC@cluster0.vccgg.mongodb.net/ejercicio1', )
   .then(() => {
     console.log('Conectado a MongoDB');
     app.listen(PORT, () => {
