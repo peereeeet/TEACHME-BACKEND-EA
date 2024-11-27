@@ -17,7 +17,7 @@ app.use(express.json());
 
 
 // Conexión a MongoDB
-mongoose.connect('mongodb+srv://juliaroquet:NuostEiBNYhHyuCC@cluster0.vccgg.mongodb.net/ejercicio1', )
+mongoose.connect('mongodb://localhost:27017/BBDD', )
   .then(() => {
     console.log('Conectado a MongoDB');
     app.listen(PORT, () => {
