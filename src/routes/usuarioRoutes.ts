@@ -32,12 +32,20 @@ const router = express.Router();
 router.post('/', crearUsuario); // Crear usuario sin protección para permitir registro inicial
 router.post('/login', loginUsuario); // Login no protegido
 router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Solo admin
-router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
+//router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
+
+router.get('/', listarUsuarios); // Solo admin
+
 router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId);
 
 ////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
-router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
-router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, AdminValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
+//router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
+//router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, AdminValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
+
+router.get('/:usuarioId/asignaturas', obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
+router.get('/:usuarioId/asignaturas/paginacion', obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
+
+
 router.get('/:nombre', TokenValidation, verUsuarioPorNombre); // Ver usuario por nombre
 router.get('/:nombre/asignaturas', TokenValidation, obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre
 

@@ -33,11 +33,14 @@ const router = express.Router();
 router.post('/', usuarioController_1.crearUsuario); // Crear usuario sin protección para permitir registro inicial
 router.post('/login', usuarioController_1.loginUsuario); // Login no protegido
 router.get('/listar-paginados', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.obtenerUsuariosPaginados); // Solo admin
-router.get('/', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.listarUsuarios); // Solo admin
+//router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
+router.get('/', usuarioController_1.listarUsuarios); // Solo admin
 router.get('/:id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.verUsuarioPorId);
 ////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
-router.get('/:usuarioId/asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
-router.get('/:usuarioId/asignaturas/paginacion', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
+//router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
+//router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, AdminValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
+router.get('/:usuarioId/asignaturas', usuarioController_1.obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
+router.get('/:usuarioId/asignaturas/paginacion', usuarioController_1.obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
 router.get('/:nombre', verifyJWT_1.TokenValidation, usuarioController_1.verUsuarioPorNombre); // Ver usuario por nombre
 router.get('/:nombre/asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre
 // Otros métodos PUT y DELETE que dependen de los parámetros

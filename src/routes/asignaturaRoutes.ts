@@ -20,7 +20,9 @@ router.post('/', TokenValidation, AdminValidation, crearAsignatura); // Solo adm
 router.get('/paginacion', TokenValidation, AdminValidation, obtenerAsignaturasPaginadas); // Paginación protegida por autenticación
 
 ////////////////////////////////////GETS/////////////////////////////////////
-router.get('/', TokenValidation, listarAsignaturas); // Listar asignaturas protegido
+//router.get('/', TokenValidation, listarAsignaturas); // Listar asignaturas protegido
+router.get('/', listarAsignaturas); // Listar asignaturas protegido
+
 router.get('/:_id', TokenValidation, verAsignaturaPorId); // Obtener asignatura por ID protegido
 router.get('/:nombre', TokenValidation, verAsignaturaPorNombre); // Obtener asignatura por nombre protegido
 

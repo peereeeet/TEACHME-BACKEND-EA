@@ -32,7 +32,8 @@ const router = express.Router();
 router.post('/', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.crearAsignatura); // Solo administradores pueden crear asignaturas
 router.get('/paginacion', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.obtenerAsignaturasPaginadas); // Paginación protegida por autenticación
 ////////////////////////////////////GETS/////////////////////////////////////
-router.get('/', verifyJWT_1.TokenValidation, asignaturaController_1.listarAsignaturas); // Listar asignaturas protegido
+//router.get('/', TokenValidation, listarAsignaturas); // Listar asignaturas protegido
+router.get('/', asignaturaController_1.listarAsignaturas); // Listar asignaturas protegido
 router.get('/:_id', verifyJWT_1.TokenValidation, asignaturaController_1.verAsignaturaPorId); // Obtener asignatura por ID protegido
 router.get('/:nombre', verifyJWT_1.TokenValidation, asignaturaController_1.verAsignaturaPorNombre); // Obtener asignatura por nombre protegido
 ////////////////////////////////////PUTS/////////////////////////////////////

@@ -11,7 +11,6 @@ const AdminValidation = (req, res, next) => {
             return res.json('You are not admin');
         }
         //eres administrador
-        console.log('seguent funcio');
         return next();
     }
     catch (_a) {
