@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.loginUsuario = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.loginUsuario = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -57,6 +57,7 @@ const usuarioService = __importStar(require("../services/usuarioService"));
 const usuario_1 = __importDefault(require("../models/usuario"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const app_1 = require("../app");
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 function crearUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -76,13 +77,15 @@ const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const { email, password } = req.body;
         const usuario = yield usuarioService.autenticarUsuario(email, password);
         // Generar el token JWT
-        const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', // Secret key para firmar el token
-        { expiresIn: '10m' } // El token expirará en 1 hora
-        );
+        const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '10m' });
         res.status(200).json({
             message: 'Login exitoso',
-            usuario: usuario,
-            token: token // Incluimos el token en la respuesta
+            usuario: {
+                id: usuario._id, // Incluimos el ID del usuario
+                email: usuario.email,
+                isAdmin: usuario.isAdmin,
+            },
+            token: token,
         });
     }
     catch (error) {
@@ -90,6 +93,18 @@ const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.loginUsuario = loginUsuario;
+// Controlador para obtener usuarios conectados
+const obtenerUsuariosConectados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // connectedUsers es un Map definido en app.ts, necesitamos importarlo
+        const usuariosConectados = Array.from(app_1.connectedUsers.keys()); // Obtener solo los IDs de los usuarios
+        res.status(200).json(usuariosConectados);
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Error al obtener usuarios conectados', details: error.message });
+    }
+});
+exports.obtenerUsuariosConectados = obtenerUsuariosConectados;
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 function obtenerIdUsuarioPorNombre(req, res) {
     return __awaiter(this, void 0, void 0, function* () {

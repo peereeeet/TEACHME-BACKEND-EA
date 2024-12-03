@@ -34,7 +34,8 @@ router.post('/', usuarioController_1.crearUsuario); // Crear usuario sin protecc
 router.post('/login', usuarioController_1.loginUsuario); // Login no protegido
 router.get('/listar-paginados', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.obtenerUsuariosPaginados); // Solo admin
 //router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
-router.get('/', usuarioController_1.listarUsuarios); // Solo admin
+router.get('/', verifyJWT_1.TokenValidation, usuarioController_1.listarUsuarios); // Solo admin
+router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados);
 router.get('/:id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.verUsuarioPorId);
 ////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
 //router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario

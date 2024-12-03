@@ -1,17 +1,32 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import { Server } from 'socket.io'; // Importamos Socket.IO
+import http from 'http'; // Para crear el servidor HTTP
 import usuarioRoutes from './routes/usuarioRoutes';
 import asignaturaRoutes from './routes/asignaturaRoutes';
-import dotenv from 'dotenv'; // Importar dotenv
+import dotenv from 'dotenv';
 
-// Cargar las variables de entorno desde el archivo .env
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-// Aplica el middleware CORS
+// Crear servidor HTTP
+const server = http.createServer(app);
+
+// Configurar Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: '*', // Permitir acceso desde cualquier origen
+  },
+});
+
+// Mapa para manejar los usuarios conectados
+const connectedUsers = new Map<string, string>(); // userId -> socketId
+export { connectedUsers, io }; // Exportamos `connectedUsers` y `io` para otros módulos
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -19,14 +34,36 @@ app.use(express.json());
 mongoose.connect('mongodb://localhost:27017/BBDD')
   .then(() => {
     console.log('Conectado a MongoDB');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
   })
   .catch(err => console.error('No se pudo conectar a MongoDB...', err));
 
-// Rutas
+// Rutas REST
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/asignaturas', asignaturaRoutes);
+
+// Configuración de eventos WebSocket
+io.on('connection', (socket) => {
+  console.log(`Usuario conectado: ${socket.id}`);
+
+  // Manejar evento para identificar a un usuario conectado
+  socket.on('user-connected', (userId) => {
+    connectedUsers.set(userId, socket.id);
+    console.log(`Usuario ${userId} conectado`);
+    io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitimos la lista actualizada de usuarios conectados
+  });
+
+  // Manejar evento de desconexión
+  socket.on('disconnect', () => {
+    const disconnectedUser = [...connectedUsers.entries()].find(([_, id]) => id === socket.id);
+    if (disconnectedUser) {
+      connectedUsers.delete(disconnectedUser[0]);
+      console.log(`Usuario ${disconnectedUser[0]} desconectado`);
+      io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitimos la lista actualizada
+    }
+  });
+});
 
 export default app;

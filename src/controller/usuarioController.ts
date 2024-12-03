@@ -4,6 +4,7 @@ import * as usuarioService from '../services/usuarioService';
 import Usuario from '../models/usuario';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { connectedUsers } from '../app';
 
 
 
@@ -26,19 +27,35 @@ export const loginUsuario = async (req: Request, res: Response) => {
     // Generar el token JWT
     const token = jwt.sign(
       { email: usuario.email, isAdmin: usuario.isAdmin },
-      process.env.SECRET || 'secretkey', // Secret key para firmar el token
-      { expiresIn: '10m' } // El token expirará en 1 hora
+      process.env.SECRET || 'secretkey',
+      { expiresIn: '10m' }
     );
 
     res.status(200).json({
       message: 'Login exitoso',
-      usuario: usuario,
-      token: token // Incluimos el token en la respuesta
+      usuario: {
+        id: usuario._id, // Incluimos el ID del usuario
+        email: usuario.email,
+        isAdmin: usuario.isAdmin,
+      },
+      token: token,
     });
   } catch (error: any) {
     res.status(401).json({ error: error.message });
   }
 };
+
+// Controlador para obtener usuarios conectados
+export const obtenerUsuariosConectados = async (req: Request, res: Response) => {
+  try {
+    const usuariosConectados = Array.from(connectedUsers.keys()); // Obtener solo los IDs de los usuarios
+    console.log('Usuarios conectados:', usuariosConectados); // Verificar en la consola
+    res.status(200).json(usuariosConectados);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Error al obtener usuarios conectados', details: error.message });
+  }
+};
+
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
   try {

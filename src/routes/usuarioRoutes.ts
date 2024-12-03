@@ -20,7 +20,8 @@ import {
     modificarPasswordUsuarioPorId,
     modificarRolUsuarioPorId,
     obtenerAsignaturasPaginadasDeUsuario,
-    loginUsuario
+    loginUsuario,
+    obtenerUsuariosConectados
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
@@ -34,8 +35,9 @@ router.post('/login', loginUsuario); // Login no protegido
 router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Solo admin
 //router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
 
-router.get('/', listarUsuarios); // Solo admin
+router.get('/', TokenValidation, listarUsuarios); // Solo admin
 
+router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
 router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId);
 
 ////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
