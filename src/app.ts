@@ -52,8 +52,10 @@ io.on('connection', (socket) => {
 
   // Enviar un mensaje inicial al cliente
   socket.emit('server-message', 'Bienvenido al servidor WebSocket');
-  socket.emit('user-connected', connectedUsers);
-
+  socket.emit('user-connected', {
+    message: 'Usuarios conectados:',
+    users: Array.from(connectedUsers.entries()),
+  });
   // Manejar eventos de mensajes
   socket.on('message', (message) => {
     console.log('Mensaje recibido del cliente:', message);
