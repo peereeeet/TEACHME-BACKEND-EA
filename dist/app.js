@@ -14,13 +14,14 @@ const asignaturaRoutes_1 = __importDefault(require("./routes/asignaturaRoutes"))
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 // Crear servidor HTTP
 const server = http_1.default.createServer(app);
 // Configurar Socket.IO
 const io = new socket_io_1.Server(server, {
     cors: {
         origin: '*', // Permitir acceso desde cualquier origen
+        methods: ['GET', 'POST'], // Métodos permitidos
     },
 });
 exports.io = io;
@@ -31,27 +32,38 @@ exports.connectedUsers = connectedUsers;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // Conexión a MongoDB
-mongoose_1.default.connect('mongodb://localhost:27017/BBDD')
+mongoose_1.default
+    .connect(process.env.MONGO_URI || 'mongodb://localhost:27017/BBDD')
     .then(() => {
     console.log('Conectado a MongoDB');
     server.listen(PORT, () => {
         console.log(`Servidor corriendo en http://localhost:${PORT}`);
     });
 })
-    .catch(err => console.error('No se pudo conectar a MongoDB...', err));
+    .catch((err) => console.error('No se pudo conectar a MongoDB...', err));
 // Rutas REST
 app.use('/api/usuarios', usuarioRoutes_1.default);
 app.use('/api/asignaturas', asignaturaRoutes_1.default);
 // Configuración de eventos WebSocket
-// Evento para manejar conexión de usuario
 io.on('connection', (socket) => {
-    console.log(`Usuario conectado: ${socket.id}`);
+    console.log(`Socket conectado: ${socket.id}`);
+    // Enviar un mensaje inicial al cliente
+    socket.emit('server-message', 'Bienvenido al servidor WebSocket');
+    socket.emit('user-connected', connectedUsers);
+    // Manejar eventos de mensajes
+    socket.on('message', (message) => {
+        console.log('Mensaje recibido del cliente:', message);
+        socket.emit('message-response', 'Mensaje recibido correctamente');
+    });
+    // Manejar conexión de usuario
     socket.on('user-connected', (data) => {
+        console.log('Estic a userConnected', data);
         const { userId } = data;
         if (userId) {
             connectedUsers.set(userId, socket.id);
             console.log(`Usuario ${userId} conectado. Usuarios conectados:`, Array.from(connectedUsers.keys()));
-            io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitir usuarios conectados
+            // Emitir actualización de usuarios conectados a todos los clientes
+            io.emit('update-user-status', Array.from(connectedUsers.keys()));
         }
     });
     // Manejar desconexión
@@ -60,8 +72,13 @@ io.on('connection', (socket) => {
         if (disconnectedUser) {
             connectedUsers.delete(disconnectedUser[0]);
             console.log(`Usuario ${disconnectedUser[0]} desconectado.`);
-            io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitir actualización
+            // Emitir actualización de usuarios conectados a todos los clientes
+            io.emit('update-user-status', Array.from(connectedUsers.keys()));
         }
+    });
+    // Manejo de errores en el socket
+    socket.on('error', (err) => {
+        console.error(`Error en el socket ${socket.id}:`, err);
     });
 });
 exports.default = app;
