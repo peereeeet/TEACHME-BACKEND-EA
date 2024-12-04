@@ -43,21 +43,24 @@ mongoose_1.default.connect('mongodb://localhost:27017/BBDD')
 app.use('/api/usuarios', usuarioRoutes_1.default);
 app.use('/api/asignaturas', asignaturaRoutes_1.default);
 // Configuración de eventos WebSocket
+// Evento para manejar conexión de usuario
 io.on('connection', (socket) => {
     console.log(`Usuario conectado: ${socket.id}`);
-    // Manejar evento para identificar a un usuario conectado
-    socket.on('user-connected', (userId) => {
-        connectedUsers.set(userId, socket.id);
-        console.log(`Usuario ${userId} conectado`);
-        io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitimos la lista actualizada de usuarios conectados
+    socket.on('user-connected', (data) => {
+        const { userId } = data;
+        if (userId) {
+            connectedUsers.set(userId, socket.id);
+            console.log(`Usuario ${userId} conectado. Usuarios conectados:`, Array.from(connectedUsers.keys()));
+            io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitir usuarios conectados
+        }
     });
-    // Manejar evento de desconexión
+    // Manejar desconexión
     socket.on('disconnect', () => {
         const disconnectedUser = [...connectedUsers.entries()].find(([_, id]) => id === socket.id);
         if (disconnectedUser) {
             connectedUsers.delete(disconnectedUser[0]);
-            console.log(`Usuario ${disconnectedUser[0]} desconectado`);
-            io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitimos la lista actualizada
+            console.log(`Usuario ${disconnectedUser[0]} desconectado.`);
+            io.emit('update-user-status', Array.from(connectedUsers.keys())); // Emitir actualización
         }
     });
 });

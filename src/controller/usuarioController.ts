@@ -4,7 +4,7 @@ import * as usuarioService from '../services/usuarioService';
 import Usuario from '../models/usuario';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { connectedUsers } from '../app';
+import { io, connectedUsers } from '../app';
 
 
 
@@ -48,13 +48,14 @@ export const loginUsuario = async (req: Request, res: Response) => {
 // Controlador para obtener usuarios conectados
 export const obtenerUsuariosConectados = async (req: Request, res: Response) => {
   try {
-    const usuariosConectados = Array.from(connectedUsers.keys()); // Obtener solo los IDs de los usuarios
-    console.log('Usuarios conectados:', usuariosConectados); // Verificar en la consola
+    const usuariosConectados = Array.from(connectedUsers.keys());
+    console.log('Usuarios conectados:', usuariosConectados);
     res.status(200).json(usuariosConectados);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Error al obtener usuarios conectados', details: error.message });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener usuarios conectados' });
   }
 };
+
 
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {

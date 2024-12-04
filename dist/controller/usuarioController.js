@@ -96,12 +96,12 @@ exports.loginUsuario = loginUsuario;
 // Controlador para obtener usuarios conectados
 const obtenerUsuariosConectados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // connectedUsers es un Map definido en app.ts, necesitamos importarlo
-        const usuariosConectados = Array.from(app_1.connectedUsers.keys()); // Obtener solo los IDs de los usuarios
+        const usuariosConectados = Array.from(app_1.connectedUsers.keys());
+        console.log('Usuarios conectados:', usuariosConectados);
         res.status(200).json(usuariosConectados);
     }
     catch (error) {
-        res.status(500).json({ error: 'Error al obtener usuarios conectados', details: error.message });
+        res.status(500).json({ error: 'Error al obtener usuarios conectados' });
     }
 });
 exports.obtenerUsuariosConectados = obtenerUsuariosConectados;
