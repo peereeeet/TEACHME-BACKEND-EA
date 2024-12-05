@@ -21,6 +21,7 @@ import {
     modificarRolUsuarioPorId,
     obtenerAsignaturasPaginadasDeUsuario,
     loginUsuario,
+    buscarUsuarios,
     obtenerUsuariosConectados
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
@@ -31,28 +32,11 @@ import { connectedUsers } from '../app';
 
 const router = express.Router();
 
-
+// Búsqueda de usuarios conectados
 router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
 
-router.post('/simular-conexion', TokenValidation, (req, res) => {
-    const { userId } = req.body; // Obtén el ID del usuario del cuerpo de la petición
-    const socketId = `fake-socket-${userId}`; // Crea un socket ID simulado
-    connectedUsers.set(userId, socketId); // Añade al mapa de usuarios conectados
-    console.log(`Usuario ${userId} conectado (simulado).`);
-    res.status(200).json({ message: 'Usuario conectado simulado', usuariosConectados: Array.from(connectedUsers.keys()) });
-});
-
-
-router.post('/simular-desconexion', TokenValidation, (req, res) => {
-    const { userId } = req.body; // Obtén el ID del usuario del cuerpo de la petición
-    if (connectedUsers.has(userId)) {
-        connectedUsers.delete(userId); // Elimina del mapa de usuarios conectados
-        console.log(`Usuario ${userId} desconectado (simulado).`);
-        res.status(200).json({ message: 'Usuario desconectado simulado', usuariosConectados: Array.from(connectedUsers.keys()) });
-    } else {
-        res.status(404).json({ error: 'Usuario no encontrado entre los conectados' });
-    }
-});
+// Búsqueda de usuarios por nombre
+router.get('/buscar', TokenValidation, buscarUsuarios); // Nueva ruta para buscar usuarios
 
 ////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
 router.post('/', crearUsuario); // Crear usuario sin protección para permitir registro inicial
@@ -60,7 +44,7 @@ router.post('/login', loginUsuario); // Login no protegido
 router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Solo admin
 //router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
 
-router.get('/', TokenValidation, listarUsuarios); // Solo admin
+router.get('/', listarUsuarios); // Solo admin
 
 //router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
 router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId);

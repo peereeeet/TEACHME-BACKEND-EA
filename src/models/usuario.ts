@@ -11,6 +11,7 @@ export interface IUsuario extends Document {
   isAlumno?: boolean;
   isAdmin?: boolean;
   asignaturasImparte?: Types.ObjectId[]; // Relación con Asignatura
+  conectado: boolean; // Nuevo atributo
   encryptPassword(password: string): Promise<string>;
   comparePassword(password: string): Promise<boolean>;
 }
@@ -25,7 +26,8 @@ const usuarioSchema = new Schema<IUsuario>(
     isProfesor: { type: Boolean, default: false },
     isAlumno: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: true },
-    asignaturasImparte: { type: [Types.ObjectId], ref: 'Asignatura', default: [] } // Unificado con Types.ObjectId
+    asignaturasImparte: { type: [Types.ObjectId], ref: 'Asignatura', default: [] },
+    conectado: { type: Boolean, default: false }, // Añadido el atributo conectado
   },
   { versionKey: false }
 );

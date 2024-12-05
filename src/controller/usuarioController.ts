@@ -19,6 +19,34 @@ export async function crearUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
+
+
+// Buscar usuarios por nombre
+export const buscarUsuarios = async (req: Request, res: Response) => {
+  try {
+    const { nombre } = req.query; // Obtener el parámetro "nombre" de la consulta
+    if (!nombre) {
+      return res.status(400).json({ error: 'El parámetro "nombre" es obligatorio.' });
+    }
+
+    const usuarios = await usuarioService.buscarUsuarios(nombre.toString());
+    if (usuarios.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron usuarios con ese nombre.' });
+    }
+
+    // Añadir estado de conexión
+    const usuariosConEstado = usuarios.map((usuario) => ({
+      ...usuario.toObject(),
+      conectado: connectedUsers.has((usuario._id as string)), // Forzar el tipo de `_id` como `string`
+    }));
+
+    res.status(200).json(usuariosConEstado);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 export const loginUsuario = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -28,7 +56,7 @@ export const loginUsuario = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { email: usuario.email, isAdmin: usuario.isAdmin },
       process.env.SECRET || 'secretkey',
-      { expiresIn: '10m' }
+      { expiresIn: '1h' }
     );
 
     res.status(200).json({

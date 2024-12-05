@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.loginUsuario = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.loginUsuario = exports.buscarUsuarios = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -72,12 +72,32 @@ function crearUsuario(req, res) {
         }
     });
 }
+// Buscar usuarios por nombre
+const buscarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { nombre } = req.query; // Obtener el parámetro "nombre" de la consulta
+        if (!nombre) {
+            return res.status(400).json({ error: 'El parámetro "nombre" es obligatorio.' });
+        }
+        const usuarios = yield usuarioService.buscarUsuarios(nombre.toString());
+        if (usuarios.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron usuarios con ese nombre.' });
+        }
+        // Añadir estado de conexión
+        const usuariosConEstado = usuarios.map((usuario) => (Object.assign(Object.assign({}, usuario.toObject()), { conectado: app_1.connectedUsers.has(usuario._id) })));
+        res.status(200).json(usuariosConEstado);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.buscarUsuarios = buscarUsuarios;
 const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
         const usuario = yield usuarioService.autenticarUsuario(email, password);
         // Generar el token JWT
-        const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '10m' });
+        const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '1h' });
         res.status(200).json({
             message: 'Login exitoso',
             usuario: {

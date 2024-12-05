@@ -23,7 +23,8 @@ const usuarioSchema = new mongoose_1.Schema({
     isProfesor: { type: Boolean, default: false },
     isAlumno: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: true },
-    asignaturasImparte: { type: [mongoose_1.Types.ObjectId], ref: 'Asignatura', default: [] } // Unificado con Types.ObjectId
+    asignaturasImparte: { type: [mongoose_1.Types.ObjectId], ref: 'Asignatura', default: [] },
+    conectado: { type: Boolean, default: false }, // Añadido el atributo conectado
 }, { versionKey: false });
 // Método para encriptar contraseña
 usuarioSchema.methods.encryptPassword = function (password) {

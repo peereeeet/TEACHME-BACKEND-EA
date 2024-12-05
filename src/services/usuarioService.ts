@@ -15,7 +15,16 @@ export const crearUsuario = async (
 ) => {
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
-  const usuario = new Usuario({ nombre, edad, email, password: hashedPassword, isProfesor, isAlumno, isAdmin });
+  const usuario = new Usuario({
+    nombre,
+    edad,
+    email,
+    password: hashedPassword,
+    isProfesor,
+    isAlumno,
+    isAdmin,
+    conectado: false, // Inicializar como desconectado
+  });
   return await usuario.save();
 };
 
@@ -28,6 +37,12 @@ export const autenticarUsuario = async (email: string, password: string) => {
   return usuario;
 };
 
+
+// Buscar usuarios por nombre
+export const buscarUsuarios = async (nombre: string) => {
+  const regex = new RegExp(`^${nombre}`, 'i'); // Buscar usuarios cuyo nombre comience con el término ingresado (no sensible a mayúsculas)
+  return await Usuario.find({ nombre: regex }).populate('asignaturasImparte'); // Retornar usuarios y asignaturas
+};
 // Obtener ID de usuario por nombre
 export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
   const usuario = await Usuario.findOne({ nombre });

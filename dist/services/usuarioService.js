@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.autenticarUsuario = exports.crearUsuario = void 0;
+exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.autenticarUsuario = exports.crearUsuario = void 0;
 const mongoose_1 = require("mongoose");
 const usuario_1 = __importDefault(require("../models/usuario")); // Importamos IUsuario
 const asignatura_1 = __importDefault(require("../models/asignatura"));
@@ -21,7 +21,16 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const crearUsuario = (nombre_1, edad_1, email_1, password_1, ...args_1) => __awaiter(void 0, [nombre_1, edad_1, email_1, password_1, ...args_1], void 0, function* (nombre, edad, email, password, isProfesor = false, isAlumno = false, isAdmin = false) {
     const saltRounds = 10;
     const hashedPassword = yield bcrypt_1.default.hash(password, saltRounds);
-    const usuario = new usuario_1.default({ nombre, edad, email, password: hashedPassword, isProfesor, isAlumno, isAdmin });
+    const usuario = new usuario_1.default({
+        nombre,
+        edad,
+        email,
+        password: hashedPassword,
+        isProfesor,
+        isAlumno,
+        isAdmin,
+        conectado: false, // Inicializar como desconectado
+    });
     return yield usuario.save();
 });
 exports.crearUsuario = crearUsuario;
@@ -36,6 +45,12 @@ const autenticarUsuario = (email, password) => __awaiter(void 0, void 0, void 0,
     return usuario;
 });
 exports.autenticarUsuario = autenticarUsuario;
+// Buscar usuarios por nombre
+const buscarUsuarios = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
+    const regex = new RegExp(`^${nombre}`, 'i'); // Buscar usuarios cuyo nombre comience con el término ingresado (no sensible a mayúsculas)
+    return yield usuario_1.default.find({ nombre: regex }).populate('asignaturasImparte'); // Retornar usuarios y asignaturas
+});
+exports.buscarUsuarios = buscarUsuarios;
 // Obtener ID de usuario por nombre
 const obtenerIdUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
     const usuario = yield usuario_1.default.findOne({ nombre });

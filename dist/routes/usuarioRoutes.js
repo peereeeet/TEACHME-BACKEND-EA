@@ -28,33 +28,17 @@ const usuarioController_1 = require("../controller/usuarioController");
 const verifyJWT_1 = require("../middleware/verifyJWT");
 const verifyAdmin_1 = require("../middleware/verifyAdmin");
 const verifyOwner_1 = require("../middleware/verifyOwner");
-const app_1 = require("../app");
 const router = express.Router();
+// Búsqueda de usuarios conectados
 router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados);
-router.post('/simular-conexion', verifyJWT_1.TokenValidation, (req, res) => {
-    const { userId } = req.body; // Obtén el ID del usuario del cuerpo de la petición
-    const socketId = `fake-socket-${userId}`; // Crea un socket ID simulado
-    app_1.connectedUsers.set(userId, socketId); // Añade al mapa de usuarios conectados
-    console.log(`Usuario ${userId} conectado (simulado).`);
-    res.status(200).json({ message: 'Usuario conectado simulado', usuariosConectados: Array.from(app_1.connectedUsers.keys()) });
-});
-router.post('/simular-desconexion', verifyJWT_1.TokenValidation, (req, res) => {
-    const { userId } = req.body; // Obtén el ID del usuario del cuerpo de la petición
-    if (app_1.connectedUsers.has(userId)) {
-        app_1.connectedUsers.delete(userId); // Elimina del mapa de usuarios conectados
-        console.log(`Usuario ${userId} desconectado (simulado).`);
-        res.status(200).json({ message: 'Usuario desconectado simulado', usuariosConectados: Array.from(app_1.connectedUsers.keys()) });
-    }
-    else {
-        res.status(404).json({ error: 'Usuario no encontrado entre los conectados' });
-    }
-});
+// Búsqueda de usuarios por nombre
+router.get('/buscar', verifyJWT_1.TokenValidation, usuarioController_1.buscarUsuarios); // Nueva ruta para buscar usuarios
 ////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
 router.post('/', usuarioController_1.crearUsuario); // Crear usuario sin protección para permitir registro inicial
 router.post('/login', usuarioController_1.loginUsuario); // Login no protegido
 router.get('/listar-paginados', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.obtenerUsuariosPaginados); // Solo admin
 //router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
-router.get('/', verifyJWT_1.TokenValidation, usuarioController_1.listarUsuarios); // Solo admin
+router.get('/', usuarioController_1.listarUsuarios); // Solo admin
 //router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
 router.get('/:id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.verUsuarioPorId);
 ////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
