@@ -13,6 +13,7 @@ const usuarioRoutes_1 = __importDefault(require("./routes/usuarioRoutes"));
 const asignaturaRoutes_1 = __importDefault(require("./routes/asignaturaRoutes"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const websocketService_1 = require("./services/websocketService"); // Importar la configuración de WebSocket
+const chatService_1 = require("./services/chatService"); // Importar el servicio de chat
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +32,7 @@ const connectedUsers = new Map();
 exports.connectedUsers = connectedUsers;
 // Configurar eventos de WebSocket
 (0, websocketService_1.configureWebSocketEvents)(io); // Configuración desde el archivo separado
+(0, chatService_1.configureChatEvents)(io); // Configuración de eventos del chat
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());

@@ -13,17 +13,25 @@ export const configureWebSocketEvents = (io: Server) => {
       users: Array.from(connectedUsers.entries()),
     });
 
-    // Manejar eventos de mensajes
-    socket.on('message', (message) => {
-      console.log('Mensaje recibido del cliente:', message);
-      socket.emit('message-response', 'Mensaje recibido correctamente');
-    });
-
     // Manejar conexión de usuario
     socket.on('user-connected', async (data) => {
       console.log('Estic a userConnected', data);
       const { userId } = data;
+
       if (userId) {
+        // Verificar si el usuario ya tiene un socket registrado
+        if (connectedUsers.has(userId)) {
+          console.log(`El usuario ${userId} ya tiene un socket conectado. Desconectando socket anterior.`);
+          const previousSocketId = connectedUsers.get(userId);
+
+          // Desconectar el socket previo si existe
+          if (previousSocketId) {
+            io.sockets.sockets.get(previousSocketId)?.disconnect();
+            connectedUsers.delete(userId);
+          }
+        }
+
+        // Registrar el nuevo socket
         connectedUsers.set(userId, socket.id);
 
         // Actualizar el estado `conectado` en la base de datos
@@ -42,11 +50,18 @@ export const configureWebSocketEvents = (io: Server) => {
       }
     });
 
+    // Manejar eventos de mensajes
+    socket.on('message', (message) => {
+      console.log('Mensaje recibido del cliente:', message);
+      socket.emit('message-response', 'Mensaje recibido correctamente');
+    });
+
     // Manejar desconexión
     socket.on('disconnect', async () => {
       const disconnectedUser = [...connectedUsers.entries()].find(
         ([_, id]) => id === socket.id
       );
+
       if (disconnectedUser) {
         connectedUsers.delete(disconnectedUser[0]);
         console.log(`Usuario ${disconnectedUser[0]} desconectado.`);

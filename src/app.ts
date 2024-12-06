@@ -7,6 +7,7 @@ import usuarioRoutes from './routes/usuarioRoutes';
 import asignaturaRoutes from './routes/asignaturaRoutes';
 import dotenv from 'dotenv';
 import { configureWebSocketEvents } from './services/websocketService'; // Importar la configuración de WebSocket
+import { configureChatEvents } from './services/chatService'; // Importar el servicio de chat
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ export { connectedUsers, io };
 
 // Configurar eventos de WebSocket
 configureWebSocketEvents(io); // Configuración desde el archivo separado
+configureChatEvents(io); // Configuración de eventos del chat
 
 // Middleware
 app.use(cors());
