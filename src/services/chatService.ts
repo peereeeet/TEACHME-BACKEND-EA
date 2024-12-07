@@ -71,7 +71,7 @@ export const configureChatEvents = (io: Server) => {
       console.log(`Mensaje enviado de ${senderId} a ${receiverId} en la sala ${room}: ${messageContent}`);
     });
 
-    // Manejar desconexión
+    // Manejar desconexión del chat
     socket.on("disconnect", () => {
       console.log(`Cliente desconectado del chat: ${socket.id}`);
       for (const [room, users] of activeRooms) {

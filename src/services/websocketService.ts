@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { connectedUsers } from '../app'; // Importa el mapa de usuarios conectados si está en `app.ts`
+import { connectedUsers } from '../app'; // Importa el mapa de usuarios conectados
 import Usuario from '../models/usuario'; // Importar el modelo de usuario
 
 export const configureWebSocketEvents = (io: Server) => {
@@ -21,7 +21,9 @@ export const configureWebSocketEvents = (io: Server) => {
       if (userId) {
         // Verificar si el usuario ya tiene un socket registrado
         if (connectedUsers.has(userId)) {
-          console.log(`El usuario ${userId} ya tiene un socket conectado. Desconectando socket anterior.`);
+          console.log(
+            `El usuario ${userId} ya tiene un socket conectado. Desconectando socket anterior.`
+          );
           const previousSocketId = connectedUsers.get(userId);
 
           // Desconectar el socket previo si existe
@@ -42,39 +44,8 @@ export const configureWebSocketEvents = (io: Server) => {
             Array.from(connectedUsers.keys())
           );
         } catch (error) {
-          console.error(`Error al actualizar el estado conectado para el usuario ${userId}:`, error);
-        }
-
-        // Emitir actualización de usuarios conectados a todos los clientes
-        io.emit('update-user-status', Array.from(connectedUsers.keys()));
-      }
-    });
-
-    // Manejar eventos de mensajes
-    socket.on('message', (message) => {
-      console.log('Mensaje recibido del cliente:', message);
-      socket.emit('message-response', 'Mensaje recibido correctamente');
-    });
-
-    // Manejar desconexión
-    socket.on('disconnect', async () => {
-      const disconnectedUser = [...connectedUsers.entries()].find(
-        ([_, id]) => id === socket.id
-      );
-
-      if (disconnectedUser) {
-        connectedUsers.delete(disconnectedUser[0]);
-        console.log(`Usuario ${disconnectedUser[0]} desconectado.`);
-
-        // Actualizar el estado `conectado` en la base de datos
-        try {
-          await Usuario.findByIdAndUpdate(disconnectedUser[0], { conectado: false });
-          console.log(
-            `Estado de conexión actualizado para el usuario ${disconnectedUser[0]}`
-          );
-        } catch (error) {
           console.error(
-            `Error al actualizar el estado desconectado para el usuario ${disconnectedUser[0]}:`,
+            `Error al actualizar el estado conectado para el usuario ${userId}:`,
             error
           );
         }
@@ -83,6 +54,56 @@ export const configureWebSocketEvents = (io: Server) => {
         io.emit('update-user-status', Array.from(connectedUsers.keys()));
       }
     });
+
+    // Manejar desconexión manual desde el cliente
+    socket.on('user-disconnected', async (data) => {
+      const { userId } = data;
+      console.log(`Evento user-disconnected recibido con data:`, data);
+  
+      if (userId && connectedUsers.has(userId)) {
+          // Eliminar usuario de la lista conectada
+          connectedUsers.delete(userId);
+          console.log(`Usuario ${userId} desconectado manualmente.`);
+  
+          // Actualizar estado en la base de datos
+          try {
+              await Usuario.findByIdAndUpdate(userId, { conectado: false });
+              console.log(`Estado de conexión actualizado para el usuario ${userId}`);
+          } catch (error) {
+              console.error(`Error al actualizar el estado desconectado: ${error}`);
+          }
+  
+          // Emitir actualización a todos los clientes
+          io.emit('update-user-status', Array.from(connectedUsers.keys()));
+      } else {
+          console.warn(`Intento de desconexión manual para un usuario no registrado: ${userId}`);
+      }
+  });
+  
+  // Manejar desconexiones automáticas
+  socket.on('disconnect', async () => {
+      const disconnectedUser = [...connectedUsers.entries()].find(([_, id]) => id === socket.id);
+  
+      if (disconnectedUser) {
+          const userId = disconnectedUser[0];
+          connectedUsers.delete(userId);
+          console.log(`Usuario ${userId} desconectado por evento 'disconnect'.`);
+  
+          // Actualizar estado en la base de datos
+          try {
+              await Usuario.findByIdAndUpdate(userId, { conectado: false });
+              console.log(`Estado de conexión actualizado para el usuario ${userId}`);
+          } catch (error) {
+              console.error(`Error al actualizar estado en 'disconnect': ${error}`);
+          }
+  
+          // Emitir actualización a todos los clientes
+          io.emit('update-user-status', Array.from(connectedUsers.keys()));
+      } else {
+          console.warn(`Socket desconectado sin usuario registrado: ${socket.id}`);
+      }
+  });
+  
 
     // Manejo de errores en el socket
     socket.on('error', (err) => {
