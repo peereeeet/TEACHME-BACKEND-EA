@@ -22,7 +22,8 @@ import {
     obtenerAsignaturasPaginadasDeUsuario,
     loginUsuario,
     buscarUsuarios,
-    obtenerUsuariosConectados
+    obtenerUsuariosConectados,
+    obtenerCoordenadasUsuarios
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
@@ -31,6 +32,10 @@ import { connectedUsers } from '../app';
 
 
 const router = express.Router();
+
+
+// Nueva ruta para obtener las coordenadas
+router.get('/coordenadas', TokenValidation, obtenerCoordenadasUsuarios);
 
 // Búsqueda de usuarios conectados
 router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
