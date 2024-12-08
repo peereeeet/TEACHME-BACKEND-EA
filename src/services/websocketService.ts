@@ -54,7 +54,19 @@ export const configureWebSocketEvents = (io: Server) => {
         io.emit('update-user-status', Array.from(connectedUsers.keys()));
       }
     });
+ // Enviar notificación a un usuario específico
+ socket.on('send-notification', (data) => {
+  const { targetUserId, message } = data; // targetUserId: usuario destino, message: contenido
+  const targetSocketId = connectedUsers.get(targetUserId);
 
+  if (targetSocketId) {
+    // Enviar el mensaje al usuario específico
+    io.to(targetSocketId).emit('notification', { message });
+    console.log(`Notificación enviada a ${targetUserId}: ${message}`);
+  } else {
+    console.warn(`Usuario ${targetUserId} no está conectado.`);
+  }
+});
     // Manejar desconexión manual desde el cliente
     socket.on('user-disconnected', async (data) => {
       const { userId } = data;
