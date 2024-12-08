@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.loginUsuario = exports.buscarUsuarios = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -94,20 +94,16 @@ const buscarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.buscarUsuarios = buscarUsuarios;
 const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password, lat, lng } = req.body;
-        if (!lat || !lng) {
-            return res.status(400).json({ error: 'Las coordenadas son obligatorias para el login' });
-        }
-        const usuario = yield usuarioService.loginYGuardarCoordenadas(email, password, lat, lng);
+        const { email, password } = req.body;
+        const usuario = yield usuarioService.autenticarUsuario(email, password);
         // Generar el token JWT
         const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '1h' });
         res.status(200).json({
             message: 'Login exitoso',
             usuario: {
-                id: usuario._id,
+                id: usuario._id, // Incluimos el ID del usuario
                 email: usuario.email,
                 isAdmin: usuario.isAdmin,
-                location: usuario.location,
             },
             token: token,
         });
@@ -117,17 +113,6 @@ const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.loginUsuario = loginUsuario;
-// Nuevo endpoint para obtener todas las coordenadas
-const obtenerCoordenadasUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const coordenadas = yield usuarioService.obtenerCoordenadasDeUsuarios();
-        res.status(200).json(coordenadas);
-    }
-    catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-exports.obtenerCoordenadasUsuarios = obtenerCoordenadasUsuarios;
 // Controlador para obtener usuarios conectados
 const obtenerUsuariosConectados = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

@@ -53,7 +53,7 @@ export const configureChatEvents = (io: Server) => {
 
     // Evento para manejar mensajes privados
     socket.on("private-message", (message: IMessage) => {
-      const { senderId, receiverId, messageContent, timestamp } = message;
+      const { senderId, receiverId, messageContent, timestamp, senderName } = message;
 
       if (!senderId || !receiverId || !messageContent) {
         console.error("Datos incompletos para enviar mensaje:", message);
@@ -63,6 +63,7 @@ export const configureChatEvents = (io: Server) => {
       const room = [senderId, receiverId].sort().join("-");
       io.to(room).emit("receive-message", {
         senderId,
+        senderName,
         receiverId,
         messageContent,
         timestamp,

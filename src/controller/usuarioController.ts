@@ -49,13 +49,8 @@ export const buscarUsuarios = async (req: Request, res: Response) => {
 
 export const loginUsuario = async (req: Request, res: Response) => {
   try {
-    const { email, password, lat, lng } = req.body;
-
-    if (!lat || !lng) {
-      return res.status(400).json({ error: 'Las coordenadas son obligatorias para el login' });
-    }
-
-    const usuario = await usuarioService.loginYGuardarCoordenadas(email, password, lat, lng);
+    const { email, password } = req.body;
+    const usuario = await usuarioService.autenticarUsuario(email, password);
 
     // Generar el token JWT
     const token = jwt.sign(
@@ -67,10 +62,9 @@ export const loginUsuario = async (req: Request, res: Response) => {
     res.status(200).json({
       message: 'Login exitoso',
       usuario: {
-        id: usuario._id,
+        id: usuario._id, // Incluimos el ID del usuario
         email: usuario.email,
         isAdmin: usuario.isAdmin,
-        location: usuario.location,
       },
       token: token,
     });
@@ -78,17 +72,6 @@ export const loginUsuario = async (req: Request, res: Response) => {
     res.status(401).json({ error: error.message });
   }
 };
-
-// Nuevo endpoint para obtener todas las coordenadas
-export const obtenerCoordenadasUsuarios = async (req: Request, res: Response) => {
-  try {
-    const coordenadas = await usuarioService.obtenerCoordenadasDeUsuarios();
-    res.status(200).json(coordenadas);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
 
 // Controlador para obtener usuarios conectados
 export const obtenerUsuariosConectados = async (req: Request, res: Response) => {

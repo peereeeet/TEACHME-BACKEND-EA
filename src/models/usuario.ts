@@ -1,12 +1,6 @@
 import mongoose, { Schema, model, Document, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-// Interfaz para el tipo GeoJSON
-export interface IGeoJSON {
-  type: 'Point';
-  coordinates: [number, number]; // Coordenadas con longitud y latitud
-}
-
 // Interfaz para los documentos de Usuario
 export interface IUsuario extends Document {
   nombre?: string;
@@ -18,7 +12,6 @@ export interface IUsuario extends Document {
   isAdmin?: boolean;
   asignaturasImparte?: Types.ObjectId[]; // Relación con Asignatura
   conectado: boolean; // Nuevo atributo
-  location?: IGeoJSON; // Agregado como opcional
   encryptPassword(password: string): Promise<string>;
   comparePassword(password: string): Promise<boolean>;
 }
@@ -35,17 +28,6 @@ const usuarioSchema = new Schema<IUsuario>(
     isAdmin: { type: Boolean, default: true },
     asignaturasImparte: { type: [Types.ObjectId], ref: 'Asignatura', default: [] },
     conectado: { type: Boolean, default: false }, // Añadido el atributo conectado
-    location: {
-      type: {
-        type: String,
-        enum: ['Point'],
-        default: 'Point',
-      },
-      coordinates: {
-        type: [Number], // GeoJSON con dos números: [lng, lat]
-        default: undefined,
-      },
-    },
   },
   { versionKey: false }
 );

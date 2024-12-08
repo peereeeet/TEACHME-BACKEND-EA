@@ -29,8 +29,6 @@ const verifyJWT_1 = require("../middleware/verifyJWT");
 const verifyAdmin_1 = require("../middleware/verifyAdmin");
 const verifyOwner_1 = require("../middleware/verifyOwner");
 const router = express.Router();
-// Nueva ruta para obtener las coordenadas
-router.get('/coordenadas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerCoordenadasUsuarios);
 // Búsqueda de usuarios conectados
 router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados);
 // Búsqueda de usuarios por nombre
