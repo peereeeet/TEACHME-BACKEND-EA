@@ -54,17 +54,12 @@ const loginYGuardarCoordenadas = (email, password, lat, lng) => __awaiter(void 0
     const isValid = yield bcrypt_1.default.compare(password, usuario.password);
     if (!isValid)
         throw new Error('Contraseña incorrecta');
-    // Validación robusta del campo `coordinates`
-    if (!usuario.location ||
-        !Array.isArray(usuario.location.coordinates) ||
-        usuario.location.coordinates.length !== 2) {
-        // Si las coordenadas no existen o no son válidas, las asignamos
-        usuario.location = {
-            type: 'Point',
-            coordinates: [lng, lat],
-        };
-        yield usuario.save();
-    }
+    // Actualizar coordenadas independientemente de su estado anterior
+    usuario.location = {
+        type: 'Point',
+        coordinates: [lng, lat],
+    };
+    yield usuario.save();
     return usuario;
 });
 exports.loginYGuardarCoordenadas = loginYGuardarCoordenadas;

@@ -43,26 +43,19 @@ export const autenticarUsuario = async (email: string, password: string) => {
 export const loginYGuardarCoordenadas = async (email: string, password: string, lat: number, lng: number) => {
   const usuario = await Usuario.findOne({ email });
   if (!usuario) throw new Error('Usuario no encontrado');
+
   const isValid = await bcrypt.compare(password, usuario.password);
   if (!isValid) throw new Error('Contraseña incorrecta');
 
-  // Validación robusta del campo `coordinates`
-  if (
-    !usuario.location ||
-    !Array.isArray(usuario.location.coordinates) ||
-    usuario.location.coordinates.length !== 2
-  ) {
-    // Si las coordenadas no existen o no son válidas, las asignamos
-    usuario.location = {
+  // Actualizar coordenadas independientemente de su estado anterior
+  usuario.location = {
       type: 'Point',
       coordinates: [lng, lat],
-    };
-    await usuario.save();
-  }
+  };
 
+  await usuario.save();
   return usuario;
 };
-
 
 
 // Obtener todas las coordenadas de los usuarios
