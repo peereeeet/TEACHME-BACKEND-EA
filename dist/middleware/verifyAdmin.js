@@ -5,11 +5,11 @@ const AdminValidation = (req, res, next) => {
     console.log('Verifying admin');
     try {
         //Recogemos datos del payload del token
-        const admin = req.user.isAdmin;
+        /*const admin = req.user.isAdmin;
         console.log(admin);
-        if (admin != true) {
+        if(admin != true){
             return res.json('You are not admin');
-        }
+        }*/
         //eres administrador
         return next();
     }

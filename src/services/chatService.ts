@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { IMessage } from "../utils/chatTypes";
+import Usuario from "../models/usuario"; // Importar el modelo de usuario
 
 const activeRooms = new Map<string, Set<string>>(); // Para rastrear usuarios en salas
 
@@ -52,25 +53,39 @@ export const configureChatEvents = (io: Server) => {
     });
 
     // Evento para manejar mensajes privados
-    socket.on("private-message", (message: IMessage) => {
-      const { senderId, receiverId, messageContent, timestamp, senderName } = message;
-
+    socket.on("private-message", async (message: IMessage) => {
+      const { senderId, receiverId, messageContent, timestamp } = message;
+    
+      const sender = await Usuario.findById(senderId);
+      const senderName = sender?.nombre || "Desconocido";
+    
       if (!senderId || !receiverId || !messageContent) {
         console.error("Datos incompletos para enviar mensaje:", message);
         return;
       }
-
+    
       const room = [senderId, receiverId].sort().join("-");
-      io.to(room).emit("receive-message", {
-        senderId,
-        senderName,
-        receiverId,
-        messageContent,
-        timestamp,
+      const clients = Array.from(io.sockets.adapter.rooms.get(room) || []);
+    
+      // Emitir el mensaje solo a otros clientes en la sala
+      clients.forEach((clientId) => {
+        if (clientId !== socket.id) {
+          io.to(clientId).emit("receive-message", {
+            senderId,
+            senderName,
+            receiverId,
+            messageContent,
+            timestamp,
+          });
+        }
       });
-
-      console.log(`Mensaje enviado de ${senderId} a ${receiverId} en la sala ${room}: ${messageContent}`);
+    
+      console.log(
+        `Mensaje enviado de ${senderId} (${senderName}) a ${receiverId} en la sala ${room}: ${messageContent}`
+      );
     });
+    
+  
 
     // Manejar desconexión del chat
     socket.on("disconnect", () => {
