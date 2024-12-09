@@ -25,6 +25,17 @@ const usuarioSchema = new mongoose_1.Schema({
     isAdmin: { type: Boolean, default: true },
     asignaturasImparte: { type: [mongoose_1.Types.ObjectId], ref: 'Asignatura', default: [] },
     conectado: { type: Boolean, default: false }, // Añadido el atributo conectado
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point',
+        },
+        coordinates: {
+            type: [Number], // GeoJSON con dos números: [lng, lat]
+            default: undefined,
+        },
+    },
 }, { versionKey: false });
 // Método para encriptar contraseña
 usuarioSchema.methods.encryptPassword = function (password) {
