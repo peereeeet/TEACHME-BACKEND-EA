@@ -45,6 +45,32 @@ const autenticarUsuario = (email, password) => __awaiter(void 0, void 0, void 0,
     return usuario;
 });
 exports.autenticarUsuario = autenticarUsuario;
+<<<<<<< HEAD
+=======
+// Login de usuario y guardar coordenadas
+// Login de usuario y guardar coordenadas
+const loginYGuardarCoordenadas = (email, password, lat, lng) => __awaiter(void 0, void 0, void 0, function* () {
+    const usuario = yield usuario_1.default.findOne({ email });
+    if (!usuario)
+        throw new Error('Usuario no encontrado');
+    const isValid = yield bcrypt_1.default.compare(password, usuario.password);
+    if (!isValid)
+        throw new Error('Contraseña incorrecta');
+    // Actualizar coordenadas independientemente de su estado anterior
+    usuario.location = {
+        type: 'Point',
+        coordinates: [lng, lat],
+    };
+    yield usuario.save();
+    return usuario;
+});
+exports.loginYGuardarCoordenadas = loginYGuardarCoordenadas;
+// Obtener todas las coordenadas de los usuarios
+const obtenerCoordenadasDeUsuarios = () => __awaiter(void 0, void 0, void 0, function* () {
+    return yield usuario_1.default.find({ location: { $exists: true } }, { location: 1, nombre: 1 });
+});
+exports.obtenerCoordenadasDeUsuarios = obtenerCoordenadasDeUsuarios;
+>>>>>>> a99f63510175703e33e464280c3064b2c476f43e
 // Buscar usuarios por nombre
 const buscarUsuarios = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
     const regex = new RegExp(`^${nombre}`, 'i'); // Buscar usuarios cuyo nombre comience con el término ingresado (no sensible a mayúsculas)
