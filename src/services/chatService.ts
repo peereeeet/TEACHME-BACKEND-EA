@@ -10,92 +10,100 @@ export const configureChatEvents = (io: Server) => {
 
     // Evento para unirse a un chat
     socket.on("join-chat", (data) => {
-      const { senderId, receiverId } = data;
+      const { roomId, userId } = data;
 
-      if (!senderId || !receiverId) {
+      if (!roomId || !userId) {
         console.error("Datos incompletos para unirse al chat:", data);
         return;
       }
 
-      const room = [senderId, receiverId].sort().join("-");
-      socket.join(room);
-
-      // Añadir el usuario a la lista de la sala
-      if (!activeRooms.has(room)) {
-        activeRooms.set(room, new Set());
+      // Crear la sala si no existe
+      if (!activeRooms.has(roomId)) {
+        activeRooms.set(roomId, new Set());
       }
-      activeRooms.get(room)?.add(senderId);
 
-      console.log(`Usuario ${senderId} se unió a la sala: ${room}`);
-      console.log(`Usuarios en la sala ${room}:`, Array.from(activeRooms.get(room) || []));
+      // Añadir el usuario al conjunto de la sala
+      activeRooms.get(roomId)?.add(socket.id);
+      socket.join(roomId);
+
+      console.log(`Usuario ${userId} se unió a la sala: ${roomId}`);
+      console.log(`Usuarios en la sala ${roomId}:`, Array.from(activeRooms.get(roomId) || []));
+
+      // Notificar a los demás usuarios en la sala
+      io.to(roomId).emit("user-joined", { userId, roomId });
+    });
+
+    // Evento para manejar mensajes en una room
+    socket.on("room-message", async (message: IMessage) => {
+      const { senderId, roomId, messageContent } = message;
+
+      const sender = await Usuario.findById(senderId);
+      const senderName = sender?.nombre || "Desconocido";
+
+      if (!senderId || !roomId || !messageContent) {
+        console.error("Datos incompletos para enviar mensaje:", message);
+        return;
+      }
+
+      const timestamp = new Date();
+
+      console.log(
+        `Mensaje enviado por ${senderId} (${senderName}) en la sala ${roomId}: ${messageContent}`
+      );
+
+      // Emitir el mensaje a todos los usuarios en la sala
+      io.to(roomId).emit("receive-message", {
+        senderId,
+        senderName,
+        roomId,
+        messageContent,
+        timestamp,
+      });
     });
 
     // Evento para salir de un chat
     socket.on("leave-chat", (data) => {
-      const { senderId, receiverId } = data;
+      const { roomId, userId } = data;
 
-      if (!senderId || !receiverId) {
+      if (!roomId || !userId) {
         console.error("Datos incompletos para salir del chat:", data);
         return;
       }
 
-      const room = [senderId, receiverId].sort().join("-");
-      socket.leave(room);
+      socket.leave(roomId);
 
       // Eliminar el usuario de la lista de la sala
-      activeRooms.get(room)?.delete(senderId);
+      activeRooms.get(roomId)?.delete(socket.id);
 
-      if (activeRooms.get(room)?.size === 0) {
-        activeRooms.delete(room); // Eliminar la sala si está vacía
+      // Eliminar la sala si está vacía
+      if (activeRooms.get(roomId)?.size === 0) {
+        activeRooms.delete(roomId);
       }
 
-      console.log(`Usuario ${senderId} salió de la sala: ${room}`);
-    });
+      console.log(`Usuario ${userId} salió de la sala: ${roomId}`);
 
-    // Evento para manejar mensajes privados
-    socket.on("private-message", async (message: IMessage) => {
-      const { senderId, receiverId, messageContent, timestamp } = message;
-    
-      const sender = await Usuario.findById(senderId);
-      const senderName = sender?.nombre || "Desconocido";
-    
-      if (!senderId || !receiverId || !messageContent) {
-        console.error("Datos incompletos para enviar mensaje:", message);
-        return;
-      }
-    
-      const room = [senderId, receiverId].sort().join("-");
-      const clients = Array.from(io.sockets.adapter.rooms.get(room) || []);
-    
-      // Emitir el mensaje solo a otros clientes en la sala
-      clients.forEach((clientId) => {
-        if (clientId !== socket.id) {
-          io.to(clientId).emit("receive-message", {
-            senderId,
-            senderName,
-            receiverId,
-            messageContent,
-            timestamp,
-          });
-        }
-      });
-    
-      console.log(
-        `Mensaje enviado de ${senderId} (${senderName}) a ${receiverId} en la sala ${room}: ${messageContent}`
-      );
+      // Notificar a los demás usuarios en la sala
+      io.to(roomId).emit("user-left", { userId, roomId });
     });
-    
-  
 
     // Manejar desconexión del chat
     socket.on("disconnect", () => {
       console.log(`Cliente desconectado del chat: ${socket.id}`);
-      for (const [room, users] of activeRooms) {
-        users.delete(socket.id);
-        if (users.size === 0) {
-          activeRooms.delete(room);
+
+      for (const [roomId, users] of activeRooms.entries()) {
+        if (users.has(socket.id)) {
+          users.delete(socket.id);
+          if (users.size === 0) {
+            activeRooms.delete(roomId);
+          }
+          console.log(`Socket eliminado de la sala ${roomId}`);
         }
       }
+    });
+
+    // Manejo de errores en el socket
+    socket.on("error", (err) => {
+      console.error(`Error en el socket ${socket.id}:`, err);
     });
   });
 };
