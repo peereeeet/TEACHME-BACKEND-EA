@@ -35,17 +35,15 @@ router.get('/coordenadas', verifyJWT_1.TokenValidation, usuarioController_1.obte
 router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados);
 // Búsqueda de usuarios por nombre
 router.get('/buscar', verifyJWT_1.TokenValidation, usuarioController_1.buscarUsuarios); // Nueva ruta para buscar usuarios
-////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
+//////////////////////////////////// RUTAS SIN PARÁMETROS /////////////////////////////////////
 router.post('/', usuarioController_1.crearUsuario); // Crear usuario sin protección para permitir registro inicial
 router.post('/login', usuarioController_1.loginUsuario); // Login no protegido
+router.post('/login-google', usuarioController_1.registrarConGoogle); // Ruta para login con Google
 router.get('/listar-paginados', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.obtenerUsuariosPaginados); // Solo admin
-//router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
 router.get('/', usuarioController_1.listarUsuarios); // Solo admin
-//router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
+// Ver un usuario por ID
 router.get('/:id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.verUsuarioPorId);
-////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
-//router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
-//router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, AdminValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
+//////////////////////////////////// RUTAS CON PARÁMETROS DINÁMICOS /////////////////////////////////////
 router.get('/:usuarioId/asignaturas', usuarioController_1.obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
 router.get('/:usuarioId/asignaturas/paginacion', usuarioController_1.obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
 router.get('/:nombre', verifyJWT_1.TokenValidation, usuarioController_1.verUsuarioPorNombre); // Ver usuario por nombre

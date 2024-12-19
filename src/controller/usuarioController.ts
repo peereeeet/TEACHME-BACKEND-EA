@@ -5,8 +5,10 @@ import Usuario from '../models/usuario';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { io, connectedUsers } from '../app';
+import { OAuth2Client } from 'google-auth-library';
 
-
+// Configurar el cliente de OAuth de Google
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // Asegúrate de que GOOGLE_CLIENT_ID esté en tu archivo .env
 
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 export async function crearUsuario(req: Request, res: Response) {
@@ -19,6 +21,61 @@ export async function crearUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
+
+////////////////////////////////////////REGISTRAR CON GOOGLE//////////////////////////////////////////
+export const registrarConGoogle = async (req: Request, res: Response) => {
+  try {
+    const { tokenId } = req.body; // El token ID de Google que recibes del frontend
+
+    // Verificar el token con Google
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID, // ID del cliente de Google
+    });
+
+    const payload = ticket.getPayload(); // Obtenemos la información del usuario de Google
+
+    if (!payload) {
+      return res.status(400).json({ error: 'Token no válido' });
+    }
+
+    // Verificar si el usuario ya existe en la base de datos
+    let usuario = await Usuario.findOne({ email: payload.email });
+
+    if (!usuario) {
+      // Si el usuario no existe, crear uno nuevo
+      usuario = new Usuario({
+        nombre: payload.name,
+        email: payload.email,
+        isProfesor: false, // Puedes asignar roles por defecto o según la lógica de tu aplicación
+        isAlumno: true,
+        isAdmin: false,
+        googleId: payload.sub, // Guardamos el ID de Google para futuras verificaciones
+      });
+
+      await usuario.save(); // Guardamos el usuario en la base de datos
+    }
+
+    // Generar un token JWT para el usuario
+    const token = jwt.sign(
+      { email: usuario.email, isAdmin: usuario.isAdmin },
+      process.env.SECRET || 'secretkey',
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({
+      message: 'Registro con Google exitoso',
+      usuario: {
+        id: usuario._id,
+        email: usuario.email,
+        isAdmin: usuario.isAdmin,
+      },
+      token: token,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
 // Buscar usuarios por nombre
@@ -89,7 +146,6 @@ export const obtenerCoordenadasUsuarios = async (req: Request, res: Response) =>
   }
 };
 
-
 // Controlador para obtener usuarios conectados
 export const obtenerUsuariosConectados = async (req: Request, res: Response) => {
   try {
@@ -112,8 +168,6 @@ export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-
-
 
 ////////////////////////////////////////LISTAR USUARIOS//////////////////////////////////////////
 export async function listarUsuarios(req: Request, res: Response) {
@@ -158,7 +212,6 @@ export async function verUsuarioPorId(req: Request, res: Response) {
   }
 }
 
-
 ////////////////////////////////////ASIGNAR ASIGNATURAS A UN USUARIO/////////////////////////////////////
 export async function asignarAsignaturasAUsuario(req: Request, res: Response) { 
   try {
@@ -169,7 +222,6 @@ export async function asignarAsignaturasAUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-
 
 ////////////////////////////////////ACTUALIZAR USUARIO POR ID/////////////////////////////////////
 export async function actualizarUsuarioPorId(req: Request, res: Response) {
@@ -302,9 +354,6 @@ export const obtenerAsignaturasDelUsuario = async (req: Request, res: Response) 
     res.status(500).json({ message: 'Error al obtener las asignaturas', error });
   }
 };
-
-
-
 
 ////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID/////////////////////////////////////
 export async function modificarRolUsuarioPorId(req: Request, res: Response) {

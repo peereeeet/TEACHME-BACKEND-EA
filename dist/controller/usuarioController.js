@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.registrarConGoogle = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -58,6 +58,9 @@ const usuario_1 = __importDefault(require("../models/usuario"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const app_1 = require("../app");
+const google_auth_library_1 = require("google-auth-library");
+// Configurar el cliente de OAuth de Google
+const client = new google_auth_library_1.OAuth2Client(process.env.GOOGLE_CLIENT_ID); // Asegúrate de que GOOGLE_CLIENT_ID esté en tu archivo .env
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 function crearUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -72,6 +75,50 @@ function crearUsuario(req, res) {
         }
     });
 }
+////////////////////////////////////////REGISTRAR CON GOOGLE//////////////////////////////////////////
+const registrarConGoogle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tokenId } = req.body; // El token ID de Google que recibes del frontend
+        // Verificar el token con Google
+        const ticket = yield client.verifyIdToken({
+            idToken: tokenId,
+            audience: process.env.GOOGLE_CLIENT_ID, // ID del cliente de Google
+        });
+        const payload = ticket.getPayload(); // Obtenemos la información del usuario de Google
+        if (!payload) {
+            return res.status(400).json({ error: 'Token no válido' });
+        }
+        // Verificar si el usuario ya existe en la base de datos
+        let usuario = yield usuario_1.default.findOne({ email: payload.email });
+        if (!usuario) {
+            // Si el usuario no existe, crear uno nuevo
+            usuario = new usuario_1.default({
+                nombre: payload.name,
+                email: payload.email,
+                isProfesor: false, // Puedes asignar roles por defecto o según la lógica de tu aplicación
+                isAlumno: true,
+                isAdmin: false,
+                googleId: payload.sub, // Guardamos el ID de Google para futuras verificaciones
+            });
+            yield usuario.save(); // Guardamos el usuario en la base de datos
+        }
+        // Generar un token JWT para el usuario
+        const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '1h' });
+        res.status(200).json({
+            message: 'Registro con Google exitoso',
+            usuario: {
+                id: usuario._id,
+                email: usuario.email,
+                isAdmin: usuario.isAdmin,
+            },
+            token: token,
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.registrarConGoogle = registrarConGoogle;
 // Buscar usuarios por nombre
 const buscarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

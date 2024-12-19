@@ -12,11 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.autenticarUsuario = exports.crearUsuario = void 0;
+exports.registrarConGoogle = exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.autenticarUsuario = exports.crearUsuario = void 0;
 const mongoose_1 = require("mongoose");
 const usuario_1 = __importDefault(require("../models/usuario")); // Importamos IUsuario
 const asignatura_1 = __importDefault(require("../models/asignatura"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const google_auth_library_1 = require("google-auth-library");
+// Instancia del cliente de Google
+const client = new google_auth_library_1.OAuth2Client('CLIENT_ID_GOOGLE'); // Reemplaza con tu CLIENT_ID de Google
 // Crear usuario
 const crearUsuario = (nombre_1, edad_1, email_1, password_1, ...args_1) => __awaiter(void 0, [nombre_1, edad_1, email_1, password_1, ...args_1], void 0, function* (nombre, edad, email, password, isProfesor = false, isAlumno = false, isAdmin = false) {
     const saltRounds = 10;
@@ -45,7 +48,6 @@ const autenticarUsuario = (email, password) => __awaiter(void 0, void 0, void 0,
     return usuario;
 });
 exports.autenticarUsuario = autenticarUsuario;
-// Login de usuario y guardar coordenadas
 // Login de usuario y guardar coordenadas
 const loginYGuardarCoordenadas = (email, password, lat, lng) => __awaiter(void 0, void 0, void 0, function* () {
     const usuario = yield usuario_1.default.findOne({ email });
@@ -82,11 +84,12 @@ const obtenerIdUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, 
     return usuario._id;
 });
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
+// Buscar usuario por nombre de usuario
 const findByUsername = (username) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findOne({ nombre: username });
 });
 exports.findByUsername = findByUsername;
-// En usuarioService.ts
+// Buscar usuario por email
 const findByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findOne({ email }); // Busca un usuario por su email
 });
@@ -101,10 +104,10 @@ const verUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, functi
     return yield usuario_1.default.findOne({ nombre }).populate('asignaturasImparte');
 });
 exports.verUsuarioPorNombre = verUsuarioPorNombre;
+// Ver usuario por ID
 const verUsuarioPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Buscando usuario con ID:", _id); // Log del ID recibido
     try {
-        //const objectId = new mongoose.Types.ObjectId(_id); // Convierte a ObjectId si no lo es
         const usuario = yield usuario_1.default.findById(_id).populate('asignaturasImparte');
         console.log("Resultado de la búsqueda:", usuario); // Log del resultado
         return usuario;
@@ -240,4 +243,39 @@ const eliminarAsignaturaDeUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(
     return yield usuario.save();
 });
 exports.eliminarAsignaturaDeUsuarioPorId = eliminarAsignaturaDeUsuarioPorId;
+// Crear usuario con Google
+const registrarConGoogle = (tokenId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Verificar el token con Google
+        const ticket = yield client.verifyIdToken({
+            idToken: tokenId,
+            audience: 'CLIENT_ID_GOOGLE', // Reemplaza con tu CLIENT_ID
+        });
+        const payload = ticket.getPayload(); // Payload contiene la información del usuario
+        if (!payload)
+            throw new Error('Error al obtener la información del usuario desde Google');
+        // Comprobar si el usuario ya existe en la base de datos por su correo electrónico
+        const usuarioExistente = yield usuario_1.default.findOne({ email: payload.email });
+        if (usuarioExistente) {
+            return usuarioExistente; // Si ya existe, devolver el usuario existente
+        }
+        // Si no existe, crear un nuevo usuario
+        const usuario = new usuario_1.default({
+            nombre: payload.name || 'Nombre no disponible', // Usar el nombre proporcionado por Google
+            email: payload.email,
+            password: '', // El password se deja vacío ya que la autenticación se maneja con Google
+            isProfesor: false,
+            isAlumno: false,
+            isAdmin: false,
+            conectado: false, // Inicializar como desconectado
+        });
+        // Guardar el nuevo usuario en la base de datos
+        return yield usuario.save();
+    }
+    catch (error) {
+        console.error('Error al registrar usuario con Google:', error);
+        throw new Error('Error al registrar el usuario con Google');
+    }
+});
+exports.registrarConGoogle = registrarConGoogle;
 //# sourceMappingURL=usuarioService.js.map

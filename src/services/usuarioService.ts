@@ -2,6 +2,10 @@ import mongoose, { Types } from 'mongoose';
 import Usuario, { IUsuario } from '../models/usuario'; // Importamos IUsuario
 import Asignatura from '../models/asignatura';
 import bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
+
+// Instancia del cliente de Google
+const client = new OAuth2Client('CLIENT_ID_GOOGLE');  // Reemplaza con tu CLIENT_ID de Google
 
 // Crear usuario
 export const crearUsuario = async (
@@ -38,8 +42,6 @@ export const autenticarUsuario = async (email: string, password: string) => {
 };
 
 // Login de usuario y guardar coordenadas
-
-// Login de usuario y guardar coordenadas
 export const loginYGuardarCoordenadas = async (email: string, password: string, lat: number, lng: number) => {
   const usuario = await Usuario.findOne({ email });
   if (!usuario) throw new Error('Usuario no encontrado');
@@ -57,18 +59,17 @@ export const loginYGuardarCoordenadas = async (email: string, password: string, 
   return usuario;
 };
 
-
 // Obtener todas las coordenadas de los usuarios
 export const obtenerCoordenadasDeUsuarios = async () => {
   return await Usuario.find({ location: { $exists: true } }, { location: 1, nombre: 1 });
 };
-
 
 // Buscar usuarios por nombre
 export const buscarUsuarios = async (nombre: string) => {
   const regex = new RegExp(`^${nombre}`, 'i'); // Buscar usuarios cuyo nombre comience con el término ingresado (no sensible a mayúsculas)
   return await Usuario.find({ nombre: regex }).populate('asignaturasImparte'); // Retornar usuarios y asignaturas
 };
+
 // Obtener ID de usuario por nombre
 export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
   const usuario = await Usuario.findOne({ nombre });
@@ -76,12 +77,12 @@ export const obtenerIdUsuarioPorNombre = async (nombre: string) => {
   return usuario._id;
 };
 
+// Buscar usuario por nombre de usuario
 export const findByUsername = async (username: string): Promise<IUsuario | null> => {
   return await Usuario.findOne({ nombre: username });
 };
 
-// En usuarioService.ts
-
+// Buscar usuario por email
 export const findByEmail = async (email: string): Promise<IUsuario | null> => {
   return await Usuario.findOne({ email }); // Busca un usuario por su email
 };
@@ -96,10 +97,10 @@ export const verUsuarioPorNombre = async (nombre: string): Promise<IUsuario | nu
   return await Usuario.findOne({ nombre }).populate('asignaturasImparte');
 };
 
+// Ver usuario por ID
 export const verUsuarioPorId = async (_id: string): Promise<IUsuario | null> => {
   console.log("Buscando usuario con ID:", _id); // Log del ID recibido
   try {
-      //const objectId = new mongoose.Types.ObjectId(_id); // Convierte a ObjectId si no lo es
       const usuario = await Usuario.findById(_id).populate('asignaturasImparte');
       console.log("Resultado de la búsqueda:", usuario); // Log del resultado
       return usuario;
@@ -108,7 +109,6 @@ export const verUsuarioPorId = async (_id: string): Promise<IUsuario | null> => 
       throw error; // Lanza el error para que sea capturado en el controlador
   }
 };
-
 
 // Actualizar usuario por ID
 export const actualizarUsuarioPorId = async (_id: string, datos: any) => {
@@ -233,4 +233,43 @@ export const eliminarAsignaturaDeUsuarioPorId = async (usuarioId: string, asigna
   if (!usuario.asignaturasImparte) usuario.asignaturasImparte = [];
   usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
   return await usuario.save();
+};
+
+// Crear usuario con Google
+export const registrarConGoogle = async (tokenId: string) => {
+  try {
+    // Verificar el token con Google
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: 'CLIENT_ID_GOOGLE',  // Reemplaza con tu CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();  // Payload contiene la información del usuario
+
+    if (!payload) throw new Error('Error al obtener la información del usuario desde Google');
+
+    // Comprobar si el usuario ya existe en la base de datos por su correo electrónico
+    const usuarioExistente = await Usuario.findOne({ email: payload.email });
+    
+    if (usuarioExistente) {
+      return usuarioExistente;  // Si ya existe, devolver el usuario existente
+    }
+
+    // Si no existe, crear un nuevo usuario
+    const usuario = new Usuario({
+      nombre: payload.name || 'Nombre no disponible',  // Usar el nombre proporcionado por Google
+      email: payload.email,
+      password: '',  // El password se deja vacío ya que la autenticación se maneja con Google
+      isProfesor: false,
+      isAlumno: false,
+      isAdmin: false,
+      conectado: false,  // Inicializar como desconectado
+    });
+
+    // Guardar el nuevo usuario en la base de datos
+    return await usuario.save();
+  } catch (error) {
+    console.error('Error al registrar usuario con Google:', error);
+    throw new Error('Error al registrar el usuario con Google');
+  }
 };
