@@ -347,3 +347,36 @@ export const obtenerAsignaturasPaginadasDeUsuario = async (req: Request, res: Re
     res.status(500).json({ error: error.message });
   }
 };
+
+
+
+import { buscarUsuariosCercanosConectados } from '../services/usuarioService';
+
+// Nuevo endpoint para buscar usuarios cercanos conectados
+export const buscarUsuariosCercanos = async (req: Request, res: Response) => {
+  try {
+    const { lat, lng, distanciaMaxima } = req.query;
+
+    if (!lat || !lng || !distanciaMaxima) {
+      return res.status(400).json({ error: 'Los parámetros lat, lng y distanciaMaxima son obligatorios' });
+    }
+
+    // Convertir lat, lng y distanciaMaxima a número
+    const latitud = parseFloat(lat as string);
+    const longitud = parseFloat(lng as string);
+    const distancia = parseInt(distanciaMaxima as string, 10);
+
+    // Llamar a la función para obtener los usuarios cercanos
+    const usuariosCercanos = await buscarUsuariosCercanosConectados(latitud, longitud, distancia);
+
+    if (usuariosCercanos.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron usuarios cercanos' });
+    }
+
+    res.status(200).json(usuariosCercanos);
+  } catch (error: any) {
+    console.error("Error al buscar usuarios cercanos:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+

@@ -23,6 +23,9 @@ export interface IUsuario extends Document {
   comparePassword(password: string): Promise<boolean>;
 }
 
+
+
+
 // Esquema de Usuario
 const usuarioSchema = new Schema<IUsuario>(
   {
@@ -49,6 +52,9 @@ const usuarioSchema = new Schema<IUsuario>(
   },
   { versionKey: false }
 );
+
+// Índice geoespacial para el campo location
+usuarioSchema.index({ location: '2dsphere' });
 
 // Método para encriptar contraseña
 usuarioSchema.methods.encryptPassword = async function (password: string): Promise<string> {

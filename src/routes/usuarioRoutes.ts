@@ -23,7 +23,8 @@ import {
     loginUsuario,
     buscarUsuarios,
     obtenerUsuariosConectados,
-    obtenerCoordenadasUsuarios
+    obtenerCoordenadasUsuarios,
+    buscarUsuariosCercanos,
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
@@ -42,6 +43,9 @@ router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
 
 // Búsqueda de usuarios por nombre
 router.get('/buscar', TokenValidation, buscarUsuarios); // Nueva ruta para buscar usuarios
+
+// Búsqueda de usuarios cercanos
+router.get('/cercanos', TokenValidation, buscarUsuariosCercanos); // Nueva ruta para buscar usuarios cercanos
 
 ////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
 router.post('/', crearUsuario); // Crear usuario sin protección para permitir registro inicial

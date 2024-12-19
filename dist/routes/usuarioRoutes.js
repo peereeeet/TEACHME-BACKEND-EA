@@ -35,6 +35,8 @@ router.get('/coordenadas', verifyJWT_1.TokenValidation, usuarioController_1.obte
 router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados);
 // Búsqueda de usuarios por nombre
 router.get('/buscar', verifyJWT_1.TokenValidation, usuarioController_1.buscarUsuarios); // Nueva ruta para buscar usuarios
+// Búsqueda de usuarios cercanos
+router.get('/cercanos', verifyJWT_1.TokenValidation, usuarioController_1.buscarUsuariosCercanos); // Nueva ruta para buscar usuarios cercanos
 ////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
 router.post('/', usuarioController_1.crearUsuario); // Crear usuario sin protección para permitir registro inicial
 router.post('/login', usuarioController_1.loginUsuario); // Login no protegido

@@ -37,6 +37,8 @@ const usuarioSchema = new mongoose_1.Schema({
         },
     },
 }, { versionKey: false });
+// Índice geoespacial para el campo location
+usuarioSchema.index({ location: '2dsphere' });
 // Método para encriptar contraseña
 usuarioSchema.methods.encryptPassword = function (password) {
     return __awaiter(this, void 0, void 0, function* () {

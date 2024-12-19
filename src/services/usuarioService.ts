@@ -234,3 +234,32 @@ export const eliminarAsignaturaDeUsuarioPorId = async (usuarioId: string, asigna
   usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
   return await usuario.save();
 };
+
+
+// Buscar usuarios por proximidad
+// Función para buscar usuarios conectados por proximidad
+export const buscarUsuariosCercanosConectados = async (lat: number, lng: number, distanciaMaxima: number) => {
+  try {
+    // Hacer la consulta por proximidad utilizando $nearSphere y filtrando por usuarios conectados
+    const usuariosCercanos = await Usuario.find({
+      conectado: true,  // Filtrar solo los usuarios que están conectados
+      location: {
+        $nearSphere: {
+          $geometry: {
+            type: 'Point',  // El tipo de geometría es 'Point'
+            coordinates: [lng, lat],  // [longitud, latitud]
+          },
+          $maxDistance: distanciaMaxima, // Distancia máxima en metros
+        },
+      },
+    });
+
+    return usuariosCercanos;
+  } catch (error) {
+    console.error("Error al buscar usuarios cercanos:", error);
+    throw error;  // Lanza el error para que sea capturado en otro lugar si es necesario
+  }
+};
+
+
+

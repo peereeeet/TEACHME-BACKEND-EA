@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.autenticarUsuario = exports.crearUsuario = void 0;
+exports.buscarUsuariosCercanosConectados = exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.autenticarUsuario = exports.crearUsuario = void 0;
 const mongoose_1 = require("mongoose");
 const usuario_1 = __importDefault(require("../models/usuario")); // Importamos IUsuario
 const asignatura_1 = __importDefault(require("../models/asignatura"));
@@ -240,4 +240,29 @@ const eliminarAsignaturaDeUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(
     return yield usuario.save();
 });
 exports.eliminarAsignaturaDeUsuarioPorId = eliminarAsignaturaDeUsuarioPorId;
+// Buscar usuarios por proximidad
+// Función para buscar usuarios conectados por proximidad
+const buscarUsuariosCercanosConectados = (lat, lng, distanciaMaxima) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Hacer la consulta por proximidad utilizando $nearSphere y filtrando por usuarios conectados
+        const usuariosCercanos = yield usuario_1.default.find({
+            conectado: true, // Filtrar solo los usuarios que están conectados
+            location: {
+                $nearSphere: {
+                    $geometry: {
+                        type: 'Point', // El tipo de geometría es 'Point'
+                        coordinates: [lng, lat], // [longitud, latitud]
+                    },
+                    $maxDistance: distanciaMaxima, // Distancia máxima en metros
+                },
+            },
+        });
+        return usuariosCercanos;
+    }
+    catch (error) {
+        console.error("Error al buscar usuarios cercanos:", error);
+        throw error; // Lanza el error para que sea capturado en otro lugar si es necesario
+    }
+});
+exports.buscarUsuariosCercanosConectados = buscarUsuariosCercanosConectados;
 //# sourceMappingURL=usuarioService.js.map

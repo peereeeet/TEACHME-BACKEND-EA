@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = void 0;
+exports.buscarUsuariosCercanos = exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -404,4 +404,29 @@ const obtenerAsignaturasPaginadasDeUsuario = (req, res) => __awaiter(void 0, voi
     }
 });
 exports.obtenerAsignaturasPaginadasDeUsuario = obtenerAsignaturasPaginadasDeUsuario;
+const usuarioService_1 = require("../services/usuarioService");
+// Nuevo endpoint para buscar usuarios cercanos conectados
+const buscarUsuariosCercanos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { lat, lng, distanciaMaxima } = req.query;
+        if (!lat || !lng || !distanciaMaxima) {
+            return res.status(400).json({ error: 'Los parámetros lat, lng y distanciaMaxima son obligatorios' });
+        }
+        // Convertir lat, lng y distanciaMaxima a número
+        const latitud = parseFloat(lat);
+        const longitud = parseFloat(lng);
+        const distancia = parseInt(distanciaMaxima, 10);
+        // Llamar a la función para obtener los usuarios cercanos
+        const usuariosCercanos = yield (0, usuarioService_1.buscarUsuariosCercanosConectados)(latitud, longitud, distancia);
+        if (usuariosCercanos.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron usuarios cercanos' });
+        }
+        res.status(200).json(usuariosCercanos);
+    }
+    catch (error) {
+        console.error("Error al buscar usuarios cercanos:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.buscarUsuariosCercanos = buscarUsuariosCercanos;
 //# sourceMappingURL=usuarioController.js.map
