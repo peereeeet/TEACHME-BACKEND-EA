@@ -9,16 +9,17 @@ export interface IGeoJSON {
 
 // Interfaz para los documentos de Usuario
 export interface IUsuario extends Document {
-  nombre?: string;
-  edad?: number;
+  nombre: string;
+  username: string;
+  fechaNacimiento: Date;
   email: string;
   password: string;
   isProfesor?: boolean;
   isAlumno?: boolean;
   isAdmin?: boolean;
-  asignaturasImparte?: Types.ObjectId[]; // Relación con Asignatura
-  conectado: boolean; // Nuevo atributo
-  location?: IGeoJSON; // Agregado como opcional
+  asignaturasImparte?: Types.ObjectId[];
+  conectado: boolean;
+  location?: IGeoJSON;
   encryptPassword(password: string): Promise<string>;
   comparePassword(password: string): Promise<boolean>;
 }
@@ -26,15 +27,16 @@ export interface IUsuario extends Document {
 // Esquema de Usuario
 const usuarioSchema = new Schema<IUsuario>(
   {
-    nombre: { type: String },
-    edad: { type: Number },
+    nombre: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    fechaNacimiento: { type: Date, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isProfesor: { type: Boolean, default: false },
     isAlumno: { type: Boolean, default: false },
-    isAdmin: { type: Boolean, default: true },
+    isAdmin: { type: Boolean, default: false },
     asignaturasImparte: { type: [Types.ObjectId], ref: 'Asignatura', default: [] },
-    conectado: { type: Boolean, default: false }, // Añadido el atributo conectado
+    conectado: { type: Boolean, default: false },
     location: {
       type: {
         type: String,
@@ -42,7 +44,7 @@ const usuarioSchema = new Schema<IUsuario>(
         default: 'Point',
       },
       coordinates: {
-        type: [Number], // GeoJSON con dos números: [lng, lat]
+        type: [Number],
         default: undefined,
       },
     },
@@ -61,7 +63,5 @@ usuarioSchema.methods.comparePassword = async function (password: string): Promi
   return bcrypt.compare(password, this.password);
 };
 
-// Modelo de Usuario
 const Usuario = model<IUsuario>('Usuario', usuarioSchema);
-
 export default Usuario;

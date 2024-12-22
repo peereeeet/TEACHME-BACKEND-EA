@@ -12,49 +12,56 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarRolUsuarioPorId = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.autenticarUsuario = exports.crearUsuario = void 0;
+exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.crearUsuario = void 0;
 const mongoose_1 = require("mongoose");
-const usuario_1 = __importDefault(require("../models/usuario")); // Importamos IUsuario
+const usuario_1 = __importDefault(require("../models/usuario"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 // Crear usuario
-const crearUsuario = (nombre_1, edad_1, email_1, password_1, ...args_1) => __awaiter(void 0, [nombre_1, edad_1, email_1, password_1, ...args_1], void 0, function* (nombre, edad, email, password, isProfesor = false, isAlumno = false, isAdmin = false) {
+const crearUsuario = (nombre_1, username_1, fechaNacimiento_1, email_1, password_1, ...args_1) => __awaiter(void 0, [nombre_1, username_1, fechaNacimiento_1, email_1, password_1, ...args_1], void 0, function* (nombre, username, fechaNacimiento, email, password, isProfesor = false, isAlumno = false, isAdmin = false) {
     const saltRounds = 10;
     const hashedPassword = yield bcrypt_1.default.hash(password, saltRounds);
     const usuario = new usuario_1.default({
         nombre,
-        edad,
+        username,
+        fechaNacimiento,
         email,
         password: hashedPassword,
         isProfesor,
         isAlumno,
         isAdmin,
-        conectado: false, // Inicializar como desconectado
+        conectado: false,
     });
     return yield usuario.save();
 });
 exports.crearUsuario = crearUsuario;
-// Autenticar usuario
-const autenticarUsuario = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const usuario = yield usuario_1.default.findOne({ email });
-    if (!usuario)
-        throw new Error('Usuario no encontrado');
-    const isValid = yield bcrypt_1.default.compare(password, usuario.password);
-    if (!isValid)
-        throw new Error('Contraseña incorrecta');
-    return usuario;
+// Modificar edad de usuario por ID
+const modificarEdadUsuarioPorId = (_id, edad) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield usuario_1.default.findByIdAndUpdate(_id, { edad }, { new: true });
 });
-exports.autenticarUsuario = autenticarUsuario;
+exports.modificarEdadUsuarioPorId = modificarEdadUsuarioPorId;
+// Modificar rol de usuario por ID
+const modificarRolUsuarioPorId = (_id, isProfesor, isAlumno, isAdmin) => __awaiter(void 0, void 0, void 0, function* () {
+    const updates = {};
+    if (isProfesor !== undefined)
+        updates.isProfesor = isProfesor;
+    if (isAlumno !== undefined)
+        updates.isAlumno = isAlumno;
+    if (isAdmin !== undefined)
+        updates.isAdmin = isAdmin;
+    return yield usuario_1.default.findByIdAndUpdate(_id, updates, { new: true });
+});
+exports.modificarRolUsuarioPorId = modificarRolUsuarioPorId;
 // Login de usuario y guardar coordenadas
-// Login de usuario y guardar coordenadas
-const loginYGuardarCoordenadas = (email, password, lat, lng) => __awaiter(void 0, void 0, void 0, function* () {
-    const usuario = yield usuario_1.default.findOne({ email });
+const loginYGuardarCoordenadas = (identifier, password, lat, lng) => __awaiter(void 0, void 0, void 0, function* () {
+    const usuario = yield usuario_1.default.findOne({
+        $or: [{ email: identifier }, { username: identifier }],
+    });
     if (!usuario)
         throw new Error('Usuario no encontrado');
     const isValid = yield bcrypt_1.default.compare(password, usuario.password);
     if (!isValid)
         throw new Error('Contraseña incorrecta');
-    // Actualizar coordenadas independientemente de su estado anterior
     usuario.location = {
         type: 'Point',
         coordinates: [lng, lat],
@@ -65,13 +72,13 @@ const loginYGuardarCoordenadas = (email, password, lat, lng) => __awaiter(void 0
 exports.loginYGuardarCoordenadas = loginYGuardarCoordenadas;
 // Obtener todas las coordenadas de los usuarios
 const obtenerCoordenadasDeUsuarios = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.find({ location: { $exists: true } }, { location: 1, nombre: 1 });
+    return yield usuario_1.default.find({ location: { $exists: true } }, { location: 1, nombre: 1, username: 1 });
 });
 exports.obtenerCoordenadasDeUsuarios = obtenerCoordenadasDeUsuarios;
 // Buscar usuarios por nombre
 const buscarUsuarios = (nombre) => __awaiter(void 0, void 0, void 0, function* () {
-    const regex = new RegExp(`^${nombre}`, 'i'); // Buscar usuarios cuyo nombre comience con el término ingresado (no sensible a mayúsculas)
-    return yield usuario_1.default.find({ nombre: regex }).populate('asignaturasImparte'); // Retornar usuarios y asignaturas
+    const regex = new RegExp(`^${nombre}`, 'i');
+    return yield usuario_1.default.find({ nombre: regex }).populate('asignaturasImparte');
 });
 exports.buscarUsuarios = buscarUsuarios;
 // Obtener ID de usuario por nombre
@@ -82,13 +89,14 @@ const obtenerIdUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, 
     return usuario._id;
 });
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
+// Obtener usuario por nombre
 const findByUsername = (username) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findOne({ nombre: username });
+    return yield usuario_1.default.findOne({ username });
 });
 exports.findByUsername = findByUsername;
-// En usuarioService.ts
+// Obtener usuario por email
 const findByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findOne({ email }); // Busca un usuario por su email
+    return yield usuario_1.default.findOne({ email });
 });
 exports.findByEmail = findByEmail;
 // Listar usuarios
@@ -101,18 +109,9 @@ const verUsuarioPorNombre = (nombre) => __awaiter(void 0, void 0, void 0, functi
     return yield usuario_1.default.findOne({ nombre }).populate('asignaturasImparte');
 });
 exports.verUsuarioPorNombre = verUsuarioPorNombre;
+// Ver usuario por ID
 const verUsuarioPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Buscando usuario con ID:", _id); // Log del ID recibido
-    try {
-        //const objectId = new mongoose.Types.ObjectId(_id); // Convierte a ObjectId si no lo es
-        const usuario = yield usuario_1.default.findById(_id).populate('asignaturasImparte');
-        console.log("Resultado de la búsqueda:", usuario); // Log del resultado
-        return usuario;
-    }
-    catch (error) {
-        console.error("Error en la búsqueda por ID:", error);
-        throw error; // Lanza el error para que sea capturado en el controlador
-    }
+    return yield usuario_1.default.findById(_id).populate('asignaturasImparte');
 });
 exports.verUsuarioPorId = verUsuarioPorId;
 // Actualizar usuario por ID
@@ -130,11 +129,6 @@ const modificarNombreUsuarioPorId = (_id, nombre) => __awaiter(void 0, void 0, v
     return yield usuario_1.default.findByIdAndUpdate(_id, { nombre }, { new: true });
 });
 exports.modificarNombreUsuarioPorId = modificarNombreUsuarioPorId;
-// Modificar edad de usuario por ID
-const modificarEdadUsuarioPorId = (_id, edad) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findByIdAndUpdate(_id, { edad }, { new: true });
-});
-exports.modificarEdadUsuarioPorId = modificarEdadUsuarioPorId;
 // Modificar email de usuario por ID
 const modificarEmailUsuarioPorId = (_id, email) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findByIdAndUpdate(_id, { email }, { new: true });
@@ -147,11 +141,6 @@ const modificarPasswordUsuarioPorId = (_id, password) => __awaiter(void 0, void 
     return yield usuario_1.default.findByIdAndUpdate(_id, { password: hashedPassword }, { new: true });
 });
 exports.modificarPasswordUsuarioPorId = modificarPasswordUsuarioPorId;
-// Modificar rol de usuario por ID
-const modificarRolUsuarioPorId = (_id, isProfesor, isAlumno, isAdmin) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findByIdAndUpdate(_id, { isProfesor, isAlumno, isAdmin }, { new: true });
-});
-exports.modificarRolUsuarioPorId = modificarRolUsuarioPorId;
 // Obtener usuarios paginados
 const obtenerUsuariosPaginados = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
     const skip = (page - 1) * limit;
@@ -172,13 +161,11 @@ const actualizarAsignaturasUsuarioPorNombre = (nombre, asignaturas) => __awaiter
 exports.actualizarAsignaturasUsuarioPorNombre = actualizarAsignaturasUsuarioPorNombre;
 // Eliminar asignatura de usuario por nombre
 const eliminarAsignaturaDeUsuarioPorNombre = (nombre, asignaturaId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const usuario = yield usuario_1.default.findOne({ nombre });
     if (!usuario)
         throw new Error('Usuario no encontrado');
-    if (!usuario.asignaturasImparte) {
-        usuario.asignaturasImparte = [];
-    }
-    usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
+    usuario.asignaturasImparte = (_a = usuario.asignaturasImparte) === null || _a === void 0 ? void 0 : _a.filter(id => id.toString() !== asignaturaId);
     return yield usuario.save();
 });
 exports.eliminarAsignaturaDeUsuarioPorNombre = eliminarAsignaturaDeUsuarioPorNombre;
@@ -209,8 +196,6 @@ const asignarAsignaturasAUsuario = (nombre, asignaturas) => __awaiter(void 0, vo
     if (!usuario)
         throw new Error('Usuario no encontrado');
     const asignaturasEncontradas = yield asignatura_1.default.find({ nombre: { $in: asignaturas } });
-    if (!usuario.asignaturasImparte)
-        usuario.asignaturasImparte = [];
     usuario.asignaturasImparte = asignaturasEncontradas.map(asignatura => asignatura._id);
     return yield usuario.save();
 });
@@ -221,8 +206,7 @@ const asignarAsignaturaAUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(vo
     if (!usuario)
         throw new Error('Usuario no encontrado');
     const asignaturaObjectId = new mongoose_1.Types.ObjectId(asignaturaId);
-    if (!usuario.asignaturasImparte)
-        usuario.asignaturasImparte = [];
+    usuario.asignaturasImparte = usuario.asignaturasImparte || [];
     if (!usuario.asignaturasImparte.some(id => id.toString() === asignaturaObjectId.toString())) {
         usuario.asignaturasImparte.push(asignaturaObjectId);
     }
@@ -231,12 +215,11 @@ const asignarAsignaturaAUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(vo
 exports.asignarAsignaturaAUsuarioPorId = asignarAsignaturaAUsuarioPorId;
 // Eliminar asignatura de usuario por ID
 const eliminarAsignaturaDeUsuarioPorId = (usuarioId, asignaturaId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const usuario = yield usuario_1.default.findById(usuarioId);
     if (!usuario)
         throw new Error('Usuario no encontrado');
-    if (!usuario.asignaturasImparte)
-        usuario.asignaturasImparte = [];
-    usuario.asignaturasImparte = usuario.asignaturasImparte.filter(id => id.toString() !== asignaturaId);
+    usuario.asignaturasImparte = (_a = usuario.asignaturasImparte) === null || _a === void 0 ? void 0 : _a.filter(id => id.toString() !== asignaturaId);
     return yield usuario.save();
 });
 exports.eliminarAsignaturaDeUsuarioPorId = eliminarAsignaturaDeUsuarioPorId;

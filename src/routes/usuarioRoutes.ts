@@ -1,82 +1,67 @@
 import * as express from 'express';
 import {
-    crearUsuario,
-    listarUsuarios,
-    obtenerUsuariosPaginados,
-    obtenerIdUsuarioPorNombre,
-    verUsuarioPorNombre,
-    verUsuarioPorId,
-    obtenerAsignaturasDelUsuario,
-    asignarAsignaturasAUsuario,
-    actualizarUsuarioPorId,
-    eliminarUsuarioPorId,
-    actualizarAsignaturasUsuarioPorNombre,
-    eliminarAsignaturaDeUsuarioPorNombre,
-    asignarAsignaturaAUsuarioPorId,
-    eliminarAsignaturaDeUsuarioPorId,
-    modificarEdadUsuarioPorId,
-    modificarEmailUsuarioPorId,
-    modificarNombreUsuarioPorId,
-    modificarPasswordUsuarioPorId,
-    modificarRolUsuarioPorId,
-    obtenerAsignaturasPaginadasDeUsuario,
-    loginUsuario,
-    buscarUsuarios,
-    obtenerUsuariosConectados,
-    obtenerCoordenadasUsuarios
+  crearUsuario,
+  listarUsuarios,
+  obtenerUsuariosPaginados,
+  obtenerIdUsuarioPorNombre,
+  verUsuarioPorNombre,
+  verUsuarioPorId,
+  obtenerAsignaturasDelUsuario,
+  asignarAsignaturasAUsuario,
+  actualizarUsuarioPorId,
+  eliminarUsuarioPorId,
+  actualizarAsignaturasUsuarioPorNombre,
+  eliminarAsignaturaDeUsuarioPorNombre,
+  asignarAsignaturaAUsuarioPorId,
+  eliminarAsignaturaDeUsuarioPorId,
+  modificarEdadUsuarioPorId,
+  modificarEmailUsuarioPorId,
+  modificarNombreUsuarioPorId,
+  modificarPasswordUsuarioPorId,
+  modificarRolUsuarioPorId,
+  obtenerAsignaturasPaginadasDeUsuario,
+  loginUsuario,
+  buscarUsuarios,
+  obtenerUsuariosConectados,
+  obtenerCoordenadasUsuarios,
+  asignarRolUsuarioPorId
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
 import { verifyOwnership } from '../middleware/verifyOwner';
-import { connectedUsers } from '../app';
-
 
 const router = express.Router();
 
+// Rutas sin parámetros
+router.post('/', crearUsuario); // Crear usuario sin protección para registro inicial
+router.post('/login', loginUsuario); // Login sin protección
+router.put('/:id/rol', TokenValidation, AdminValidation, asignarRolUsuarioPorId);
+router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Listar usuarios paginados (solo admin)
+router.get('/buscar', TokenValidation, buscarUsuarios); // Buscar usuarios por nombre
+router.get('/coordenadas', TokenValidation, obtenerCoordenadasUsuarios); // Obtener coordenadas de usuarios
+router.get('/conectados', TokenValidation, obtenerUsuariosConectados); // Ver usuarios conectados
 
-// Nueva ruta para obtener las coordenadas
-router.get('/coordenadas', TokenValidation, obtenerCoordenadasUsuarios);
-
-// Búsqueda de usuarios conectados
-router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
-
-// Búsqueda de usuarios por nombre
-router.get('/buscar', TokenValidation, buscarUsuarios); // Nueva ruta para buscar usuarios
-
-////////////////////////////////////RUTAS SIN PARÁMETROS/////////////////////////////////////
-router.post('/', crearUsuario); // Crear usuario sin protección para permitir registro inicial
-router.post('/login', loginUsuario); // Login no protegido
-router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Solo admin
-//router.get('/', TokenValidation, AdminValidation, listarUsuarios); // Solo admin
-
-router.get('/', listarUsuarios); // Solo admin
-
-//router.get('/conectados', TokenValidation, obtenerUsuariosConectados);
-router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId);
-
-////////////////////////////////////RUTAS CON PARÁMETROS DINÁMICOS/////////////////////////////////////
-//router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
-//router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, AdminValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
-
-router.get('/:usuarioId/asignaturas', obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
-router.get('/:usuarioId/asignaturas/paginacion', obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
-
-
+// Rutas con parámetros dinámicos
+router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId); // Ver usuario por ID
 router.get('/:nombre', TokenValidation, verUsuarioPorNombre); // Ver usuario por nombre
 router.get('/:nombre/asignaturas', TokenValidation, obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre
+router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
+router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
 
-// Otros métodos PUT y DELETE que dependen de los parámetros
-router.put('/:nombre/asignaturas', TokenValidation, asignarAsignaturasAUsuario); // Asignar asignaturas
+// Métodos PUT
+router.put('/:nombre/asignaturas', TokenValidation, asignarAsignaturasAUsuario); // Asignar asignaturas a un usuario por nombre
 router.put('/:_id', TokenValidation, verifyOwnership, actualizarUsuarioPorId); // Actualizar datos propios
-router.put('/:nombre/asignaturas/actualizar', TokenValidation, AdminValidation, actualizarAsignaturasUsuarioPorNombre); // Solo admin
-router.put('/:usuarioId/asignaturas/:asignaturaId', TokenValidation, AdminValidation, asignarAsignaturaAUsuarioPorId); // Asignar asignatura a usuario
-router.put('/:_id/edad', TokenValidation, verifyOwnership, modificarEdadUsuarioPorId); // Modificar edad propio
-router.put('/:_id/email', TokenValidation, verifyOwnership, modificarEmailUsuarioPorId); // Modificar email propio
-router.put('/:_id/nombre', TokenValidation, verifyOwnership, modificarNombreUsuarioPorId); // Modificar nombre propio
+router.put('/:nombre/asignaturas/actualizar', TokenValidation, AdminValidation, actualizarAsignaturasUsuarioPorNombre); // Actualizar asignaturas (solo admin)
+router.put('/:usuarioId/asignaturas/:asignaturaId', TokenValidation, AdminValidation, asignarAsignaturaAUsuarioPorId); // Asignar asignatura por ID
+router.put('/:_id/edad', TokenValidation, verifyOwnership, modificarEdadUsuarioPorId); // Modificar edad
+router.put('/:_id/email', TokenValidation, verifyOwnership, modificarEmailUsuarioPorId); // Modificar email
+router.put('/:_id/nombre', TokenValidation, verifyOwnership, modificarNombreUsuarioPorId); // Modificar nombre
 router.put('/:_id/password', TokenValidation, verifyOwnership, modificarPasswordUsuarioPorId); // Modificar contraseña
-router.put('/:_id/rol', TokenValidation, AdminValidation, modificarRolUsuarioPorId); // Solo admin
-router.delete('/:usuarioId/asignaturas/:asignaturaId', TokenValidation, AdminValidation, eliminarAsignaturaDeUsuarioPorId); // Eliminar asignatura propia
-router.delete('/:nombre/asignaturas/:asignaturaId', TokenValidation, AdminValidation, eliminarAsignaturaDeUsuarioPorNombre); // Solo admin
-router.delete('/:usuarioId', TokenValidation, AdminValidation, eliminarUsuarioPorId); // Solo admin
+router.put('/:_id/rol', TokenValidation, AdminValidation, modificarRolUsuarioPorId); // Modificar rol (solo admin)
+
+// Métodos DELETE
+router.delete('/:usuarioId', TokenValidation, AdminValidation, eliminarUsuarioPorId); // Eliminar usuario (solo admin)
+router.delete('/:nombre/asignaturas/:asignaturaId', TokenValidation, AdminValidation, eliminarAsignaturaDeUsuarioPorNombre); // Eliminar asignatura por nombre (solo admin)
+router.delete('/:usuarioId/asignaturas/:asignaturaId', TokenValidation, eliminarAsignaturaDeUsuarioPorId); // Eliminar asignatura por ID
 
 export default router;

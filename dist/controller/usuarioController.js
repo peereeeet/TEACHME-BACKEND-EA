@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.asignarRolUsuarioPorId = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -62,8 +62,8 @@ const app_1 = require("../app");
 function crearUsuario(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-            const usuario = yield usuarioService.crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+            const { nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+            const usuario = yield usuarioService.crearUsuario(nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin);
             console.log(usuario);
             res.status(201).json(usuario);
         }
@@ -72,6 +72,27 @@ function crearUsuario(req, res) {
         }
     });
 }
+const asignarRolUsuarioPorId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { isProfesor, isAlumno } = req.body;
+        const userId = req.params.id; // Obtener el ID desde los parámetros de la URL
+        if (!userId) {
+            return res.status(400).json({ error: 'El ID del usuario es obligatorio' });
+        }
+        if (isProfesor === isAlumno) {
+            return res.status(400).json({ error: 'Debes elegir un único rol: profesor o alumno' });
+        }
+        const usuario = yield usuarioService.modificarRolUsuarioPorId(userId, isProfesor, isAlumno, undefined);
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+        res.status(200).json({ message: 'Rol asignado con éxito', usuario });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.asignarRolUsuarioPorId = asignarRolUsuarioPorId;
 // Buscar usuarios por nombre
 const buscarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -94,17 +115,18 @@ const buscarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.buscarUsuarios = buscarUsuarios;
 const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password, lat, lng } = req.body;
+        const { identifier, password, lat, lng } = req.body;
         if (!lat || !lng) {
             return res.status(400).json({ error: 'Las coordenadas son obligatorias para el login' });
         }
-        const usuario = yield usuarioService.loginYGuardarCoordenadas(email, password, lat, lng);
+        const usuario = yield usuarioService.loginYGuardarCoordenadas(identifier, password, lat, lng);
         // Generar el token JWT
         const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '1h' });
         res.status(200).json({
             message: 'Login exitoso',
             usuario: {
                 id: usuario._id,
+                username: usuario.username,
                 email: usuario.email,
                 isAdmin: usuario.isAdmin,
                 location: usuario.location,
@@ -299,7 +321,6 @@ function eliminarAsignaturaDeUsuarioPorId(req, res) {
         }
     });
 }
-////////////////////////////////////añadir las funciones restantes de usuarioService.ts/////////////////////////////////////
 ////////////////////////////////////MODIFICAR NOMBRE DE USUARIO POR ID/////////////////////////////////////
 function modificarNombreUsuarioPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {

@@ -6,19 +6,42 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { io, connectedUsers } from '../app';
 
-
-
 ////////////////////////////////////////CREAR NUEVO USUARIO//////////////////////////////////////////
 export async function crearUsuario(req: Request, res: Response) {
   try {
-    const { nombre, edad, email, password, isProfesor, isAlumno, isAdmin } = req.body;
-    const usuario = await usuarioService.crearUsuario(nombre, edad, email, password, isProfesor, isAlumno, isAdmin);
+    const { nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin } = req.body;
+    const usuario = await usuarioService.crearUsuario(nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin);
     console.log(usuario);
     res.status(201).json(usuario);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 }
+
+export const asignarRolUsuarioPorId = async (req: Request, res: Response) => {
+  try {
+    const { isProfesor, isAlumno } = req.body;
+    const userId = req.params.id; // Obtener el ID desde los parámetros de la URL
+
+    if (!userId) {
+      return res.status(400).json({ error: 'El ID del usuario es obligatorio' });
+    }
+
+    if (isProfesor === isAlumno) {
+      return res.status(400).json({ error: 'Debes elegir un único rol: profesor o alumno' });
+    }
+
+    const usuario = await usuarioService.modificarRolUsuarioPorId(userId, isProfesor, isAlumno, undefined);
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json({ message: 'Rol asignado con éxito', usuario });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
 // Buscar usuarios por nombre
@@ -46,16 +69,15 @@ export const buscarUsuarios = async (req: Request, res: Response) => {
   }
 };
 
-
 export const loginUsuario = async (req: Request, res: Response) => {
   try {
-    const { email, password, lat, lng } = req.body;
+    const { identifier, password, lat, lng } = req.body;
 
     if (!lat || !lng) {
       return res.status(400).json({ error: 'Las coordenadas son obligatorias para el login' });
     }
 
-    const usuario = await usuarioService.loginYGuardarCoordenadas(email, password, lat, lng);
+    const usuario = await usuarioService.loginYGuardarCoordenadas(identifier, password, lat, lng);
 
     // Generar el token JWT
     const token = jwt.sign(
@@ -68,6 +90,7 @@ export const loginUsuario = async (req: Request, res: Response) => {
       message: 'Login exitoso',
       usuario: {
         id: usuario._id,
+        username: usuario.username,
         email: usuario.email,
         isAdmin: usuario.isAdmin,
         location: usuario.location,
@@ -89,7 +112,6 @@ export const obtenerCoordenadasUsuarios = async (req: Request, res: Response) =>
   }
 };
 
-
 // Controlador para obtener usuarios conectados
 export const obtenerUsuariosConectados = async (req: Request, res: Response) => {
   try {
@@ -101,7 +123,6 @@ export const obtenerUsuariosConectados = async (req: Request, res: Response) => 
   }
 };
 
-
 ////////////////////////////////////////OBTENER ID DE USUARIO POR NOMBRE//////////////////////////////////////////
 export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
   try {
@@ -112,8 +133,6 @@ export async function obtenerIdUsuarioPorNombre(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-
-
 
 ////////////////////////////////////////LISTAR USUARIOS//////////////////////////////////////////
 export async function listarUsuarios(req: Request, res: Response) {
@@ -158,7 +177,6 @@ export async function verUsuarioPorId(req: Request, res: Response) {
   }
 }
 
-
 ////////////////////////////////////ASIGNAR ASIGNATURAS A UN USUARIO/////////////////////////////////////
 export async function asignarAsignaturasAUsuario(req: Request, res: Response) { 
   try {
@@ -169,7 +187,6 @@ export async function asignarAsignaturasAUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-
 
 ////////////////////////////////////ACTUALIZAR USUARIO POR ID/////////////////////////////////////
 export async function actualizarUsuarioPorId(req: Request, res: Response) {
@@ -241,8 +258,6 @@ export async function eliminarAsignaturaDeUsuarioPorId(req: Request, res: Respon
   }
 }
 
-////////////////////////////////////añadir las funciones restantes de usuarioService.ts/////////////////////////////////////
-
 ////////////////////////////////////MODIFICAR NOMBRE DE USUARIO POR ID/////////////////////////////////////
 export async function modificarNombreUsuarioPorId(req: Request, res: Response) {
   try {
@@ -303,9 +318,6 @@ export const obtenerAsignaturasDelUsuario = async (req: Request, res: Response) 
   }
 };
 
-
-
-
 ////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID/////////////////////////////////////
 export async function modificarRolUsuarioPorId(req: Request, res: Response) {
   try {
@@ -316,7 +328,6 @@ export async function modificarRolUsuarioPorId(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
-
 
 export const obtenerUsuariosPaginados = async (req: Request, res: Response) => {
   try {

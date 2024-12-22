@@ -16,15 +16,16 @@ const mongoose_1 = require("mongoose");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 // Esquema de Usuario
 const usuarioSchema = new mongoose_1.Schema({
-    nombre: { type: String },
-    edad: { type: Number },
+    nombre: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    fechaNacimiento: { type: Date, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isProfesor: { type: Boolean, default: false },
     isAlumno: { type: Boolean, default: false },
-    isAdmin: { type: Boolean, default: true },
+    isAdmin: { type: Boolean, default: false },
     asignaturasImparte: { type: [mongoose_1.Types.ObjectId], ref: 'Asignatura', default: [] },
-    conectado: { type: Boolean, default: false }, // Añadido el atributo conectado
+    conectado: { type: Boolean, default: false },
     location: {
         type: {
             type: String,
@@ -32,7 +33,7 @@ const usuarioSchema = new mongoose_1.Schema({
             default: 'Point',
         },
         coordinates: {
-            type: [Number], // GeoJSON con dos números: [lng, lat]
+            type: [Number],
             default: undefined,
         },
     },
@@ -50,7 +51,6 @@ usuarioSchema.methods.comparePassword = function (password) {
         return bcryptjs_1.default.compare(password, this.password);
     });
 };
-// Modelo de Usuario
 const Usuario = (0, mongoose_1.model)('Usuario', usuarioSchema);
 exports.default = Usuario;
 //# sourceMappingURL=usuario.js.map
