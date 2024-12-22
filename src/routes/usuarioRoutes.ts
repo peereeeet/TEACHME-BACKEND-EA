@@ -24,7 +24,8 @@ import {
   buscarUsuarios,
   obtenerUsuariosConectados,
   obtenerCoordenadasUsuarios,
-  asignarRolUsuarioPorId
+  asignarRolUsuarioPorId,
+  getAllUsers
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
@@ -35,13 +36,14 @@ const router = express.Router();
 // Rutas sin parámetros
 router.post('/', crearUsuario); // Crear usuario sin protección para registro inicial
 router.post('/login', loginUsuario); // Login sin protección
-router.put('/:id/rol', TokenValidation, AdminValidation, asignarRolUsuarioPorId);
-router.get('/listar-paginados', TokenValidation, AdminValidation, obtenerUsuariosPaginados); // Listar usuarios paginados (solo admin)
+router.put('/:id/rol', TokenValidation, asignarRolUsuarioPorId);
+router.get('/listar-paginados', TokenValidation, obtenerUsuariosPaginados); // Listar usuarios paginados (solo admin)
 router.get('/buscar', TokenValidation, buscarUsuarios); // Buscar usuarios por nombre
 router.get('/coordenadas', TokenValidation, obtenerCoordenadasUsuarios); // Obtener coordenadas de usuarios
 router.get('/conectados', TokenValidation, obtenerUsuariosConectados); // Ver usuarios conectados
 
 // Rutas con parámetros dinámicos
+router.get('/', getAllUsers);
 router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId); // Ver usuario por ID
 router.get('/:nombre', TokenValidation, verUsuarioPorNombre); // Ver usuario por nombre
 router.get('/:nombre/asignaturas', TokenValidation, obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre

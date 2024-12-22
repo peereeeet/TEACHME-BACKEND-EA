@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.asignarRolUsuarioPorId = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.getAllUsers = exports.asignarRolUsuarioPorId = void 0;
 exports.crearUsuario = crearUsuario;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
@@ -64,7 +64,6 @@ function crearUsuario(req, res) {
         try {
             const { nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin } = req.body;
             const usuario = yield usuarioService.crearUsuario(nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin);
-            console.log(usuario);
             res.status(201).json(usuario);
         }
         catch (error) {
@@ -75,7 +74,7 @@ function crearUsuario(req, res) {
 const asignarRolUsuarioPorId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { isProfesor, isAlumno } = req.body;
-        const userId = req.params.id; // Obtener el ID desde los parámetros de la URL
+        const userId = req.params.id;
         if (!userId) {
             return res.status(400).json({ error: 'El ID del usuario es obligatorio' });
         }
@@ -93,6 +92,16 @@ const asignarRolUsuarioPorId = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.asignarRolUsuarioPorId = asignarRolUsuarioPorId;
+const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const usuarios = yield usuarioService.obtenerTodosLosUsuarios();
+        res.status(200).json(usuarios);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.getAllUsers = getAllUsers;
 // Buscar usuarios por nombre
 const buscarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -124,14 +133,8 @@ const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '1h' });
         res.status(200).json({
             message: 'Login exitoso',
-            usuario: {
-                id: usuario._id,
-                username: usuario.username,
-                email: usuario.email,
-                isAdmin: usuario.isAdmin,
-                location: usuario.location,
-            },
-            token: token,
+            usuario, // Enviar todos los atributos devueltos
+            token,
         });
     }
     catch (error) {

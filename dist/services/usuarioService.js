@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.crearUsuario = void 0;
+exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.obtenerTodosLosUsuarios = exports.crearUsuario = void 0;
 const mongoose_1 = require("mongoose");
 const usuario_1 = __importDefault(require("../models/usuario"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
@@ -35,6 +35,16 @@ const crearUsuario = (nombre_1, username_1, fechaNacimiento_1, email_1, password
     return yield usuario.save();
 });
 exports.crearUsuario = crearUsuario;
+const obtenerTodosLosUsuarios = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const usuarios = yield usuario_1.default.find();
+        return usuarios;
+    }
+    catch (error) {
+        throw new Error(`Error al obtener los usuarios: ${error.message}`);
+    }
+});
+exports.obtenerTodosLosUsuarios = obtenerTodosLosUsuarios;
 // Modificar edad de usuario por ID
 const modificarEdadUsuarioPorId = (_id, edad) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findByIdAndUpdate(_id, { edad }, { new: true });
@@ -62,12 +72,26 @@ const loginYGuardarCoordenadas = (identifier, password, lat, lng) => __awaiter(v
     const isValid = yield bcrypt_1.default.compare(password, usuario.password);
     if (!isValid)
         throw new Error('Contraseña incorrecta');
+    // Guardar las coordenadas del usuario
     usuario.location = {
         type: 'Point',
         coordinates: [lng, lat],
     };
     yield usuario.save();
-    return usuario;
+    // Devolver todos los atributos relevantes del usuario
+    return {
+        id: usuario._id,
+        nombre: usuario.nombre,
+        username: usuario.username,
+        email: usuario.email,
+        fechaNacimiento: usuario.fechaNacimiento,
+        isProfesor: usuario.isProfesor,
+        isAlumno: usuario.isAlumno,
+        isAdmin: usuario.isAdmin,
+        location: usuario.location,
+        conectado: usuario.conectado,
+        asignaturasImparte: usuario.asignaturasImparte,
+    };
 });
 exports.loginYGuardarCoordenadas = loginYGuardarCoordenadas;
 // Obtener todas las coordenadas de los usuarios

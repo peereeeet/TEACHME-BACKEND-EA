@@ -11,7 +11,6 @@ export async function crearUsuario(req: Request, res: Response) {
   try {
     const { nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin } = req.body;
     const usuario = await usuarioService.crearUsuario(nombre, username, fechaNacimiento, email, password, isProfesor, isAlumno, isAdmin);
-    console.log(usuario);
     res.status(201).json(usuario);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -21,7 +20,7 @@ export async function crearUsuario(req: Request, res: Response) {
 export const asignarRolUsuarioPorId = async (req: Request, res: Response) => {
   try {
     const { isProfesor, isAlumno } = req.body;
-    const userId = req.params.id; // Obtener el ID desde los parámetros de la URL
+    const userId = req.params.id;
 
     if (!userId) {
       return res.status(400).json({ error: 'El ID del usuario es obligatorio' });
@@ -38,6 +37,15 @@ export const asignarRolUsuarioPorId = async (req: Request, res: Response) => {
     }
 
     res.status(200).json({ message: 'Rol asignado con éxito', usuario });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const usuarios = await usuarioService.obtenerTodosLosUsuarios();
+    res.status(200).json(usuarios);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -88,19 +96,15 @@ export const loginUsuario = async (req: Request, res: Response) => {
 
     res.status(200).json({
       message: 'Login exitoso',
-      usuario: {
-        id: usuario._id,
-        username: usuario.username,
-        email: usuario.email,
-        isAdmin: usuario.isAdmin,
-        location: usuario.location,
-      },
-      token: token,
+      usuario, // Enviar todos los atributos devueltos
+      token,
     });
   } catch (error: any) {
     res.status(401).json({ error: error.message });
   }
 };
+
+
 
 // Nuevo endpoint para obtener todas las coordenadas
 export const obtenerCoordenadasUsuarios = async (req: Request, res: Response) => {

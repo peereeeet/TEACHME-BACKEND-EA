@@ -30,6 +30,15 @@ export const crearUsuario = async (
   return await usuario.save();
 };
 
+export const obtenerTodosLosUsuarios = async () => {
+  try {
+    const usuarios = await Usuario.find();
+    return usuarios;
+  } catch (error: any) {
+    throw new Error(`Error al obtener los usuarios: ${error.message}`);
+  }
+};
+
 // Modificar edad de usuario por ID
 export const modificarEdadUsuarioPorId = async (_id: string, edad: number) => {
   return await Usuario.findByIdAndUpdate(_id, { edad }, { new: true });
@@ -60,18 +69,35 @@ export const loginYGuardarCoordenadas = async (
   const usuario = await Usuario.findOne({
     $or: [{ email: identifier }, { username: identifier }],
   });
+
   if (!usuario) throw new Error('Usuario no encontrado');
 
   const isValid = await bcrypt.compare(password, usuario.password);
   if (!isValid) throw new Error('Contraseña incorrecta');
 
+  // Guardar las coordenadas del usuario
   usuario.location = {
     type: 'Point',
     coordinates: [lng, lat],
   };
   await usuario.save();
-  return usuario;
+
+  // Devolver todos los atributos relevantes del usuario
+  return {
+    id: usuario._id,
+    nombre: usuario.nombre,
+    username: usuario.username,
+    email: usuario.email,
+    fechaNacimiento: usuario.fechaNacimiento,
+    isProfesor: usuario.isProfesor,
+    isAlumno: usuario.isAlumno,
+    isAdmin: usuario.isAdmin,
+    location: usuario.location,
+    conectado: usuario.conectado,
+    asignaturasImparte: usuario.asignaturasImparte,
+  };
 };
+
 
 // Obtener todas las coordenadas de los usuarios
 export const obtenerCoordenadasDeUsuarios = async () => {

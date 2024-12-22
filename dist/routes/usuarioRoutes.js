@@ -32,12 +32,13 @@ const router = express.Router();
 // Rutas sin parámetros
 router.post('/', usuarioController_1.crearUsuario); // Crear usuario sin protección para registro inicial
 router.post('/login', usuarioController_1.loginUsuario); // Login sin protección
-router.put('/:id/rol', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.asignarRolUsuarioPorId);
-router.get('/listar-paginados', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.obtenerUsuariosPaginados); // Listar usuarios paginados (solo admin)
+router.put('/:id/rol', verifyJWT_1.TokenValidation, usuarioController_1.asignarRolUsuarioPorId);
+router.get('/listar-paginados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosPaginados); // Listar usuarios paginados (solo admin)
 router.get('/buscar', verifyJWT_1.TokenValidation, usuarioController_1.buscarUsuarios); // Buscar usuarios por nombre
 router.get('/coordenadas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerCoordenadasUsuarios); // Obtener coordenadas de usuarios
 router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados); // Ver usuarios conectados
 // Rutas con parámetros dinámicos
+router.get('/', usuarioController_1.getAllUsers);
 router.get('/:id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.verUsuarioPorId); // Ver usuario por ID
 router.get('/:nombre', verifyJWT_1.TokenValidation, usuarioController_1.verUsuarioPorNombre); // Ver usuario por nombre
 router.get('/:nombre/asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre
