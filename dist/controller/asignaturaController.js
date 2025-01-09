@@ -37,21 +37,19 @@ exports.crearAsignatura = crearAsignatura;
 exports.listarAsignaturas = listarAsignaturas;
 exports.verAsignaturaPorId = verAsignaturaPorId;
 exports.verAsignaturaPorNombre = verAsignaturaPorNombre;
-exports.asignarUsuariosAAsignaturaPorNombre = asignarUsuariosAAsignaturaPorNombre;
-exports.asignarUsuariosAAsignaturaPorId = asignarUsuariosAAsignaturaPorId;
-exports.eliminarAsignaturaPorNombre = eliminarAsignaturaPorNombre;
 exports.eliminarAsignaturaPorId = eliminarAsignaturaPorId;
+exports.eliminarAsignaturaPorNombre = eliminarAsignaturaPorNombre;
 const asignaturaService = __importStar(require("../services/asignaturaService"));
 ////////////////////////////////////CREAR ASIGNATURA/////////////////////////////////////
 function crearAsignatura(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { nombre, descripcion } = req.body;
-            const asignatura = yield asignaturaService.crearAsignatura(nombre, descripcion);
-            return res.status(201).json(asignatura); // Usar `return` para asegurar una única respuesta
+            const { nombre, nivel } = req.body;
+            const asignatura = yield asignaturaService.crearAsignatura(nombre, nivel);
+            return res.status(201).json(asignatura);
         }
         catch (error) {
-            return res.status(400).json({ error: error.message }); // Usar `return` aquí también
+            return res.status(400).json({ error: error.message });
         }
     });
 }
@@ -75,8 +73,7 @@ function verAsignaturaPorId(req, res) {
             if (!asignatura) {
                 return res.status(404).json({ error: 'Asignatura no encontrada' });
             }
-            console.log(asignatura);
-            res.status(200).send().json(asignatura);
+            res.status(200).json(asignatura);
         }
         catch (error) {
             res.status(500).json({ error: error.message });
@@ -90,7 +87,6 @@ function verAsignaturaPorNombre(req, res) {
             if (!asignatura) {
                 return res.status(404).json({ error: 'Asignatura no encontrada' });
             }
-            console.log(asignatura);
             res.status(200).json(asignatura);
         }
         catch (error) {
@@ -98,55 +94,10 @@ function verAsignaturaPorNombre(req, res) {
         }
     });
 }
-//AÑADIR USUARIO A ASIGNATURA POR NOMBRE E ID
-function asignarUsuariosAAsignaturaPorNombre(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { nombreAsignatura, nombresUsuarios } = req.body;
-            const asignatura = yield asignaturaService.asignarUsuariosAAsignaturaPorNombre(nombreAsignatura, nombresUsuarios);
-            console.log(asignatura);
-            res.status(200).send().json(asignatura);
-        }
-        catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    });
-}
-function asignarUsuariosAAsignaturaPorId(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { _id } = req.params;
-            const { nombresUsuarios } = req.body;
-            const asignatura = yield asignaturaService.asignarUsuariosAAsignaturaPorId(_id, nombresUsuarios);
-            console.log(asignatura);
-            res.status(200).send().json(asignatura);
-        }
-        catch (error) {
-            res.status(400).json({ error: error.message });
-        }
-    });
-}
-//ELIMINAR ASIGNATURA DE LA BASE DE DATOS POR NOMBRE E ID
-function eliminarAsignaturaPorNombre(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { nombre } = req.params;
-            const resultado = yield asignaturaService.eliminarAsignaturaPorNombre(nombre);
-            if (!resultado) {
-                return res.status(404).json({ error: 'Asignatura no encontrada' });
-            }
-            console.log(listarAsignaturas);
-            res.status(200).send().json(listarAsignaturas);
-        }
-        catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    });
-}
+////////////////////////////////////ELIMINAR ASIGNATURA POR NOMBRE E ID/////////////////////////////////////
 function eliminarAsignaturaPorId(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log("ID recibido para eliminar:", req.params._id); // Agrega este log
             const asignatura = yield asignaturaService.eliminarAsignaturaPorId(req.params._id);
             if (!asignatura) {
                 return res.status(404).json({ error: 'Asignatura no encontrada' });
@@ -158,6 +109,21 @@ function eliminarAsignaturaPorId(req, res) {
         }
     });
 }
+function eliminarAsignaturaPorNombre(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const asignatura = yield asignaturaService.eliminarAsignaturaPorNombre(req.params.nombre);
+            if (!asignatura) {
+                return res.status(404).json({ error: 'Asignatura no encontrada' });
+            }
+            res.status(200).json({ message: 'Asignatura eliminada con éxito' });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    });
+}
+////////////////////////////////////OBTENER ASIGNATURAS PAGINADAS/////////////////////////////////////
 const obtenerAsignaturasPaginadas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { page = 1, limit = 5 } = req.query;

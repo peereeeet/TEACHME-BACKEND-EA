@@ -1,5 +1,5 @@
 import mongoose, { Types } from 'mongoose';
-import Usuario, { IUsuario } from '../models/usuario';
+import Usuario, { IUsuario, IDisponibilidad } from '../models/usuario';
 import Asignatura from '../models/asignatura';
 import bcrypt from 'bcrypt';
 
@@ -39,9 +39,53 @@ export const obtenerTodosLosUsuarios = async () => {
   }
 };
 
+// Actualizar datos personales, incluyendo descripción
+export const actualizarUsuarioPorId = async (
+  userId: string,
+  datos: Partial<IUsuario>
+) => {
+  return await Usuario.findByIdAndUpdate(userId, datos, { new: true });
+};
+
+////////////////////////////////////ELIMINAR USUARIO POR ID/////////////////////////////////////
+export const eliminarUsuarioPorId = async (id: string) => {
+  try {
+    return await Usuario.findByIdAndDelete(id);
+  } catch (error: any) {
+    throw new Error(`Error al eliminar usuario por ID: ${error.message}`);
+  }
+};
+
+export const actualizarAsignaturas = async (userId: string, asignaturas: string[]) => {
+  // Busca el usuario por ID
+  const usuario = await Usuario.findById(userId);
+
+  if (!usuario) {
+    throw new Error('Usuario no encontrado.');
+  }
+
+  // Verifica que todas las asignaturas existen en la base de datos
+  const asignaturasValidas = await Asignatura.find({ _id: { $in: asignaturas } });
+
+  if (asignaturasValidas.length !== asignaturas.length) {
+    throw new Error('Algunas asignaturas no fueron encontradas.');
+  }
+
+  // Asigna las asignaturas al usuario
+  usuario.asignaturasImparte = asignaturas.map(id => new mongoose.Types.ObjectId(id));
+
+  return await usuario.save();
+};
+
+
 // Modificar edad de usuario por ID
 export const modificarEdadUsuarioPorId = async (_id: string, edad: number) => {
   return await Usuario.findByIdAndUpdate(_id, { edad }, { new: true });
+};
+
+// Actualizar disponibilidad
+export const actualizarDisponibilidad = async (userId: string, disponibilidad: IDisponibilidad[]) => {
+  return await Usuario.findByIdAndUpdate(userId, { disponibilidad }, { new: true });
 };
 
 // Modificar rol de usuario por ID
@@ -68,7 +112,9 @@ export const loginYGuardarCoordenadas = async (
 ) => {
   const usuario = await Usuario.findOne({
     $or: [{ email: identifier }, { username: identifier }],
-  });
+  })
+    .populate('asignaturasImparte') // Agregar populate para asignaturas
+    .lean(); // Convierte el documento Mongoose a un objeto plano
 
   if (!usuario) throw new Error('Usuario no encontrado');
 
@@ -76,15 +122,19 @@ export const loginYGuardarCoordenadas = async (
   if (!isValid) throw new Error('Contraseña incorrecta');
 
   // Guardar las coordenadas del usuario
-  usuario.location = {
-    type: 'Point',
-    coordinates: [lng, lat],
-  };
-  await usuario.save();
+  await Usuario.updateOne(
+    { _id: usuario._id },
+    {
+      location: {
+        type: 'Point',
+        coordinates: [lng, lat],
+      },
+    }
+  );
 
   // Devolver todos los atributos relevantes del usuario
   return {
-    id: usuario._id,
+    id: usuario._id.toString(), // `_id` ya está como string
     nombre: usuario.nombre,
     username: usuario.username,
     email: usuario.email,
@@ -95,8 +145,13 @@ export const loginYGuardarCoordenadas = async (
     location: usuario.location,
     conectado: usuario.conectado,
     asignaturasImparte: usuario.asignaturasImparte,
+    descripcion: usuario.descripcion || '', // Añadir descripción
+    foto: usuario.foto || '', // Añadir foto
+    disponibilidad: usuario.disponibilidad || [], // Añadir disponibilidad
   };
 };
+
+
 
 
 // Obtener todas las coordenadas de los usuarios
@@ -145,15 +200,6 @@ export const verUsuarioPorId = async (_id: string): Promise<IUsuario | null> => 
   return await Usuario.findById(_id).populate('asignaturasImparte');
 };
 
-// Actualizar usuario por ID
-export const actualizarUsuarioPorId = async (_id: string, datos: any) => {
-  return await Usuario.findByIdAndUpdate(_id, datos, { new: true });
-};
-
-// Eliminar usuario por ID
-export const eliminarUsuarioPorId = async (_id: string) => {
-  return await Usuario.findByIdAndDelete(_id);
-};
 
 // Modificar nombre de usuario por ID
 export const modificarNombreUsuarioPorId = async (_id: string, nombre: string) => {

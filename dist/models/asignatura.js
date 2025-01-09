@@ -4,8 +4,7 @@ const mongoose_1 = require("mongoose");
 // Esquema de Asignatura
 const asignaturaSchema = new mongoose_1.Schema({
     nombre: { type: String },
-    descripcion: { type: String },
-    usuarios: { type: [mongoose_1.Schema.Types.ObjectId], ref: 'Usuario', default: [] }, // Establece default: []
+    nivel: { type: String, enum: ['ESO', 'Bachillerato'], required: true }, // Nivel con valores válidos
 }, { versionKey: false } // Desactivamos el campo __v
 );
 // Modelo de Asignatura

@@ -39,12 +39,14 @@ router.get('/coordenadas', verifyJWT_1.TokenValidation, usuarioController_1.obte
 router.get('/conectados', verifyJWT_1.TokenValidation, usuarioController_1.obtenerUsuariosConectados); // Ver usuarios conectados
 // Rutas con parámetros dinámicos
 router.get('/', usuarioController_1.getAllUsers);
-router.get('/:id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.verUsuarioPorId); // Ver usuario por ID
+router.get('/:id', verifyJWT_1.TokenValidation, usuarioController_1.verUsuarioPorId); // Ver usuario por ID
 router.get('/:nombre', verifyJWT_1.TokenValidation, usuarioController_1.verUsuarioPorNombre); // Ver usuario por nombre
-router.get('/:nombre/asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre
 router.get('/:usuarioId/asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
 router.get('/:usuarioId/asignaturas/paginacion', verifyJWT_1.TokenValidation, usuarioController_1.obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
 // Métodos PUT
+router.put('/:id/actualizar-disponibilidad', verifyJWT_1.TokenValidation, usuarioController_1.actualizarDisponibilidad);
+router.put('/:id/actualizar-asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.actualizarAsignaturas);
+router.put('/:id/actualizar-datos', verifyJWT_1.TokenValidation, usuarioController_1.actualizarDatosUsuario);
 router.put('/:nombre/asignaturas', verifyJWT_1.TokenValidation, usuarioController_1.asignarAsignaturasAUsuario); // Asignar asignaturas a un usuario por nombre
 router.put('/:_id', verifyJWT_1.TokenValidation, verifyOwner_1.verifyOwnership, usuarioController_1.actualizarUsuarioPorId); // Actualizar datos propios
 router.put('/:nombre/asignaturas/actualizar', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.actualizarAsignaturasUsuarioPorNombre); // Actualizar asignaturas (solo admin)
@@ -55,6 +57,7 @@ router.put('/:_id/nombre', verifyJWT_1.TokenValidation, verifyOwner_1.verifyOwne
 router.put('/:_id/password', verifyJWT_1.TokenValidation, verifyOwner_1.verifyOwnership, usuarioController_1.modificarPasswordUsuarioPorId); // Modificar contraseña
 router.put('/:_id/rol', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.modificarRolUsuarioPorId); // Modificar rol (solo admin)
 // Métodos DELETE
+router.delete('/:id', verifyJWT_1.TokenValidation, usuarioController_1.eliminarUsuarioPorId); // Eliminar usuario por ID
 router.delete('/:usuarioId', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.eliminarUsuarioPorId); // Eliminar usuario (solo admin)
 router.delete('/:nombre/asignaturas/:asignaturaId', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, usuarioController_1.eliminarAsignaturaDeUsuarioPorNombre); // Eliminar asignatura por nombre (solo admin)
 router.delete('/:usuarioId/asignaturas/:asignaturaId', verifyJWT_1.TokenValidation, usuarioController_1.eliminarAsignaturaDeUsuarioPorId); // Eliminar asignatura por ID

@@ -26,21 +26,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = __importStar(require("express"));
 const asignaturaController_1 = require("../controller/asignaturaController");
 const verifyJWT_1 = require("../middleware/verifyJWT");
-const verifyAdmin_1 = require("../middleware/verifyAdmin");
 const router = express.Router();
 ////////////////////////////////////POSTS/////////////////////////////////////
-router.post('/', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.crearAsignatura); // Solo administradores pueden crear asignaturas
-router.get('/paginacion', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.obtenerAsignaturasPaginadas); // Paginación protegida por autenticación
+router.post('/', verifyJWT_1.TokenValidation, asignaturaController_1.crearAsignatura); // Crear nueva asignatura
 ////////////////////////////////////GETS/////////////////////////////////////
-//router.get('/', TokenValidation, listarAsignaturas); // Listar asignaturas protegido
-router.get('/', asignaturaController_1.listarAsignaturas); // Listar asignaturas protegido
-router.get('/:_id', verifyJWT_1.TokenValidation, asignaturaController_1.verAsignaturaPorId); // Obtener asignatura por ID protegido
-router.get('/:nombre', verifyJWT_1.TokenValidation, asignaturaController_1.verAsignaturaPorNombre); // Obtener asignatura por nombre protegido
-////////////////////////////////////PUTS/////////////////////////////////////
-router.put('/:nombre/usuario', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.asignarUsuariosAAsignaturaPorNombre); // Asignar usuarios a asignaturas (nombre)
-router.put('/:_id/usuario', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.asignarUsuariosAAsignaturaPorId); // Asignar usuarios a asignaturas (ID)
+router.get('/', verifyJWT_1.TokenValidation, asignaturaController_1.listarAsignaturas); // Listar asignaturas
+router.get('/paginacion', verifyJWT_1.TokenValidation, asignaturaController_1.obtenerAsignaturasPaginadas); // Obtener asignaturas con paginación
+router.get('/:_id', verifyJWT_1.TokenValidation, asignaturaController_1.verAsignaturaPorId); // Obtener asignatura por ID
+router.get('/:nombre', verifyJWT_1.TokenValidation, asignaturaController_1.verAsignaturaPorNombre); // Obtener asignatura por nombre
 ////////////////////////////////////DELETES/////////////////////////////////////
-router.delete('/:_id', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.eliminarAsignaturaPorId); // Solo administradores pueden eliminar asignaturas
-router.delete('/:nombre', verifyJWT_1.TokenValidation, verifyAdmin_1.AdminValidation, asignaturaController_1.eliminarAsignaturaPorNombre); // Solo administradores pueden eliminar asignaturas por nombre
+router.delete('/:_id', verifyJWT_1.TokenValidation, asignaturaController_1.eliminarAsignaturaPorId); // Eliminar asignatura por ID
+router.delete('/:nombre', verifyJWT_1.TokenValidation, asignaturaController_1.eliminarAsignaturaPorNombre); // Eliminar asignatura por nombre
 exports.default = router;
 //# sourceMappingURL=asignaturaRoutes.js.map

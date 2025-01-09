@@ -1,6 +1,12 @@
 import mongoose, { Schema, model, Document, Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+// Interfaz para Disponibilidad
+export interface IDisponibilidad {
+  dia: string; // Día de la semana, ejemplo: "Lunes"
+  turno: 'Mañana' | 'Tarde'; // Turno: "Mañana" o "Tarde"
+}
+
 // Interfaz para el tipo GeoJSON
 export interface IGeoJSON {
   type: 'Point';
@@ -20,6 +26,9 @@ export interface IUsuario extends Document {
   asignaturasImparte?: Types.ObjectId[];
   conectado: boolean;
   location?: IGeoJSON;
+  descripcion?: string; // Nueva descripción del perfil
+  foto?: string; // URL o base64 de la foto de perfil
+  disponibilidad?: IDisponibilidad[]; // Nueva disponibilidad del usuario
   encryptPassword(password: string): Promise<string>;
   comparePassword(password: string): Promise<boolean>;
 }
@@ -48,6 +57,14 @@ const usuarioSchema = new Schema<IUsuario>(
         default: undefined,
       },
     },
+    descripcion: { type: String, default: '' }, // Nueva descripción del perfil
+    foto: { type: String, default: '' }, // Nueva foto de perfil
+    disponibilidad: [
+      {
+        dia: { type: String, required: true }, // Día de la semana
+        turno: { type: String, enum: ['Mañana', 'Tarde'], required: true }, // Turno
+      },
+    ], // Nueva disponibilidad del usuario
   },
   { versionKey: false }
 );

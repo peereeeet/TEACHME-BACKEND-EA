@@ -35,15 +35,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.getAllUsers = exports.asignarRolUsuarioPorId = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.getAllUsers = exports.actualizarDisponibilidad = exports.actualizarDatosUsuario = exports.asignarRolUsuarioPorId = exports.actualizarAsignaturas = void 0;
 exports.crearUsuario = crearUsuario;
+exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
 exports.listarUsuarios = listarUsuarios;
 exports.verUsuarioPorNombre = verUsuarioPorNombre;
 exports.verUsuarioPorId = verUsuarioPorId;
 exports.asignarAsignaturasAUsuario = asignarAsignaturasAUsuario;
 exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
-exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
 exports.actualizarAsignaturasUsuarioPorNombre = actualizarAsignaturasUsuarioPorNombre;
 exports.eliminarAsignaturaDeUsuarioPorNombre = eliminarAsignaturaDeUsuarioPorNombre;
 exports.asignarAsignaturaAUsuarioPorId = asignarAsignaturaAUsuarioPorId;
@@ -71,6 +71,20 @@ function crearUsuario(req, res) {
         }
     });
 }
+const actualizarAsignaturas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const { asignaturas } = req.body;
+        const usuario = yield usuarioService.actualizarAsignaturas(userId, asignaturas);
+        if (!usuario)
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(200).json({ message: 'Asignaturas actualizadas correctamente', usuario });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.actualizarAsignaturas = actualizarAsignaturas;
 const asignarRolUsuarioPorId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { isProfesor, isAlumno } = req.body;
@@ -92,6 +106,58 @@ const asignarRolUsuarioPorId = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.asignarRolUsuarioPorId = asignarRolUsuarioPorId;
+////////////////////////////////////ELIMINAR USUARIO POR ID/////////////////////////////////////
+function eliminarUsuarioPorId(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { id } = req.params;
+            const usuario = yield usuarioService.eliminarUsuarioPorId(id);
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            return res.status(200).json({ message: 'Usuario eliminado con éxito' });
+        }
+        catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    });
+}
+// Actualizar datos personales, incluyendo descripción
+const actualizarDatosUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const { nombre, username, foto, password, descripcion } = req.body;
+        const updatedData = { nombre, username, foto, descripcion };
+        // Si se envía una nueva contraseña, hashearla
+        if (password) {
+            const saltRounds = 10;
+            updatedData.password = yield bcrypt_1.default.hash(password, saltRounds);
+        }
+        const usuario = yield usuarioService.actualizarUsuarioPorId(userId, updatedData);
+        if (!usuario)
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(200).json({ message: 'Datos actualizados correctamente', usuario });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.actualizarDatosUsuario = actualizarDatosUsuario;
+// Actualizar disponibilidad académica
+const actualizarDisponibilidad = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = req.params.id;
+        const { disponibilidad } = req.body;
+        const usuario = yield usuarioService.actualizarDisponibilidad(userId, disponibilidad);
+        if (!usuario)
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(200).json({ message: 'Disponibilidad actualizada correctamente', usuario });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.actualizarDisponibilidad = actualizarDisponibilidad;
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const usuarios = yield usuarioService.obtenerTodosLosUsuarios();
@@ -128,12 +194,17 @@ const loginUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (!lat || !lng) {
             return res.status(400).json({ error: 'Las coordenadas son obligatorias para el login' });
         }
+        // Llama al servicio para autenticar al usuario y guardar las coordenadas
         const usuario = yield usuarioService.loginYGuardarCoordenadas(identifier, password, lat, lng);
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
         // Generar el token JWT
         const token = jsonwebtoken_1.default.sign({ email: usuario.email, isAdmin: usuario.isAdmin }, process.env.SECRET || 'secretkey', { expiresIn: '1h' });
+        // Preparar respuesta con todos los atributos del usuario
         res.status(200).json({
             message: 'Login exitoso',
-            usuario, // Enviar todos los atributos devueltos
+            usuario, // Enviar todos los atributos devueltos por el servicio
             token,
         });
     }
@@ -258,20 +329,6 @@ function actualizarUsuarioPorId(req, res) {
         }
     });
 }
-function eliminarUsuarioPorId(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const usuario = yield usuarioService.eliminarUsuarioPorId(req.params.usuarioId);
-            if (!usuario) {
-                return res.status(404).json({ error: 'Usuario no encontrado' });
-            }
-            res.status(200).json(usuario);
-        }
-        catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    });
-}
 ////////////////////////////////ACTUALIZAR ASIGNATURAS DE UN USUARIO POR NOMBRE/////////////////////////////////////
 function actualizarAsignaturasUsuarioPorNombre(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -375,20 +432,19 @@ function modificarPasswordUsuarioPorId(req, res) {
 const obtenerAsignaturasDelUsuario = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const usuarioId = req.params.usuarioId;
-        console.log("ID del usuario recibido:", usuarioId); // Verificación de ID
-        const usuario = yield usuario_1.default.findById(usuarioId).populate('asignaturasImparte');
-        if (usuario) {
-            console.log("Usuario encontrado:", usuario);
-            res.status(200).json(usuario.asignaturasImparte);
+        if (!usuarioId) {
+            return res.status(400).json({ error: 'El ID del usuario es obligatorio.' });
         }
-        else {
-            console.log("Usuario no encontrado con ID:", usuarioId);
-            res.status(404).json({ message: 'Usuario no encontrado' });
+        const usuario = yield usuario_1.default.findById(usuarioId); // Sin populate
+        console.log("Usuario encontrado:", usuario);
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado.' });
         }
+        res.status(200).json(usuario.asignaturasImparte); // Devolver los IDs directamente
     }
     catch (error) {
-        console.error("Error al obtener las asignaturas:", error);
-        res.status(500).json({ message: 'Error al obtener las asignaturas', error });
+        console.error('Error al obtener las asignaturas del usuario:', error.message);
+        res.status(500).json({ error: 'Error interno del servidor.' });
     }
 });
 exports.obtenerAsignaturasDelUsuario = obtenerAsignaturasDelUsuario;

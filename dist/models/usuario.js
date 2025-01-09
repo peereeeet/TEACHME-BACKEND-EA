@@ -37,6 +37,14 @@ const usuarioSchema = new mongoose_1.Schema({
             default: undefined,
         },
     },
+    descripcion: { type: String, default: '' }, // Nueva descripción del perfil
+    foto: { type: String, default: '' }, // Nueva foto de perfil
+    disponibilidad: [
+        {
+            dia: { type: String, required: true }, // Día de la semana
+            turno: { type: String, enum: ['Mañana', 'Tarde'], required: true }, // Turno
+        },
+    ], // Nueva disponibilidad del usuario
 }, { versionKey: false });
 // Método para encriptar contraseña
 usuarioSchema.methods.encryptPassword = function (password) {

@@ -25,7 +25,10 @@ import {
   obtenerUsuariosConectados,
   obtenerCoordenadasUsuarios,
   asignarRolUsuarioPorId,
-  getAllUsers
+  getAllUsers,
+  actualizarDatosUsuario,
+  actualizarDisponibilidad,
+  actualizarAsignaturas
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
@@ -44,13 +47,15 @@ router.get('/conectados', TokenValidation, obtenerUsuariosConectados); // Ver us
 
 // Rutas con parámetros dinámicos
 router.get('/', getAllUsers);
-router.get('/:id', TokenValidation, AdminValidation, verUsuarioPorId); // Ver usuario por ID
+router.get('/:id', TokenValidation, verUsuarioPorId); // Ver usuario por ID
 router.get('/:nombre', TokenValidation, verUsuarioPorNombre); // Ver usuario por nombre
-router.get('/:nombre/asignaturas', TokenValidation, obtenerIdUsuarioPorNombre); // Obtener ID de usuario por nombre
 router.get('/:usuarioId/asignaturas', TokenValidation, obtenerAsignaturasDelUsuario); // Ver asignaturas de un usuario
 router.get('/:usuarioId/asignaturas/paginacion', TokenValidation, obtenerAsignaturasPaginadasDeUsuario); // Paginación de asignaturas
 
 // Métodos PUT
+router.put('/:id/actualizar-disponibilidad', TokenValidation, actualizarDisponibilidad);
+router.put('/:id/actualizar-asignaturas', TokenValidation, actualizarAsignaturas);
+router.put('/:id/actualizar-datos', TokenValidation, actualizarDatosUsuario);
 router.put('/:nombre/asignaturas', TokenValidation, asignarAsignaturasAUsuario); // Asignar asignaturas a un usuario por nombre
 router.put('/:_id', TokenValidation, verifyOwnership, actualizarUsuarioPorId); // Actualizar datos propios
 router.put('/:nombre/asignaturas/actualizar', TokenValidation, AdminValidation, actualizarAsignaturasUsuarioPorNombre); // Actualizar asignaturas (solo admin)
@@ -62,6 +67,7 @@ router.put('/:_id/password', TokenValidation, verifyOwnership, modificarPassword
 router.put('/:_id/rol', TokenValidation, AdminValidation, modificarRolUsuarioPorId); // Modificar rol (solo admin)
 
 // Métodos DELETE
+router.delete('/:id', TokenValidation, eliminarUsuarioPorId); // Eliminar usuario por ID
 router.delete('/:usuarioId', TokenValidation, AdminValidation, eliminarUsuarioPorId); // Eliminar usuario (solo admin)
 router.delete('/:nombre/asignaturas/:asignaturaId', TokenValidation, AdminValidation, eliminarAsignaturaDeUsuarioPorNombre); // Eliminar asignatura por nombre (solo admin)
 router.delete('/:usuarioId/asignaturas/:asignaturaId', TokenValidation, eliminarAsignaturaDeUsuarioPorId); // Eliminar asignatura por ID

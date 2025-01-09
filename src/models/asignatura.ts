@@ -1,18 +1,16 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 // Define la interfaz para Asignatura
 export interface IAsignatura extends Document {
   nombre?: string; // Campo opcional
-  descripcion?: string; // Campo opcional
-  usuarios?: Types.ObjectId[]; // Relación con los usuarios
+  nivel: 'ESO' | 'Bachillerato'; // Campo obligatorio con valores restringidos
 }
 
 // Esquema de Asignatura
 const asignaturaSchema = new Schema<IAsignatura>(
   {
     nombre: { type: String },
-    descripcion: { type: String },
-    usuarios: { type: [Schema.Types.ObjectId], ref: 'Usuario', default: [] }, // Establece default: []
+    nivel: { type: String, enum: ['ESO', 'Bachillerato'], required: true }, // Nivel con valores válidos
   },
   { versionKey: false } // Desactivamos el campo __v
 );

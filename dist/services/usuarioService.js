@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,8 +35,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.modificarEdadUsuarioPorId = exports.obtenerTodosLosUsuarios = exports.crearUsuario = void 0;
-const mongoose_1 = require("mongoose");
+exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.actualizarDisponibilidad = exports.modificarEdadUsuarioPorId = exports.actualizarAsignaturas = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.obtenerTodosLosUsuarios = exports.crearUsuario = void 0;
+const mongoose_1 = __importStar(require("mongoose"));
 const usuario_1 = __importDefault(require("../models/usuario"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -45,11 +68,47 @@ const obtenerTodosLosUsuarios = () => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.obtenerTodosLosUsuarios = obtenerTodosLosUsuarios;
+// Actualizar datos personales, incluyendo descripción
+const actualizarUsuarioPorId = (userId, datos) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield usuario_1.default.findByIdAndUpdate(userId, datos, { new: true });
+});
+exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
+////////////////////////////////////ELIMINAR USUARIO POR ID/////////////////////////////////////
+const eliminarUsuarioPorId = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return yield usuario_1.default.findByIdAndDelete(id);
+    }
+    catch (error) {
+        throw new Error(`Error al eliminar usuario por ID: ${error.message}`);
+    }
+});
+exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
+const actualizarAsignaturas = (userId, asignaturas) => __awaiter(void 0, void 0, void 0, function* () {
+    // Busca el usuario por ID
+    const usuario = yield usuario_1.default.findById(userId);
+    if (!usuario) {
+        throw new Error('Usuario no encontrado.');
+    }
+    // Verifica que todas las asignaturas existen en la base de datos
+    const asignaturasValidas = yield asignatura_1.default.find({ _id: { $in: asignaturas } });
+    if (asignaturasValidas.length !== asignaturas.length) {
+        throw new Error('Algunas asignaturas no fueron encontradas.');
+    }
+    // Asigna las asignaturas al usuario
+    usuario.asignaturasImparte = asignaturas.map(id => new mongoose_1.default.Types.ObjectId(id));
+    return yield usuario.save();
+});
+exports.actualizarAsignaturas = actualizarAsignaturas;
 // Modificar edad de usuario por ID
 const modificarEdadUsuarioPorId = (_id, edad) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findByIdAndUpdate(_id, { edad }, { new: true });
 });
 exports.modificarEdadUsuarioPorId = modificarEdadUsuarioPorId;
+// Actualizar disponibilidad
+const actualizarDisponibilidad = (userId, disponibilidad) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield usuario_1.default.findByIdAndUpdate(userId, { disponibilidad }, { new: true });
+});
+exports.actualizarDisponibilidad = actualizarDisponibilidad;
 // Modificar rol de usuario por ID
 const modificarRolUsuarioPorId = (_id, isProfesor, isAlumno, isAdmin) => __awaiter(void 0, void 0, void 0, function* () {
     const updates = {};
@@ -66,21 +125,24 @@ exports.modificarRolUsuarioPorId = modificarRolUsuarioPorId;
 const loginYGuardarCoordenadas = (identifier, password, lat, lng) => __awaiter(void 0, void 0, void 0, function* () {
     const usuario = yield usuario_1.default.findOne({
         $or: [{ email: identifier }, { username: identifier }],
-    });
+    })
+        .populate('asignaturasImparte') // Agregar populate para asignaturas
+        .lean(); // Convierte el documento Mongoose a un objeto plano
     if (!usuario)
         throw new Error('Usuario no encontrado');
     const isValid = yield bcrypt_1.default.compare(password, usuario.password);
     if (!isValid)
         throw new Error('Contraseña incorrecta');
     // Guardar las coordenadas del usuario
-    usuario.location = {
-        type: 'Point',
-        coordinates: [lng, lat],
-    };
-    yield usuario.save();
+    yield usuario_1.default.updateOne({ _id: usuario._id }, {
+        location: {
+            type: 'Point',
+            coordinates: [lng, lat],
+        },
+    });
     // Devolver todos los atributos relevantes del usuario
     return {
-        id: usuario._id,
+        id: usuario._id.toString(), // `_id` ya está como string
         nombre: usuario.nombre,
         username: usuario.username,
         email: usuario.email,
@@ -91,6 +153,9 @@ const loginYGuardarCoordenadas = (identifier, password, lat, lng) => __awaiter(v
         location: usuario.location,
         conectado: usuario.conectado,
         asignaturasImparte: usuario.asignaturasImparte,
+        descripcion: usuario.descripcion || '', // Añadir descripción
+        foto: usuario.foto || '', // Añadir foto
+        disponibilidad: usuario.disponibilidad || [], // Añadir disponibilidad
     };
 });
 exports.loginYGuardarCoordenadas = loginYGuardarCoordenadas;
@@ -138,16 +203,6 @@ const verUsuarioPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () 
     return yield usuario_1.default.findById(_id).populate('asignaturasImparte');
 });
 exports.verUsuarioPorId = verUsuarioPorId;
-// Actualizar usuario por ID
-const actualizarUsuarioPorId = (_id, datos) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findByIdAndUpdate(_id, datos, { new: true });
-});
-exports.actualizarUsuarioPorId = actualizarUsuarioPorId;
-// Eliminar usuario por ID
-const eliminarUsuarioPorId = (_id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield usuario_1.default.findByIdAndDelete(_id);
-});
-exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
 // Modificar nombre de usuario por ID
 const modificarNombreUsuarioPorId = (_id, nombre) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findByIdAndUpdate(_id, { nombre }, { new: true });

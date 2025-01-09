@@ -1,7 +1,7 @@
 import cors from 'cors';
 import { Router, Request, Response } from 'express';
 import * as usuarioService from '../services/usuarioService';
-import Usuario from '../models/usuario';
+import Usuario, { IUsuario } from '../models/usuario';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { io, connectedUsers } from '../app';
@@ -16,6 +16,22 @@ export async function crearUsuario(req: Request, res: Response) {
     res.status(400).json({ error: error.message });
   }
 }
+
+
+export const actualizarAsignaturas = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const { asignaturas } = req.body;
+
+    const usuario = await usuarioService.actualizarAsignaturas(userId, asignaturas);
+
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    res.status(200).json({ message: 'Asignaturas actualizadas correctamente', usuario });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export const asignarRolUsuarioPorId = async (req: Request, res: Response) => {
   try {
@@ -41,6 +57,65 @@ export const asignarRolUsuarioPorId = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+////////////////////////////////////ELIMINAR USUARIO POR ID/////////////////////////////////////
+export async function eliminarUsuarioPorId(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const usuario = await usuarioService.eliminarUsuarioPorId(id);
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    return res.status(200).json({ message: 'Usuario eliminado con éxito' });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+// Actualizar datos personales, incluyendo descripción
+export const actualizarDatosUsuario = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const { nombre, username, foto, password, descripcion } = req.body;
+
+    const updatedData: Partial<IUsuario> = { nombre, username, foto, descripcion };
+
+    // Si se envía una nueva contraseña, hashearla
+    if (password) {
+      const saltRounds = 10;
+      updatedData.password = await bcrypt.hash(password, saltRounds);
+    }
+
+    const usuario = await usuarioService.actualizarUsuarioPorId(userId, updatedData);
+
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    res.status(200).json({ message: 'Datos actualizados correctamente', usuario });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+// Actualizar disponibilidad académica
+export const actualizarDisponibilidad = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const { disponibilidad } = req.body;
+
+    const usuario = await usuarioService.actualizarDisponibilidad(userId, disponibilidad);
+
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    res.status(200).json({ message: 'Disponibilidad actualizada correctamente', usuario });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -85,7 +160,12 @@ export const loginUsuario = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Las coordenadas son obligatorias para el login' });
     }
 
+    // Llama al servicio para autenticar al usuario y guardar las coordenadas
     const usuario = await usuarioService.loginYGuardarCoordenadas(identifier, password, lat, lng);
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
 
     // Generar el token JWT
     const token = jwt.sign(
@@ -94,15 +174,18 @@ export const loginUsuario = async (req: Request, res: Response) => {
       { expiresIn: '1h' }
     );
 
+    // Preparar respuesta con todos los atributos del usuario
     res.status(200).json({
       message: 'Login exitoso',
-      usuario, // Enviar todos los atributos devueltos
+      usuario, // Enviar todos los atributos devueltos por el servicio
       token,
     });
   } catch (error: any) {
     res.status(401).json({ error: error.message });
   }
 };
+
+
 
 
 
@@ -210,17 +293,7 @@ export async function actualizarUsuarioPorId(req: Request, res: Response) {
       res.status(400).json({ error: error.message });
   }
 }
-export async function eliminarUsuarioPorId(req: Request, res: Response) {
-  try {
-    const usuario = await usuarioService.eliminarUsuarioPorId(req.params.usuarioId);
-    if (!usuario) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-    res.status(200).json(usuario);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-}
+
 ////////////////////////////////ACTUALIZAR ASIGNATURAS DE UN USUARIO POR NOMBRE/////////////////////////////////////
 export async function actualizarAsignaturasUsuarioPorNombre(req: Request, res: Response) {
   try {
@@ -305,22 +378,26 @@ export async function modificarPasswordUsuarioPorId(req: Request, res: Response)
 export const obtenerAsignaturasDelUsuario = async (req: Request, res: Response) => {
   try {
     const usuarioId = req.params.usuarioId;
-    console.log("ID del usuario recibido:", usuarioId); // Verificación de ID
 
-    const usuario = await Usuario.findById(usuarioId).populate('asignaturasImparte');
-    
-    if (usuario) {
-      console.log("Usuario encontrado:", usuario);
-      res.status(200).json(usuario.asignaturasImparte);
-    } else {
-      console.log("Usuario no encontrado con ID:", usuarioId);
-      res.status(404).json({ message: 'Usuario no encontrado' });
+    if (!usuarioId) {
+      return res.status(400).json({ error: 'El ID del usuario es obligatorio.' });
     }
-  } catch (error) {
-    console.error("Error al obtener las asignaturas:", error);
-    res.status(500).json({ message: 'Error al obtener las asignaturas', error });
+
+    const usuario = await Usuario.findById(usuarioId); // Sin populate
+    console.log("Usuario encontrado:", usuario);
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    res.status(200).json(usuario.asignaturasImparte); // Devolver los IDs directamente
+  } catch (error: any) {
+    console.error('Error al obtener las asignaturas del usuario:', error.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
   }
 };
+
+
 
 ////////////////////////////////////MODIFICAR ROL DE USUARIO POR ID/////////////////////////////////////
 export async function modificarRolUsuarioPorId(req: Request, res: Response) {
