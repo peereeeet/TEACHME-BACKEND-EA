@@ -28,7 +28,8 @@ import {
   getAllUsers,
   actualizarDatosUsuario,
   actualizarDisponibilidad,
-  actualizarAsignaturas
+  actualizarAsignaturas,
+  filtrarUsuarios
 } from '../controller/usuarioController';
 import { TokenValidation } from '../middleware/verifyJWT';
 import { AdminValidation } from '../middleware/verifyAdmin';
@@ -40,6 +41,7 @@ const router = express.Router();
 router.post('/', crearUsuario); // Crear usuario sin protección para registro inicial
 router.post('/login', loginUsuario); // Login sin protección
 router.put('/:id/rol', TokenValidation, asignarRolUsuarioPorId);
+router.get('/filtrar', TokenValidation, filtrarUsuarios);
 router.get('/listar-paginados', TokenValidation, obtenerUsuariosPaginados); // Listar usuarios paginados (solo admin)
 router.get('/buscar', TokenValidation, buscarUsuarios); // Buscar usuarios por nombre
 router.get('/coordenadas', TokenValidation, obtenerCoordenadasUsuarios); // Obtener coordenadas de usuarios

@@ -33,6 +33,43 @@ export const actualizarAsignaturas = async (req: Request, res: Response) => {
   }
 };
 
+export const filtrarUsuarios = async (req: Request, res: Response) => {
+  try {
+    const { rol, asignaturaId, disponibilidad } = req.query;
+
+    // Validar que el rol sea válido
+    if (!rol || (rol !== 'profesor' && rol !== 'alumno')) {
+      return res.status(400).json({ error: 'El parámetro "rol" es obligatorio y debe ser "profesor" o "alumno".' });
+    }
+
+    // Procesar el parámetro `disponibilidad` (formato esperado: "Lunes,Mañana;Martes,Tarde")
+    let disponibilidadArray: { dia: string; turno: string }[] | undefined;
+    if (disponibilidad) {
+      disponibilidadArray = (disponibilidad as string)
+        .split(';')
+        .map((item) => {
+          const [dia, turno] = item.split(',');
+          return { dia, turno };
+        });
+    }
+
+    // Llamar al servicio para obtener los usuarios filtrados
+    const usuarios = await usuarioService.filtrarUsuarios(
+      rol as 'profesor' | 'alumno',
+      asignaturaId as string,
+      disponibilidadArray
+    );
+
+    res.status(200).json(usuarios);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
 export const asignarRolUsuarioPorId = async (req: Request, res: Response) => {
   try {
     const { isProfesor, isAlumno } = req.body;

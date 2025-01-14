@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.getAllUsers = exports.actualizarDisponibilidad = exports.actualizarDatosUsuario = exports.asignarRolUsuarioPorId = exports.actualizarAsignaturas = void 0;
+exports.obtenerAsignaturasPaginadasDeUsuario = exports.obtenerUsuariosPaginados = exports.obtenerAsignaturasDelUsuario = exports.obtenerUsuariosConectados = exports.obtenerCoordenadasUsuarios = exports.loginUsuario = exports.buscarUsuarios = exports.getAllUsers = exports.actualizarDisponibilidad = exports.actualizarDatosUsuario = exports.asignarRolUsuarioPorId = exports.filtrarUsuarios = exports.actualizarAsignaturas = void 0;
 exports.crearUsuario = crearUsuario;
 exports.eliminarUsuarioPorId = eliminarUsuarioPorId;
 exports.obtenerIdUsuarioPorNombre = obtenerIdUsuarioPorNombre;
@@ -85,6 +85,32 @@ const actualizarAsignaturas = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.actualizarAsignaturas = actualizarAsignaturas;
+const filtrarUsuarios = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { rol, asignaturaId, disponibilidad } = req.query;
+        // Validar que el rol sea válido
+        if (!rol || (rol !== 'profesor' && rol !== 'alumno')) {
+            return res.status(400).json({ error: 'El parámetro "rol" es obligatorio y debe ser "profesor" o "alumno".' });
+        }
+        // Procesar el parámetro `disponibilidad` (formato esperado: "Lunes,Mañana;Martes,Tarde")
+        let disponibilidadArray;
+        if (disponibilidad) {
+            disponibilidadArray = disponibilidad
+                .split(';')
+                .map((item) => {
+                const [dia, turno] = item.split(',');
+                return { dia, turno };
+            });
+        }
+        // Llamar al servicio para obtener los usuarios filtrados
+        const usuarios = yield usuarioService.filtrarUsuarios(rol, asignaturaId, disponibilidadArray);
+        res.status(200).json(usuarios);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+exports.filtrarUsuarios = filtrarUsuarios;
 const asignarRolUsuarioPorId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { isProfesor, isAlumno } = req.body;

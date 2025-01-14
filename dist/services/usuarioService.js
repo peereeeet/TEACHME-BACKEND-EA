@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.actualizarDisponibilidad = exports.modificarEdadUsuarioPorId = exports.actualizarAsignaturas = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.obtenerTodosLosUsuarios = exports.crearUsuario = void 0;
+exports.eliminarAsignaturaDeUsuarioPorId = exports.asignarAsignaturaAUsuarioPorId = exports.asignarAsignaturasAUsuario = exports.obtenerAsignaturasPaginadasDeUsuario = exports.eliminarAsignaturaDeUsuarioPorNombre = exports.actualizarAsignaturasUsuarioPorNombre = exports.obtenerUsuariosPaginados = exports.modificarPasswordUsuarioPorId = exports.modificarEmailUsuarioPorId = exports.modificarNombreUsuarioPorId = exports.verUsuarioPorId = exports.verUsuarioPorNombre = exports.listarUsuarios = exports.findByEmail = exports.findByUsername = exports.obtenerIdUsuarioPorNombre = exports.buscarUsuarios = exports.obtenerCoordenadasDeUsuarios = exports.loginYGuardarCoordenadas = exports.modificarRolUsuarioPorId = exports.actualizarDisponibilidad = exports.modificarEdadUsuarioPorId = exports.actualizarAsignaturas = exports.eliminarUsuarioPorId = exports.actualizarUsuarioPorId = exports.filtrarUsuarios = exports.obtenerTodosLosUsuarios = exports.crearUsuario = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const usuario_1 = __importDefault(require("../models/usuario"));
 const asignatura_1 = __importDefault(require("../models/asignatura"));
@@ -68,6 +68,38 @@ const obtenerTodosLosUsuarios = () => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.obtenerTodosLosUsuarios = obtenerTodosLosUsuarios;
+// Filtrar usuarios según los parámetros
+const filtrarUsuarios = (rol, asignaturaId, disponibilidadArray) => __awaiter(void 0, void 0, void 0, function* () {
+    const filtro = {};
+    // Filtrar por rol
+    if (rol === 'profesor') {
+        filtro.isProfesor = true;
+    }
+    else if (rol === 'alumno') {
+        filtro.isAlumno = true;
+    }
+    // Filtrar por asignatura
+    if (asignaturaId) {
+        filtro.asignaturasImparte = asignaturaId; // Aseguramos que la asignatura sea específica
+    }
+    // Filtrar por disponibilidad (modificado para manejar combinaciones de día-turno correctamente)
+    if (disponibilidadArray === null || disponibilidadArray === void 0 ? void 0 : disponibilidadArray.length) {
+        filtro.disponibilidad = {
+            $elemMatch: {
+                $or: disponibilidadArray.map(({ dia, turno }) => ({ dia, turno })),
+            },
+        };
+    }
+    // Excluir usuarios con asignaturas o disponibilidad vacías
+    filtro.$and = [
+        { asignaturasImparte: { $exists: true, $not: { $size: 0 } } },
+        { disponibilidad: { $exists: true, $not: { $size: 0 } } },
+    ];
+    // Ejecutar la consulta con populate para asignaturas
+    const usuarios = yield usuario_1.default.find(filtro).populate('asignaturasImparte');
+    return usuarios;
+});
+exports.filtrarUsuarios = filtrarUsuarios;
 // Actualizar datos personales, incluyendo descripción
 const actualizarUsuarioPorId = (userId, datos) => __awaiter(void 0, void 0, void 0, function* () {
     return yield usuario_1.default.findByIdAndUpdate(userId, datos, { new: true });

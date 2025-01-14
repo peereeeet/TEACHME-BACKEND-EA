@@ -39,6 +39,48 @@ export const obtenerTodosLosUsuarios = async () => {
   }
 };
 
+// Filtrar usuarios según los parámetros
+export const filtrarUsuarios = async (
+  rol: 'profesor' | 'alumno',
+  asignaturaId?: string,
+  disponibilidadArray?: { dia: string; turno: string }[]
+) => {
+  const filtro: any = {};
+
+  // Filtrar por rol
+  if (rol === 'profesor') {
+    filtro.isProfesor = true;
+  } else if (rol === 'alumno') {
+    filtro.isAlumno = true;
+  }
+
+  // Filtrar por asignatura
+  if (asignaturaId) {
+    filtro.asignaturasImparte = asignaturaId; // Aseguramos que la asignatura sea específica
+  }
+
+  // Filtrar por disponibilidad (modificado para manejar combinaciones de día-turno correctamente)
+  if (disponibilidadArray?.length) {
+    filtro.disponibilidad = {
+      $elemMatch: {
+        $or: disponibilidadArray.map(({ dia, turno }) => ({ dia, turno })),
+      },
+    };
+  }
+
+  // Excluir usuarios con asignaturas o disponibilidad vacías
+  filtro.$and = [
+    { asignaturasImparte: { $exists: true, $not: { $size: 0 } } },
+    { disponibilidad: { $exists: true, $not: { $size: 0 } } },
+  ];
+
+  // Ejecutar la consulta con populate para asignaturas
+  const usuarios = await Usuario.find(filtro).populate('asignaturasImparte');
+
+  return usuarios;
+};
+
+
 // Actualizar datos personales, incluyendo descripción
 export const actualizarUsuarioPorId = async (
   userId: string,
