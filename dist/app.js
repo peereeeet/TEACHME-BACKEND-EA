@@ -14,6 +14,7 @@ const asignaturaRoutes_1 = __importDefault(require("./routes/asignaturaRoutes"))
 const dotenv_1 = __importDefault(require("dotenv"));
 const websocketService_1 = require("./services/websocketService"); // Importar la configuración de WebSocket
 const chatService_1 = require("./services/chatService"); // Importar el servicio de chat
+const mapaRoutes_1 = __importDefault(require("./routes/mapaRoutes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3000;
@@ -49,5 +50,6 @@ mongoose_1.default
 // Rutas REST
 app.use('/api/usuarios', usuarioRoutes_1.default);
 app.use('/api/asignaturas', asignaturaRoutes_1.default);
+app.use('/api/mapa', mapaRoutes_1.default);
 exports.default = app;
 //# sourceMappingURL=app.js.map

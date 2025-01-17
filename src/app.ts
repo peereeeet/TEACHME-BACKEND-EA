@@ -8,6 +8,8 @@ import asignaturaRoutes from './routes/asignaturaRoutes';
 import dotenv from 'dotenv';
 import { configureWebSocketEvents } from './services/websocketService'; // Importar la configuración de WebSocket
 import { configureChatEvents } from './services/chatService'; // Importar el servicio de chat
+import mapaRoutes from './routes/mapaRoutes';
+
 
 dotenv.config();
 
@@ -51,5 +53,7 @@ mongoose
 // Rutas REST
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/asignaturas', asignaturaRoutes);
+app.use('/api/mapa', mapaRoutes);
+
 
 export default app;
