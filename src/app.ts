@@ -5,6 +5,8 @@ import { Server } from 'socket.io';
 import http from 'http';
 import usuarioRoutes from './routes/usuarioRoutes';
 import asignaturaRoutes from './routes/asignaturaRoutes';
+import claseRoutes from './routes/claseRoutes';
+import reviewRoutes from './routes/reviewRoutes';
 import dotenv from 'dotenv';
 import { configureWebSocketEvents } from './services/websocketService'; // Importar la configuración de WebSocket
 import { configureChatEvents } from './services/chatService'; // Importar el servicio de chat
@@ -51,5 +53,7 @@ mongoose
 // Rutas REST
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/asignaturas', asignaturaRoutes);
+app.use('/api/clases', claseRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 export default app;

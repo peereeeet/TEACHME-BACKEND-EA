@@ -11,6 +11,8 @@ const socket_io_1 = require("socket.io");
 const http_1 = __importDefault(require("http"));
 const usuarioRoutes_1 = __importDefault(require("./routes/usuarioRoutes"));
 const asignaturaRoutes_1 = __importDefault(require("./routes/asignaturaRoutes"));
+const claseRoutes_1 = __importDefault(require("./routes/claseRoutes"));
+const reviewRoutes_1 = __importDefault(require("./routes/reviewRoutes"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const websocketService_1 = require("./services/websocketService"); // Importar la configuración de WebSocket
 const chatService_1 = require("./services/chatService"); // Importar el servicio de chat
@@ -49,5 +51,7 @@ mongoose_1.default
 // Rutas REST
 app.use('/api/usuarios', usuarioRoutes_1.default);
 app.use('/api/asignaturas', asignaturaRoutes_1.default);
+app.use('/api/clases', claseRoutes_1.default);
+app.use('/api/reviews', reviewRoutes_1.default);
 exports.default = app;
 //# sourceMappingURL=app.js.map
