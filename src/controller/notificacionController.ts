@@ -16,12 +16,14 @@ class NotificationController {
   static async listarNotificaciones(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
+      // Llama al servicio, que ya excluye las leídas
       const notificaciones = await NotificationService.listarNotificaciones(new mongoose.Types.ObjectId(userId));
       res.status(200).json(notificaciones);
     } catch (error) {
       res.status(500).json({ error: 'Error al listar las notificaciones' });
     }
   }
+  
 
   static async marcarComoLeida(req: Request, res: Response): Promise<void> {
     try {
